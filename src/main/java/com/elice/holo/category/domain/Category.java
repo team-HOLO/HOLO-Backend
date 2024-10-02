@@ -31,8 +31,8 @@ public class Category {
     @Column(nullable = true, length = 255)
     private String description;
 
-    @Column(nullable = false, length = 1)
-    private Character isDeleted;
+    @Column(nullable = false)
+    private Boolean isDeleted = Boolean.FALSE;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
