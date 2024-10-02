@@ -1,12 +1,17 @@
 package com.elice.holo.category.repository;
 
 import com.elice.holo.category.domain.Category;
-import com.elice.holo.category.dto.CategoryDto;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    List<Category> findByParentCategory(Category parent);}
+
+    Optional<Category> findByCategoryIdAndIsDeletedFalse(Long id);
+
+    List<Category> findByIsDeletedFalse();
+
+    List<Category> findByParentCategoryAndIsDeletedFalse(Category parent);
+}
