@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 public class ProductImage {
 
     @Id
@@ -38,6 +37,12 @@ public class ProductImage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @Builder
+    private ProductImage(String originName, String storeName) {
+        this.originName = originName;
+        this.storeName = storeName;
+    }
 
     //==생성 메서드==//
     public static ProductImage createProductImage(String originName, String storeName) {
