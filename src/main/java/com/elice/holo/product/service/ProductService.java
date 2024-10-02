@@ -13,6 +13,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    @Transactional
     public Product saveProduct(Product product) {
         return productRepository.save(product);
     }
