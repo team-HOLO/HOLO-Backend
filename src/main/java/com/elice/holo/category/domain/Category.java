@@ -13,12 +13,14 @@ import jakarta.persistence.PrePersist;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Data
 @EntityListeners(AuditingEntityListener.class)
+@SQLDelete(sql = "UPDATE Category SET is_deleted = true WHERE category_id = ?")
 public class Category {
 
     @Id
