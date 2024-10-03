@@ -1,10 +1,6 @@
 package com.elice.holo.product.controller.dto;
 
 import com.elice.holo.product.domain.Product;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
