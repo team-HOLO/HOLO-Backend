@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 public class Product {
 
     @Id
@@ -42,6 +41,14 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
+
+    @Builder
+    private Product(String name, int price, String description, int stockQuantity) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.stockQuantity = stockQuantity;
+    }
 
     //== 생성 메서드 ==//
     public static Product createProduct(String name, int price, String description, int stockQuantity
@@ -75,6 +82,5 @@ public class Product {
     public void addStock(int quantity) {
         this.stockQuantity += quantity;
     }
-
 
 }
