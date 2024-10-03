@@ -1,5 +1,6 @@
 package com.elice.holo.order.domain;
 
+import com.elice.holo.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -13,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -37,15 +39,19 @@ public class Order {
     private List<OrderProduct> orderProducts; //주문 상품 리스트
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50)//주문 상태
     private OrderStatus status; //OrderStatus는 enum으로 관리(확정x)
 
     @Column(nullable = false)
-    private LocalDateTime orderDate;
+    private LocalDateTime orderDate; //주문 날짜
 
     @LastModifiedDate
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt; //마지막 수정 시간
+
+    @Column(nullable = false, precision = 19, scale = 2) // DECIMAL (소수점 2자리까지 19자리 숫자 저장가능)
+    private BigDecimal totalPrice; // 총 가격
+
 
     @PrePersist
     protected void onCreate() {

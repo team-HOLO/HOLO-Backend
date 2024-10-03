@@ -27,7 +27,7 @@ public class OrderProduct {
     @ManyToOne(fetch = FetchType.LAZY) // 하나의 제품은 여러 주문에 포함될 수 있다.
     @JoinColumn(name = "product_id")
     private Product productId; // 상품 ID
-    
+
     private int count; // 상품 수량
 
 }

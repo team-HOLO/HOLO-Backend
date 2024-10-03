@@ -11,7 +11,6 @@ public class OrderDto {
     private Long orderId;
     private Long memberId;
     private List<OrderProductDto> orderProducts = new ArrayList<>();
-    ;
     private LocalDateTime orderDate;
     private String status;
 }
