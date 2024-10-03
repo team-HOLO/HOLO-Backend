@@ -27,16 +27,16 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
-    @Column(nullable = false, length = 255)
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(nullable = true, length = 255)
+    @Column
     private String description;
 
     @Column(nullable = false)
     private Boolean isDeleted = Boolean.FALSE;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
