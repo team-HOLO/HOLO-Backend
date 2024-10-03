@@ -14,14 +14,14 @@ public class AddProductRequest {
     private String name;
 
     @NotBlank
-    @Pattern(regexp = "[a-z0-9]*$") //숫자만 허용
+    @Pattern(regexp = "[0-9]*$") //숫자만 허용
     private int price;
 
     @NotBlank
     private String description;
 
     @NotBlank
-    @Pattern(regexp = "[a-z0-9]*$") //숫자만 허용
+    @Pattern(regexp = "[0-9]*$") //숫자만 허용
     private int stockQuantity;
 
 //    private List<MultipartFile> multipartFiles; //상품 이미지들 TODO
