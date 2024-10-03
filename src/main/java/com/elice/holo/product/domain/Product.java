@@ -42,8 +42,12 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product")
+    private List<ProductOption> productOptions = new ArrayList<>();
+
     @Builder
     private Product(String name, int price, String description, int stockQuantity) {
+
         this.name = name;
         this.price = price;
         this.description = description;
@@ -65,6 +69,11 @@ public class Product {
     public void addProductImages(ProductImage productImage) {
         productImages.add(productImage);
         productImage.assignProduct(this);
+    }
+
+    public void addProductOption(ProductOption productOption) {
+        productOptions.add(productOption);
+        productOption.assignProduct(this);
     }
 
     //== 비즈니스 메서드 ==//
