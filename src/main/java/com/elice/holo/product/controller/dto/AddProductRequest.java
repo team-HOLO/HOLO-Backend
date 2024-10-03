@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+//상품 등록 request DTO
 @Data
 @AllArgsConstructor
 public class AddProductRequest {
