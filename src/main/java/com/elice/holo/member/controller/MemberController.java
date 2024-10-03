@@ -50,14 +50,16 @@ public class MemberController {
 
     // 특정 회원 조회 API
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable Long memberId) {
+    public ResponseEntity<MemberResponseDto> getMemberById(
+        @PathVariable(name = "memberId") Long memberId) {
         MemberResponseDto memberResponseDto = memberService.getMemberById(memberId);
         return ResponseEntity.ok(memberResponseDto);
     }
 
     // 회원 정보 수정 API
     @PutMapping("/{memberId}")
-    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Long memberId,
+    public ResponseEntity<MemberResponseDto> updateMember(
+        @PathVariable(name = "memberId") Long memberId,
         @RequestBody MemberUpdateRequestDto requestDto) {
         MemberResponseDto updatedMember = memberService.updateMember(memberId, requestDto);
         return ResponseEntity.ok(updatedMember);
@@ -65,7 +67,7 @@ public class MemberController {
 
     // 회원 삭제 API
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
+    public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId) {
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
     }
