@@ -1,11 +1,10 @@
 package com.elice.holo.member.repository;
 
 import com.elice.holo.member.domain.Member;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByEmail(String email); //이메일따라
+    Member findByEmail(String email); // O이메일에 따라 멤버반환, null처리 필요
 }
