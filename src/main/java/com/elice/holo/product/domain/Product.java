@@ -1,6 +1,7 @@
 package com.elice.holo.product.domain;
 
 import com.elice.holo.category.domain.Category;
+import com.elice.holo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Product {
+public class Product extends BaseEntity {
 
     @Id
     @Column(name = "product_id")
