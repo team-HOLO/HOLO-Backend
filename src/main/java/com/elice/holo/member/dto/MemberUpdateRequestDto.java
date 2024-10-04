@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class MemberUpdateRequestDto {
 
+    private String email;
     private String password;
     private String name;
     private String tel;
