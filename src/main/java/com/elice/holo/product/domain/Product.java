@@ -1,5 +1,6 @@
 package com.elice.holo.product.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,12 +43,11 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductOption> productOptions = new ArrayList<>();
 
     @Builder
     private Product(String name, int price, String description, int stockQuantity) {
-
         this.name = name;
         this.price = price;
         this.description = description;
