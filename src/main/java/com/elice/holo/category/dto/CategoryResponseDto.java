@@ -1,14 +1,14 @@
 package com.elice.holo.category.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 public class CategoryResponseDto {
-    private Long id;
+
+    private Long categoryId;
     private String name;
     private List<CategoryDto> subCategories;
 }
