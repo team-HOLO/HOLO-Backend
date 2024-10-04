@@ -118,7 +118,7 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
         @RequestBody CategoryCreateDto categoryCreateDto,
-        @PathVariable Long id
+        @PathVariable(name = "id") Long id
     ) {
         try {
             CategoryResponseDto updated = categoryService.updateCategory(id, categoryCreateDto);
