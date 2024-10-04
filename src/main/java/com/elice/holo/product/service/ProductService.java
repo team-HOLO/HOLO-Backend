@@ -1,9 +1,11 @@
 package com.elice.holo.product.service;
 
+import com.elice.holo.product.service.dto.AddProductRequest;
+import com.elice.holo.product.controller.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +17,28 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    /**
+     * 상품 추가를 위한 메서드
+     * @param addProductRequest
+     * @return Product
+     */
     @Transactional
-    public Product saveProduct(Product product) {
+    public Product saveProduct(AddProductRequest addProductRequest) {
+
+        Product newProduct = addProductRequest.toEntity();
+
+        //옵션 리스트 받아와서 Product 에 추가
+        addProductRequest.getProductOptions().stream()
+            .map(ProductOptionDto::toEntity)
+            .collect(Collectors.toList()).forEach(newProduct::addProductOption);
+
+        Product product = productRepository.save(newProduct);
+
         return productRepository.save(product);
     }
 
     /**
-     * 상품 단일 조회
-     *
+     * 상품 단일 조회(상세 조회)를 위한 메서드
      * @param id
      * @return Product
      */

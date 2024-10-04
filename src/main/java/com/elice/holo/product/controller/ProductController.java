@@ -1,12 +1,10 @@
 package com.elice.holo.product.controller;
 
-import com.elice.holo.product.controller.dto.AddProductRequest;
+import com.elice.holo.product.service.dto.AddProductRequest;
 import com.elice.holo.product.controller.dto.AddProductResponse;
-import com.elice.holo.product.controller.dto.ProductOptionDto;
 import com.elice.holo.product.controller.dto.ProductResponseDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.service.ProductService;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +27,7 @@ public class ProductController {
     public ResponseEntity<AddProductResponse> saveProduct(
         @RequestBody AddProductRequest addProductRequest) {
 
-        Product newProduct = addProductRequest.toEntity();
-
-        //옵션 리스트 받아와서 Product 에 추가
-        addProductRequest.getProductOptions().stream()
-            .map(ProductOptionDto::toEntity)
-            .collect(Collectors.toList()).forEach(newProduct::addProductOption);
-
-        Product product = productService.saveProduct(newProduct);
+        Product product = productService.saveProduct(addProductRequest);
 
         return new ResponseEntity<>(new AddProductResponse(product), HttpStatus.CREATED);
     }

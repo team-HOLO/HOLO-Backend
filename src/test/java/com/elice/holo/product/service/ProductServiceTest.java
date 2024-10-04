@@ -4,13 +4,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.elice.holo.product.controller.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
+import com.elice.holo.product.service.dto.AddProductRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,10 +42,12 @@ class ProductServiceTest {
 
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        AddProductRequest request = new AddProductRequest("의자", 300000, "시디즈", 100,
+            getProductOptionDto());
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         //when
-        Product savedProduct = productService.saveProduct(product);
+        Product savedProduct = productService.saveProduct(request);
 
         //then
         assertNotNull(savedProduct);
@@ -58,10 +63,9 @@ class ProductServiceTest {
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
 
-        List<ProductOption> productOption = getProductOption();
-        for (ProductOption option : productOption) {
-            product.addProductOption(option);
-        }
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .collect(Collectors.toList()).forEach(product::addProductOption);
 
 
         when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
@@ -98,7 +102,7 @@ class ProductServiceTest {
     }
 
     //옵션 생성 메서드
-    private List<ProductOption> getProductOption() {
+    private List<ProductOptionDto> getProductOptionDto() {
 
         ProductOption option1 = ProductOption.createOption("white", "L", 30);
         ProductOption option2 = ProductOption.createOption("black", "L", 30);
@@ -107,6 +111,10 @@ class ProductServiceTest {
         optionList.add(option1);
         optionList.add(option2);
 
-        return optionList;
+        List<ProductOptionDto> productOptionDtoList = optionList.stream()
+            .map(ol -> new ProductOptionDto(ol.getColor(), ol.getSize(), ol.getOptionQuantity()))
+            .collect(Collectors.toList());
+
+        return productOptionDtoList;
     }
 }
