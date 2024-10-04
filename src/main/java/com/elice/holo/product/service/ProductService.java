@@ -5,6 +5,8 @@ import com.elice.holo.product.service.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
+import com.elice.holo.product.service.dto.ProductsResponseDto;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,17 @@ public class ProductService {
     public Product findProductById(Long id) {
         return productRepository.findById(id)
             .orElseThrow(() -> new ProductNotFoundException("상품이 존재하지 않습니다."));
+    }
+
+    /**
+     *
+     * 상품 다수 조회(목록 조회)를 위한 메서드
+     * @return List<ProductsResponseDto>
+     */
+    public List<ProductsResponseDto> findProducts() {
+        return productRepository.findAll().stream()
+            .map(ProductsResponseDto::new)
+            .collect(Collectors.toList());
     }
 
 
