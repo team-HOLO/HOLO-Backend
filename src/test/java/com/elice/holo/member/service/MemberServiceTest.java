@@ -11,7 +11,10 @@ import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
 import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
+import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.repository.MemberRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -148,7 +151,6 @@ class MemberServiceTest {
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
             Optional.of(member));
 
-        // Act
         memberService.deleteMember(memberId);
 
         // Then
@@ -182,5 +184,149 @@ class MemberServiceTest {
 
         // Then
         assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
+    }
+
+    @DisplayName("회원 정보 업데이트 테스트")
+    @Test
+    void updateMemberTest() {
+        // Given
+        Long memberId = 1L;
+
+        MemberUpdateRequestDto updateRequest = new MemberUpdateRequestDto();
+        updateRequest.setEmail("updated@test.com");
+        updateRequest.setName("UpdatedName");
+        updateRequest.setTel("010-1235-5678");
+        updateRequest.setGender(true);
+        updateRequest.setAge(30);
+
+        Member member = Member.builder()
+            .email("test@test.com")
+            .name("유재석")
+            .tel("010-1234-5678")
+            .gender(true)
+            .age(45)
+            .isDeleted(false)
+            .build();
+
+        // When
+        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
+            Optional.of(member));
+
+        // Act
+        member.setEmail(updateRequest.getEmail());
+        member.setName(updateRequest.getName());
+        member.setTel(updateRequest.getTel());
+        member.setGender(updateRequest.getGender());
+        member.setAge(updateRequest.getAge());
+
+        MemberResponseDto updatedMember = memberService.updateMember(memberId, updateRequest);
+
+        // Then
+        assertEquals(updatedMember.getEmail(), updateRequest.getEmail());
+        assertEquals(updatedMember.getName(), updateRequest.getName());
+        assertEquals(updatedMember.getTel(), updateRequest.getTel());
+        assertEquals(updatedMember.getGender(), updateRequest.getGender());
+        assertEquals(updatedMember.getAge(), updateRequest.getAge());
+    }
+
+    @DisplayName("모든 회원 조회 테스트")
+    @Test
+    void getAllMembersTest() {
+        // Given
+        Member member1 = Member.builder()
+            .email("test1@test.com")
+            .name("Tester1")
+            .tel("010-1234-5678")
+            .gender(true)
+            .age(30)
+            .isDeleted(false)
+            .build();
+
+        Member member2 = Member.builder()
+            .email("test2@test.com")
+            .name("Tester2")
+            .tel("010-8765-4321")
+            .gender(false)
+            .age(25)
+            .isDeleted(false)
+            .build();
+
+        List<Member> members = new ArrayList<>();
+        members.add(member1);
+        members.add(member2);
+
+        // When
+        when(memberRepository.findAllByIsDeletedFalse()).thenReturn(members);
+
+        List<MemberResponseDto> result = memberService.getAllMembers();
+
+        // Then
+        assertEquals(2, result.size());
+        assertEquals(result.get(0).getEmail(), "test1@test.com");
+        assertEquals(result.get(1).getEmail(), "test2@test.com");
+    }
+
+    @DisplayName("특정 회원 조회 테스트")
+    @Test
+    void getMemberByIdTest() {
+        // Given
+        Long memberId = 1L;
+
+        Member member = Member.builder()
+            .email("test@test.com")
+            .password("password123")
+            .name("유재석")
+            .tel("010-1234-5678")
+            .gender(true)
+            .age(45)
+            .isDeleted(false)
+            .build();
+
+        // When
+        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
+            Optional.of(member));
+
+        MemberResponseDto result = memberService.getMemberById(memberId);
+
+        // Then
+        assertEquals(result.getEmail(), "test@test.com");
+        assertEquals(result.getName(), "유재석");
+        assertEquals(result.getTel(), "010-1234-5678");
+        assertEquals(result.getGender(), true);
+        assertEquals(result.getAge(), 45);
+    }
+
+    @DisplayName("특정 회원 조회 실패 - 존재하지 않는 회원")
+    @Test
+    void getMemberByIdFailTest() {
+        // Given
+        Long memberId = 1L;
+
+        // When
+        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
+            Optional.empty());
+
+        // Then
+        assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
+    }
+
+    @DisplayName("이미 존재하는 이메일로 회원가입 시도 테스트")
+    @Test
+    void signupExistingEmailTest() {
+        // Given
+        MemberSignupRequestDto requestDto = new MemberSignupRequestDto();
+        requestDto.setEmail("test@test.com");
+        requestDto.setPassword("password123");
+        requestDto.setName("유재석");
+        requestDto.setTel("010-1234-5678");
+        requestDto.setGender(true);
+        requestDto.setAge(45);
+
+        when(memberRepository.findByEmailAndIsDeletedFalse("test@test.com"))
+            .thenReturn(Optional.of(Member.builder().build()));
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> memberService.signup(requestDto));
+        verify(memberRepository, never()).save(any(Member.class));
     }
 }
