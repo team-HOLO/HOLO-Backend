@@ -33,7 +33,7 @@ public class MemberController {
         @RequestBody MemberSignupRequestDto requestDto) {
         //requestbody로 json을 dto로 변환해 매핑
         MemberResponseDto memberResponseDto = memberService.signup(requestDto);
-        return ResponseEntity.ok(memberResponseDto); //상태코드200번, json 데이터 전달
+        return ResponseEntity.status(201).body(memberResponseDto);
     }
 
     // 로그인 API
