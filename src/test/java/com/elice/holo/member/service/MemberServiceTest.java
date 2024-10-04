@@ -212,7 +212,6 @@ class MemberServiceTest {
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
             Optional.of(member));
 
-        // Act
         member.setEmail(updateRequest.getEmail());
         member.setName(updateRequest.getName());
         member.setTel(updateRequest.getTel());
@@ -325,7 +324,6 @@ class MemberServiceTest {
         when(memberRepository.findByEmailAndIsDeletedFalse("test@test.com"))
             .thenReturn(Optional.of(Member.builder().build()));
 
-        // When & Then
         assertThrows(IllegalArgumentException.class, () -> memberService.signup(requestDto));
         verify(memberRepository, never()).save(any(Member.class));
     }
