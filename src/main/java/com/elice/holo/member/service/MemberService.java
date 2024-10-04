@@ -7,8 +7,8 @@ import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +16,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    //의존성 주입
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional
+    //새로운 회원 등록 메소드
+    @Transactional //db 상태 변경
     public MemberResponseDto signup(MemberSignupRequestDto requestDto) {
         Member member = Member.builder()
             .email(requestDto.getEmail())
@@ -29,7 +31,7 @@ public class MemberService {
             .tel(requestDto.getTel())
             .gender(requestDto.getGender())
             .age(requestDto.getAge())
-            .isAdmin(false) // 회원가입 시 기본값 설정
+            .isAdmin(false) // 회원가입 시 기본값 설정, 일반회원 의미
             .isDeleted(false) // 회원가입 시 기본값 설정
             .build();
 
@@ -37,8 +39,9 @@ public class MemberService {
         return new MemberResponseDto(member);
     }
 
+    //회원 로그인 이메일로 회원 조회하고 비밀번호 일치하는 지 확인
     public MemberResponseDto login(MemberLoginRequestDto requestDto) {
-        Member member = memberRepository.findByEmail(requestDto.getEmail());
+        Member member = memberRepository.findByEmail(requestDto.getEmail()); //이메일로 찾기
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
@@ -48,11 +51,19 @@ public class MemberService {
         return new MemberResponseDto(member);
     }
 
+    //모든 회원 정보 목록
     public List<MemberResponseDto> getAllMembers() {
         List<Member> members = memberRepository.findAll();
-        return members.stream().map(MemberResponseDto::new).collect(Collectors.toList());
+        List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
+
+        for (Member member : members) {
+            memberResponseDtos.add(new MemberResponseDto(member));
+        }
+
+        return memberResponseDtos;
     }
 
+    //특정 회원의 ID로 회원 조회
     public MemberResponseDto getMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElse(null);
         if (member == null) {
@@ -61,13 +72,13 @@ public class MemberService {
         return new MemberResponseDto(member);
     }
 
-    @Transactional
+    @Transactional //db 상태 변경
     public MemberResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) {
         Member member = memberRepository.findById(memberId).orElse(null);
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
-
+        member.setEmail(requestDto.getEmail());
         member.setPassword(requestDto.getPassword());
         member.setName(requestDto.getName());
         member.setTel(requestDto.getTel());
@@ -83,6 +94,8 @@ public class MemberService {
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
-        memberRepository.delete(member);
+
+        // 실제 삭제 대신 isDeleted를 true로 설정
+        member.setIsDeleted(true);
     }
 }
