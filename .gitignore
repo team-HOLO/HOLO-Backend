@@ -25,6 +25,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+intellij-java-google-style.xml
 
 ### NetBeans ###
 /nbproject/private/
