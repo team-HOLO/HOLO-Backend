@@ -6,6 +6,7 @@ import com.elice.holo.category.dto.CategoryDetailsDto;
 import com.elice.holo.category.dto.CategoryDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
 import com.elice.holo.category.repository.CategoryRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class CategoryService {
      * @param categoryCreateDto 생성할 카테고리의 정보가 담긴 dto
      * @return 생성 완료된 카테고리의 정보를 담음 response dto
      */
+    @Transactional
     public CategoryResponseDto createCategory(CategoryCreateDto categoryCreateDto) {
         Category category = new Category();
         // TODO: 추후에 Mapper 사용하도록 변경 예정
@@ -50,6 +52,7 @@ public class CategoryService {
      * @param updateDto 수정할 내용이 담긴 CategoryCreateDto
      * @return 수정 내용이 반영된 CategoryResponseDto
      */
+    @Transactional
     public CategoryResponseDto updateCategory(Long id, CategoryCreateDto updateDto) {
         Optional<Category> optionalCategory = categoryRepository.findByCategoryIdAndIsDeletedFalse(
             id);
@@ -60,7 +63,8 @@ public class CategoryService {
             targetCategory.setDescription(updateDto.getDescription());
             targetCategory.setParentCategory(
                 categoryRepository.findByCategoryIdAndIsDeletedFalse(updateDto.getParentCategory())
-                    .get());
+                    .orElseThrow(() -> new IllegalArgumentException("해당 Parent 카테고리가 존재하지 않습니다."))
+            );
 
             Category updatedCategory = categoryRepository.save(targetCategory);
 
@@ -77,6 +81,7 @@ public class CategoryService {
      * @param id 삭제할 카테고리의 ID
      * @throws IllegalArgumentException 해당 ID의 카테고리가 존재하지 않을 경우 발생
      */
+    @Transactional
     public void deleteCategory(Long id) {
         if (categoryRepository.existsById(id)) {
             categoryRepository.deleteById(id);
