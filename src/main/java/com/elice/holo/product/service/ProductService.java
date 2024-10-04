@@ -41,6 +41,7 @@ public class ProductService {
      * 상품 단일 조회(상세 조회)를 위한 메서드
      * @param id
      * @return Product
+     * @throws ProductNotFoundException 상품이 존재하지 않을 경우
      */
     public Product findProductById(Long id) {
         return productRepository.findById(id)
