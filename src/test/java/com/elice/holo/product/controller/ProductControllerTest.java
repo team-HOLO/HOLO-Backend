@@ -114,7 +114,7 @@ class ProductControllerTest {
     void getAllProductTest() throws Exception {
 
         //given
-        final String url = "api/products";
+        final String url = "/api/products";
         Product product1 = Product.createProduct("의자", 300000, "시디즈", 100);
         Product product2 = Product.createProduct("책상", 100000, "데스크", 200);
         setProductOption(product1, product2);  //옵션 세팅
@@ -129,7 +129,7 @@ class ProductControllerTest {
         resultActions
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].name").value("의자"))
-            .andExpect(jsonPath("$[1].description").value("데스크"));
+            .andExpect(jsonPath("$[1].price").value(100000));
     }
 
     //옵션 생성 메서드
