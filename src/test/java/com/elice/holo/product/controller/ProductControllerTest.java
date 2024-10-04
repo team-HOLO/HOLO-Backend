@@ -23,9 +23,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
+@Transactional
 @AutoConfigureMockMvc
 class ProductControllerTest {
 
@@ -109,6 +111,28 @@ class ProductControllerTest {
 
     }
 
+    @Test
+    @DisplayName("상품 목록 조회 테스트")
+    void getAllProductTest() throws Exception {
+
+        //given
+        final String url = "/api/products";
+        Product product1 = Product.createProduct("의자", 300000, "시디즈", 100);
+        Product product2 = Product.createProduct("책상", 100000, "데스크", 200);
+        setProductOption(product1, product2);  //옵션 세팅
+
+        productRepository.save(product1);
+        productRepository.save(product2);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get(url));
+
+        //then
+        resultActions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].name").value("의자"))
+            .andExpect(jsonPath("$[1].price").value(100000));
+    }
 
     //옵션 생성 메서드
     private List<ProductOptionDto> getProductOptionDto() {
@@ -125,6 +149,16 @@ class ProductControllerTest {
             .collect(Collectors.toList());
 
         return productOptionDtoList;
+    }
+
+    //옵션 setting 메서드
+    private void setProductOption(Product product1, Product product2) {
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .collect(Collectors.toList()).forEach(product1::addProductOption);
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .collect(Collectors.toList()).forEach(product2::addProductOption);
     }
 
 
