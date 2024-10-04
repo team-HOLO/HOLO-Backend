@@ -1,10 +1,16 @@
 package com.elice.holo.product.domain;
 
+import com.elice.holo.category.domain.Category;
+import com.elice.holo.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Product {
+public class Product extends BaseEntity {
 
     @Id
     @Column(name = "product_id")
@@ -42,8 +48,16 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductOption> productOptions = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Builder
     private Product(String name, int price, String description, int stockQuantity) {
+
         this.name = name;
         this.price = price;
         this.description = description;
@@ -65,6 +79,15 @@ public class Product {
     public void addProductImages(ProductImage productImage) {
         productImages.add(productImage);
         productImage.assignProduct(this);
+    }
+
+    public void addProductOption(ProductOption productOption) {
+        productOptions.add(productOption);
+        productOption.assignProduct(this);
+    }
+
+    public void addProductCategory(Category category) {
+        this.category = category;
     }
 
     //== 비즈니스 메서드 ==//
