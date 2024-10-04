@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-
 @Getter
 @Setter
 public class MemberResponseDto {
+
     private Long memberId;
     private String email;
     private String name;
@@ -17,7 +17,7 @@ public class MemberResponseDto {
     private Integer age;
     private Boolean isAdmin;
 
-    // Member 객체를 받아 필드를 초기화하는 생성자 추가
+    // 생성자
     public MemberResponseDto(Member member) {
         this.memberId = member.getMemberId();
         this.email = member.getEmail();
