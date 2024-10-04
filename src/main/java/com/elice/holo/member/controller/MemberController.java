@@ -28,10 +28,12 @@ public class MemberController {
 
     // 회원가입 API
     @PostMapping("/signup")
+
     public ResponseEntity<MemberResponseDto> signup(
         @RequestBody MemberSignupRequestDto requestDto) {
+        //requestbody로 json을 dto로 변환해 매핑
         MemberResponseDto memberResponseDto = memberService.signup(requestDto);
-        return ResponseEntity.ok(memberResponseDto);
+        return ResponseEntity.ok(memberResponseDto); //상태코드200번, json 데이터 전달
     }
 
     // 로그인 API
