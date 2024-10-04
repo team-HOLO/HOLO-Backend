@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.elice.holo.product.controller.dto.ProductOptionDto;
+import com.elice.holo.product.service.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.exception.ProductNotFoundException;
@@ -14,13 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 class ProductServiceTest {

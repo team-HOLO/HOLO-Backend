@@ -1,6 +1,5 @@
 package com.elice.holo.product.service.dto;
 
-import com.elice.holo.product.controller.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

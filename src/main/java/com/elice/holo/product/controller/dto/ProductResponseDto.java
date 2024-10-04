@@ -1,12 +1,11 @@
 package com.elice.holo.product.controller.dto;
 
 import com.elice.holo.product.domain.Product;
-import com.elice.holo.product.domain.ProductOption;
+import com.elice.holo.product.service.dto.ProductOptionDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 //상품 단일 조회 DTO
 @Data

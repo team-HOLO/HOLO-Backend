@@ -1,7 +1,7 @@
 package com.elice.holo.product.service;
 
 import com.elice.holo.product.service.dto.AddProductRequest;
-import com.elice.holo.product.controller.dto.ProductOptionDto;
+import com.elice.holo.product.service.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
