@@ -32,9 +32,7 @@ public class ProductService {
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList()).forEach(newProduct::addProductOption);
 
-        Product product = productRepository.save(newProduct);
-
-        return productRepository.save(product);
+        return productRepository.save(newProduct);
     }
 
     /**
