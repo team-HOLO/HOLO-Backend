@@ -41,8 +41,9 @@ public class MemberService {
 
     //회원 로그인 이메일로 회원 조회하고 비밀번호 일치하는 지 확인
     public MemberResponseDto login(MemberLoginRequestDto requestDto) {
-        Member member = memberRepository.findByEmail(requestDto.getEmail()); //이메일로 찾기
-        if (member == null) {
+        Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
+            .orElse(null);
+        if (member == null) { //orElse(null) 로직, 멤버가 null 일 경우
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
         if (!member.getPassword().equals(requestDto.getPassword())) {
@@ -53,7 +54,7 @@ public class MemberService {
 
     //모든 회원 정보 목록
     public List<MemberResponseDto> getAllMembers() {
-        List<Member> members = memberRepository.findAll();
+        List<Member> members = memberRepository.findAllByIsDeletedFalse();
         List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 
         for (Member member : members) {
@@ -65,7 +66,7 @@ public class MemberService {
 
     //특정 회원의 ID로 회원 조회
     public MemberResponseDto getMemberById(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElse(null);
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
@@ -74,7 +75,7 @@ public class MemberService {
 
     @Transactional //db 상태 변경
     public MemberResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) {
-        Member member = memberRepository.findById(memberId).orElse(null);
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
@@ -90,7 +91,7 @@ public class MemberService {
 
     @Transactional
     public void deleteMember(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElse(null);
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
         if (member == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
