@@ -10,7 +10,9 @@ import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.service.dto.AddProductRequest;
+import com.elice.holo.product.service.dto.ProductsResponseDto;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -98,6 +100,31 @@ class ProductServiceTest {
         assertThat(exception.getMessage()).contains("상품이 존재하지 않습니다.");
         verify(productRepository, times(1)).findById(id);
     }
+
+    @Test
+    @DisplayName("상품 다수 조회 테스트")
+    void getAllProductTest() {
+
+        //given
+        Product product1 = Product.createProduct("의자", 300000, "시디즈", 100);
+        Product product2 = Product.createProduct("책상", 100000, "데스크", 200);
+        List<Product> productList = Arrays.asList(product1, product2);
+
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .collect(Collectors.toList())
+            .forEach(product2::addProductOption);
+
+        when(productRepository.findAll()).thenReturn(productList);
+
+        //when
+        List<ProductsResponseDto> products = productService.findProducts();
+
+        //then
+        assertThat(products.get(1).getName()).isEqualTo("책상");
+        assertThat(products.get(0).getPrice()).isEqualTo(300000);
+    }
+
 
     //옵션 생성 메서드
     private List<ProductOptionDto> getProductOptionDto() {
