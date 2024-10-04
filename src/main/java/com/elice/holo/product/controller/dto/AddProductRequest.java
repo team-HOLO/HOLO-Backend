@@ -31,12 +31,7 @@ public class AddProductRequest {
 //    private List<MultipartFile> multipartFiles; //상품 이미지들 TODO
 
     public Product toEntity() {
-        return Product.builder()
-            .name(name)
-            .price(price)
-            .description(description)
-            .stockQuantity(stockQuantity)
-            .build();
+        return Product.createProduct(name, price, description, stockQuantity);
     }
 
 }
