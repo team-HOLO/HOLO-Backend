@@ -41,5 +41,10 @@ public class CartProduct {
         this.product = product;
         this.quantity = quantity;
     }
+
+    public int getPrice() {
+        return (int)(product.getPrice()*quantity);
+    }
+
 }
 

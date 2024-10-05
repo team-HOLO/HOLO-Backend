@@ -64,6 +64,12 @@ public class CartService {
         }
         cartRepository.save(cart);
     }
+    //장바구니의 총 가격을 계산하는 메서드
+    public double calculateTotalPrice(Cart cart) {
+        return cart.getCartProducts().stream()
+            .mapToInt(CartProduct::getPrice)
+            .sum();
+    }
 }
 
 

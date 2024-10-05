@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.service.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;

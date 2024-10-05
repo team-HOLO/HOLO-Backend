@@ -1,4 +1,4 @@
-package com.elice.holo.product.controller.dto;
+package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.service.dto.ProductOptionDto;

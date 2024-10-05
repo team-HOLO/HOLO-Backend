@@ -1,8 +1,8 @@
-package com.elice.holo.product.controller;
+package com.elice.holo.product;
 
 import com.elice.holo.product.service.dto.AddProductRequest;
-import com.elice.holo.product.controller.dto.AddProductResponse;
-import com.elice.holo.product.controller.dto.ProductResponseDto;
+import com.elice.holo.product.dto.AddProductResponse;
+import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.service.dto.ProductsResponseDto;
