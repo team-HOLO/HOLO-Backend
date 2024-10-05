@@ -1,10 +1,14 @@
 package com.elice.holo.category.dto;
 
-import com.elice.holo.category.domain.Category;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class CategoryCreateDto {
+
     private String name;
     private String description;
     private Long parentCategory;

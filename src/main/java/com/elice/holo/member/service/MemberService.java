@@ -24,6 +24,11 @@ public class MemberService {
     //새로운 회원 등록 메소드
     @Transactional //db 상태 변경
     public MemberResponseDto signup(MemberSignupRequestDto requestDto) {
+        // 이미 존재하는 이메일인지 확인
+        if (memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        }
+
         Member member = Member.builder()
             .email(requestDto.getEmail())
             .password(requestDto.getPassword())
