@@ -19,7 +19,6 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -46,20 +45,20 @@ class CartServiceTest {
 
         cart = Cart.createCart(member);
 
-        product=Product.createProduct("Test product",100, "Test Description",10);
+        product = Product.createProduct("Test product", 100, "Test Description", 10);
 
-        cartProduct= new CartProduct(cart, product, 2L);
+        cartProduct = new CartProduct(cart, product, 2L);
     }
 
     @Test
-    void testGetCartByMember(){
-        when(cartRepository.findByMemberId(member.getMemberId())).thenReturn(cart);
+    void testGetCartByMember() {
+        when(cartRepository.findByMember_MemberId(member.getMemberId())).thenReturn(cart);
 
         Cart result = cartService.getCartByMember(member);
 
         assertNotNull(result);
         assertEquals(cart, result);
-        verify(cartRepository).findByMemberId(member.getMemberId());
+        verify(cartRepository).findByMember_MemberId(member.getMemberId());
     }
 
     @Test
@@ -142,6 +141,7 @@ class CartServiceTest {
         Cart savedCart = captor.getValue();
         assertFalse(savedCart.getCartProducts().contains(cartProduct)); // 기대값을 false로 설정
     }
+
     @Test
     void testCalculateTotalPrice() {
         cart.addCartPoduct(product, 2L);
