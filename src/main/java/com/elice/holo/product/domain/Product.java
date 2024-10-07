@@ -22,14 +22,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class Product extends BaseEntity {
 
     @Id
-    @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long productId;
 
     @Column(nullable = false)
     private String name;
@@ -55,7 +53,6 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Builder
     private Product(String name, int price, String description, int stockQuantity) {
 
         this.name = name;
@@ -67,12 +64,7 @@ public class Product extends BaseEntity {
     //== 생성 메서드 ==//
     public static Product createProduct(String name, int price, String description, int stockQuantity
     ) {
-        return Product.builder()
-            .name(name)
-            .price(price)
-            .description(description)
-            .stockQuantity(stockQuantity)
-            .build();
+        return new Product(name, price, description, stockQuantity);
     }
 
     //== 연관 관계 편의 메서드 ==//
@@ -112,6 +104,10 @@ public class Product extends BaseEntity {
         this.price = price;
         this.description = description;
         this.stockQuantity = stockQuantity;
+    }
+
+    public void updateIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
 }
