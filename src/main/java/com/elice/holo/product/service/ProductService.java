@@ -7,7 +7,6 @@ import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
-import com.elice.holo.product.repository.ProductOptionRepository;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.ProductsResponseDto;
 import java.util.ArrayList;
@@ -23,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductOptionService productOptionService;
-    private final ProductOptionRepository productOptionRepository;
 
     /**
      * 상품 추가를 위한 메서드

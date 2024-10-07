@@ -25,6 +25,7 @@ public class ProductOption {
     private String color;
     private String size;
     private int optionQuantity;
+    private boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -44,5 +45,16 @@ public class ProductOption {
         this.size = size;
         this.optionQuantity = optionQuantity;
     }
+
+    public void updateProductOption(String color, String size, int optionQuantity) {
+        this.color = color;
+        this.size = size;
+        this.optionQuantity = optionQuantity;
+    }
+
+    public void updateIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
 }
 
