@@ -85,7 +85,6 @@ public class MemberService {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 회원 정보 수정 (의미 있는 메서드 사용)
         member.updateMemberInfo(requestDto.getName(), requestDto.getEmail(), requestDto.getTel(),
             requestDto.getAge(), requestDto.getGender());
 
