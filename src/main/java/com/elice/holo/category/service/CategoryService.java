@@ -7,6 +7,7 @@ import com.elice.holo.category.dto.CategoryDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
 import com.elice.holo.category.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,10 +62,16 @@ public class CategoryService {
             Category targetCategory = optionalCategory.get();
             targetCategory.setName(updateDto.getName());
             targetCategory.setDescription(updateDto.getDescription());
-            targetCategory.setParentCategory(
-                categoryRepository.findByCategoryIdAndIsDeletedFalse(updateDto.getParentCategory())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 Parent 카테고리가 존재하지 않습니다."))
-            );
+
+            // ParentCategory가 null인지 체크 후, null이 아니면 설정
+            if (updateDto.getParentCategory() != null) {
+                Category parentCategory = categoryRepository.findByCategoryIdAndIsDeletedFalse(
+                        updateDto.getParentCategory())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 Parent 카테고리가 존재하지 않습니다."));
+                targetCategory.setParentCategory(parentCategory);
+            } else {
+                targetCategory.setParentCategory(null); // 혹은 ParentCategory를 null로 설정
+            }
 
             Category updatedCategory = categoryRepository.save(targetCategory);
 
@@ -149,7 +156,9 @@ public class CategoryService {
             .map(category -> new CategoryResponseDto(
                 category.getCategoryId(),
                 category.getName(),
-                category.getSubCategories().stream()
+                Optional.ofNullable(category.getSubCategories()) // null 체크
+                    .orElse(new ArrayList<>()) // null이면 빈 리스트 반환
+                    .stream()
                     .filter(subCategory -> !subCategory.getIsDeleted())
                     .map(subCategory -> new CategoryDto(subCategory.getCategoryId(),
                         subCategory.getName()))
