@@ -1,8 +1,6 @@
-package com.elice.holo.product.service.dto;
+package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.Product;
-import com.elice.holo.product.domain.ProductImage;
-import java.util.Optional;
 import lombok.Data;
 
 /**

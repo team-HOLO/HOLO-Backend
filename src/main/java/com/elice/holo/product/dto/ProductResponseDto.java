@@ -1,7 +1,6 @@
 package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.Product;
-import com.elice.holo.product.service.dto.ProductOptionDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
