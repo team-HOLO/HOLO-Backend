@@ -1,5 +1,6 @@
 package com.elice.holo.product.service;
 
+import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductOptionDto;
@@ -23,11 +24,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    /**
-     * 상품 추가를 위한 메서드
-     * @param request
-     * @return Product
-     */
+    //상품 추가를 위한 메서드
     @Transactional
     public Product saveProduct(AddProductRequest request) {
 
@@ -41,34 +38,20 @@ public class ProductService {
         return productRepository.save(newProduct);
     }
 
-    /**
-     * 상품 단일 조회(상세 조회)를 위한 메서드
-     * @param id
-     * @return Product
-     * @throws ProductNotFoundException 상품이 존재하지 않을 경우
-     */
+    //상품 단일 조회(상세 조회)를 위한 메서드
     public Product findProductById(Long id) {
-        return productRepository.findById(id)
+        return productRepository.findProductDetailByProductId(id)
             .orElseThrow(() -> new ProductNotFoundException("상품이 존재하지 않습니다."));
     }
 
-    /**
-     *
-     * 상품 다수 조회(목록 조회)를 위한 메서드
-     * @return List<ProductsResponseDto>
-     */
+    //상품 다수 조회(목록 조회)를 위한 메서드
     public List<ProductsResponseDto> findProducts() {
         return productRepository.findAll().stream()
             .map(ProductsResponseDto::new)
             .collect(Collectors.toList());
     }
 
-    /**
-     * 상품 수정 메서드
-     * @param productId
-     * @param request
-     * @return
-     */
+    //상품 수정 메서드
     @Transactional
     public Long updateProduct(Long productId, UpdateProductRequest request) {
 
@@ -80,7 +63,7 @@ public class ProductService {
 
         addProductOptions(request, product);
 
-        return product.getId();
+        return product.getProductId();
     }
 
     //상품 옵션 수정시 추가 메서드
@@ -92,12 +75,11 @@ public class ProductService {
 
         for (ProductOption existOption : existProductOptions) {
             boolean isExist = newProductOptions.stream().anyMatch(newOption ->
-                newOption.getId() != null && newOption.getId().equals(existOption.getId())
+                newOption.getId() != null && newOption.getId().equals(existOption.getProductOptionId())
             );
 
             //상품 옵션 삭제
             if (!isExist) existOption.updateIsDeleted(true);
-
         }
 
         newProductOptions.forEach(newOption -> {
@@ -105,7 +87,7 @@ public class ProductService {
                 product.addProductOption(newOption.toEntity());
             } else {
                 existProductOptions.stream()
-                    .filter(exist -> exist.getId().equals(newOption.getId()))
+                    .filter(exist -> exist.getProductOptionId().equals(newOption.getId()))
                     .findFirst()
                     .ifPresent(exist -> {
                         exist.updateProductOption(newOption.getColor(), newOption.getSize(),
@@ -114,6 +96,8 @@ public class ProductService {
             }
         });
     }
+
+
 
 
 }
