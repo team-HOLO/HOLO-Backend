@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
@@ -52,6 +53,9 @@ class ProductControllerTest {
     ProductRepository productRepository;
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductMapper mapper;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -110,7 +114,7 @@ class ProductControllerTest {
         Product savedProduct = productRepository.save(product);
 
         //when
-        ResultActions resultActions = mockMvc.perform(get(url, savedProduct.getId()));
+        ResultActions resultActions = mockMvc.perform(get(url, savedProduct.getProductId()));
 
         //then
         resultActions
@@ -159,22 +163,23 @@ class ProductControllerTest {
             .forEach(product::addProductOption);
 
         Product savedProduct = productRepository.save(product);
+        Long productOptionId = savedProduct.getProductOptions().get(1).getProductOptionId();
 
         UpdateProductOptionDto optionDto1 = new UpdateProductOptionDto(null, "brown", "F", 100);
-        UpdateProductOptionDto optionDto2 = new UpdateProductOptionDto(2L, "RED", "F", 700);
+        UpdateProductOptionDto optionDto2 = new UpdateProductOptionDto(productOptionId, "RED", "F", 700);
         UpdateProductRequest request = new UpdateProductRequest("의자(수정)", 200000, "시디즈(수정)",
             300, List.of(optionDto1, optionDto2)
         );
 
         //when
-        ResultActions result = mockMvc.perform(put(url, savedProduct.getId())
+        ResultActions result = mockMvc.perform(put(url, savedProduct.getProductId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)));
 
         //then
         result.andExpect(status().isOk());
 
-        Product updatedProduct = productRepository.findById(savedProduct.getId()).get();
+        Product updatedProduct = productRepository.findById(savedProduct.getProductId()).get();
         assertThat(updatedProduct.getName()).isEqualTo("의자(수정)");
         assertThat(updatedProduct.getDescription()).isEqualTo("시디즈(수정)");
         assertThat(updatedProduct.getProductOptions()).extracting("color")
