@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 //상품 옵션 수정 DTO
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class UpdateProductOptionDto {
 

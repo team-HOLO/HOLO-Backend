@@ -15,7 +15,7 @@ public class AddProductResponse {
     private String description;
 
     public AddProductResponse(Product product) {
-        productId = product.getId();
+        productId = product.getProductId();
         name = product.getName();
         price = product.getPrice();
         description = product.getDescription();

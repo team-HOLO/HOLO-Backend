@@ -19,7 +19,7 @@ public class ProductResponseDto {
 //    private List<ProductImageDto>  TODO 상품 이미지 반환
 
     public ProductResponseDto(Product product) {
-        productId = product.getId();
+        productId = product.getProductId();
         name = product.getName();
         price = product.getPrice();
         description = product.getDescription();
