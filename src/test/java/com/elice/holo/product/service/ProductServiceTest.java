@@ -69,7 +69,7 @@ class ProductServiceTest {
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList()).forEach(product::addProductOption);
 
-        when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
+        when(productRepository.findProductDetailByProductId(any(Long.class))).thenReturn(Optional.of(product));
 
         //when
         Product findProduct = productService.findProductById(1L);
@@ -89,7 +89,7 @@ class ProductServiceTest {
 
         //given
         Long id = 999L;
-        when(productRepository.findById(id)).thenReturn(Optional.empty());
+        when(productRepository.findProductDetailByProductId(id)).thenReturn(Optional.empty());
 
         //when
         ProductNotFoundException exception =
@@ -99,7 +99,7 @@ class ProductServiceTest {
 
         //then
         assertThat(exception.getMessage()).contains("상품이 존재하지 않습니다.");
-        verify(productRepository, times(1)).findById(id);
+        verify(productRepository, times(1)).findProductDetailByProductId(id);
     }
 
     @Test
@@ -142,7 +142,7 @@ class ProductServiceTest {
         UpdateProductRequest updateRequest = new UpdateProductRequest(
             "침대 수정", 200000, "에이스 침대", 100, List.of(updateDto));
 
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(productRepository.findProductDetailByProductId(productId)).thenReturn(Optional.of(product));
 
         //when
         productService.updateProduct(productId, updateRequest);
@@ -151,8 +151,11 @@ class ProductServiceTest {
         Product updatedProduct = productService.findProductById(productId);
         assertThat(updatedProduct.getName()).isEqualTo("침대 수정");
         assertThat(updatedProduct.getDescription()).isEqualTo("에이스 침대");
-        assertThat(updatedProduct.getProductOptions().size()).isEqualTo(1);
-        assertThat(updatedProduct.getProductOptions().get(0).getColor()).isEqualTo("brown");
+        assertThat(updatedProduct.getProductOptions().size()).isEqualTo(3);
+        assertThat(updatedProduct.getProductOptions().get(2).getColor()).isEqualTo("brown");
+        assertThat(updatedProduct.getProductOptions().get(0).isDeleted()).isTrue();
+        assertThat(updatedProduct.getProductOptions().get(1).isDeleted()).isTrue();
+
 
     }
 
