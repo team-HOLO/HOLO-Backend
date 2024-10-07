@@ -4,8 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.elice.holo.product.service.dto.AddProductRequest;
-import com.elice.holo.product.service.dto.ProductOptionDto;
+import com.elice.holo.product.dto.AddProductRequest;
+import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.repository.ProductRepository;
