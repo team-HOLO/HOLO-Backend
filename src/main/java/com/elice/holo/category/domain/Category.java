@@ -42,14 +42,7 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories;
-
-    // 생성자
-    public void Category(String name, String description) {
-        this.name = name;
-        this.description = description;
-        this.isDeleted = false;
-    }
-
+    
     // 상위 카테고리 설정 메서드
     public void updateParentCategory(Category parentCategory) {
         this.parentCategory = parentCategory;
