@@ -2,6 +2,7 @@ package com.elice.holo.member.service;
 
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
+import com.elice.holo.member.dto.MemberMapper;
 import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
@@ -9,99 +10,99 @@ import com.elice.holo.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+@AllArgsConstructor
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    //의존성 주입
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
 
-    //새로운 회원 등록 메소드
-    @Transactional //db 상태 변경
+    //회원등록
+    @Transactional
     public MemberResponseDto signup(MemberSignupRequestDto requestDto) {
-        // 이미 존재하는 이메일인지 확인
+        // 이메일 중복 확인
         if (memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        Member member = Member.builder()
-            .email(requestDto.getEmail())
-            .password(requestDto.getPassword())
-            .name(requestDto.getName())
-            .tel(requestDto.getTel())
-            .gender(requestDto.getGender())
-            .age(requestDto.getAge())
-            .isAdmin(false) // 회원가입 시 기본값 설정, 일반회원 의미
-            .isDeleted(false) // 회원가입 시 기본값 설정
-            .build();
+        // DTO 엔티티로 변환
+        Member member = MemberMapper.toEntity(requestDto);
 
+        // DB에 저장
         memberRepository.save(member);
-        return new MemberResponseDto(member);
+
+        // 엔티티를 DTO로 변환 후 반환
+        return MemberMapper.toDto(member);
     }
 
-    //회원 로그인 이메일로 회원 조회하고 비밀번호 일치하는 지 확인
+    //로그인
     public MemberResponseDto login(MemberLoginRequestDto requestDto) {
+        // 이메일로 회원 조회
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
-            .orElse(null);
-        if (member == null) { //orElse(null) 로직, 멤버가 null 일 경우
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        // 비밀번호 검증
         if (!member.getPassword().equals(requestDto.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        return new MemberResponseDto(member);
+
+        // 로그인 성공 시 회원 정보를 DTO로 반환
+        return MemberMapper.toDto(member);
     }
 
-    //모든 회원 정보 목록
+    //모든 회원조회
     public List<MemberResponseDto> getAllMembers() {
+        // 삭제되지 않은 모든 회원 조회
         List<Member> members = memberRepository.findAllByIsDeletedFalse();
-        List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 
+        // 엔티티 리스트를 DTO 리스트로 변환
+        List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
         for (Member member : members) {
-            memberResponseDtos.add(new MemberResponseDto(member));
+            memberResponseDtos.add(MemberMapper.toDto(member));
         }
 
         return memberResponseDtos;
     }
 
-    //특정 회원의 ID로 회원 조회
+    //특정회원 조회
     public MemberResponseDto getMemberById(Long memberId) {
-        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
-        if (member == null) {
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
-        return new MemberResponseDto(member);
+        // ID로 특정 회원 조회
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        // 조회된 회원 정보를 DTO로 반환
+        return MemberMapper.toDto(member);
     }
 
-    @Transactional //db 상태 변경
+    //회원수정함수
+    @Transactional
     public MemberResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) {
-        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
-        if (member == null) {
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
-        member.setEmail(requestDto.getEmail());
-        member.setPassword(requestDto.getPassword());
-        member.setName(requestDto.getName());
-        member.setTel(requestDto.getTel());
-        member.setGender(requestDto.getGender());
-        member.setAge(requestDto.getAge());
+        // ID로 특정 회원 조회
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return new MemberResponseDto(member);
+        // 회원 정보 수정 (의미 있는 메서드 사용)
+        member.updateMemberInfo(requestDto.getName(), requestDto.getEmail(), requestDto.getTel(),
+            requestDto.getAge(), requestDto.getGender());
+
+        memberRepository.save(member);
+
+        // 업데이트된 회원 정보를 DTO로 반환
+        return MemberMapper.toDto(member);
     }
 
+    //회원삭제 함수
     @Transactional
     public void deleteMember(Long memberId) {
-        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId).orElse(null);
-        if (member == null) {
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
+        // ID로 특정 회원 조회
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 실제 삭제 대신 isDeleted를 true로 설정
-        member.setIsDeleted(true);
+        member.deactivateMember();
+        memberRepository.save(member);
     }
 }

@@ -186,6 +186,7 @@ class MemberServiceTest {
         assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
     }
 
+
     @DisplayName("회원 정보 업데이트 테스트")
     @Test
     void updateMemberTest() {
@@ -212,11 +213,8 @@ class MemberServiceTest {
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
             Optional.of(member));
 
-        member.setEmail(updateRequest.getEmail());
-        member.setName(updateRequest.getName());
-        member.setTel(updateRequest.getTel());
-        member.setGender(updateRequest.getGender());
-        member.setAge(updateRequest.getAge());
+        member.updateMemberInfo(updateRequest.getName(), updateRequest.getEmail(),
+            updateRequest.getTel(), updateRequest.getAge(), updateRequest.getGender());
 
         MemberResponseDto updatedMember = memberService.updateMember(memberId, updateRequest);
 
