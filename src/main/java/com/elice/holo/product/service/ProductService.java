@@ -1,11 +1,16 @@
 package com.elice.holo.product.service;
 
-import com.elice.holo.product.service.dto.AddProductRequest;
-import com.elice.holo.product.service.dto.ProductOptionDto;
+import com.elice.holo.product.domain.ProductOption;
+import com.elice.holo.product.dto.AddProductRequest;
+import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
+import com.elice.holo.product.dto.UpdateProductOptionDto;
+import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
+import com.elice.holo.product.repository.ProductOptionRepository;
 import com.elice.holo.product.repository.ProductRepository;
-import com.elice.holo.product.service.dto.ProductsResponseDto;
+import com.elice.holo.product.dto.ProductsResponseDto;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +23,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductOptionService productOptionService;
+    private final ProductOptionRepository productOptionRepository;
 
     /**
      * 상품 추가를 위한 메서드
-     * @param addProductRequest
+     * @param request
      * @return Product
      */
     @Transactional
-    public Product saveProduct(AddProductRequest addProductRequest) {
+    public Product saveProduct(AddProductRequest request) {
 
-        Product newProduct = addProductRequest.toEntity();
+        Product newProduct = request.toEntity();
 
         //옵션 리스트 받아와서 Product 에 추가
-        addProductRequest.getProductOptions().stream()
+        request.getProductOptions().stream()
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList()).forEach(newProduct::addProductOption);
 
@@ -59,6 +66,57 @@ public class ProductService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * 상품 수정 메서드
+     * @param productId
+     * @param request
+     * @return
+     */
+    @Transactional
+    public Long updateProduct(Long productId, UpdateProductRequest request) {
+
+        Product product = findProductById(productId);
+
+        product.updateProduct(request.getName(), request.getPrice(),
+            request.getDescription(), request.getStockQuantity()
+        );
+
+        addProductOptions(request, product);
+
+        return product.getId();
+    }
+
+    //상품 옵션 수정시 추가 메서드
+    private void addProductOptions(UpdateProductRequest request, Product product) {
+
+        //기존 상품 옵션과 수정 상품 옵션 비교해서 기존 상품 옵션 삭제
+        List<ProductOption> existProductOptions = new ArrayList<>(product.getProductOptions());
+        List<UpdateProductOptionDto> newProductOptions = request.getProductOptions();
+
+        for (ProductOption existOption : existProductOptions) {
+            boolean isExist = newProductOptions.stream().anyMatch(newOption ->
+                newOption.getId() != null && newOption.getId().equals(existOption.getId())
+            );
+
+            //상품 옵션 삭제
+            if (!isExist) existOption.updateIsDeleted(true);
+
+        }
+
+        newProductOptions.forEach(newOption -> {
+            if (newOption.getId() == null) {
+                product.addProductOption(newOption.toEntity());
+            } else {
+                existProductOptions.stream()
+                    .filter(exist -> exist.getId().equals(newOption.getId()))
+                    .findFirst()
+                    .ifPresent(exist -> {
+                        exist.updateProductOption(newOption.getColor(), newOption.getSize(),
+                            newOption.getOptionQuantity());
+                    });
+            }
+        });
+    }
 
 
 }

@@ -48,7 +48,7 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductOption> productOptions = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -104,6 +104,14 @@ public class Product extends BaseEntity {
     //주문이 취소되면 상품 재고도 증가
     public void addStock(int quantity) {
         this.stockQuantity += quantity;
+    }
+
+    //상품 수정 메서드
+    public void updateProduct(String name, int price, String description, int stockQuantity) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.stockQuantity = stockQuantity;
     }
 
 }
