@@ -1,18 +1,25 @@
 package com.elice.holo.product.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
+import com.elice.holo.product.dto.UpdateProductOptionDto;
+import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.repository.ProductRepository;
+import com.elice.holo.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -42,6 +50,8 @@ class ProductControllerTest {
 
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    private ProductService productService;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -132,7 +142,47 @@ class ProductControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].name").value("의자"))
             .andExpect(jsonPath("$[1].price").value(100000));
+
     }
+
+
+
+    @Test
+    @DisplayName("상품 수정 테스트")
+    void updateProductTest() throws Exception {
+
+        //given
+        final String url = "/api/products/{id}";
+        Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .forEach(product::addProductOption);
+
+        Product savedProduct = productRepository.save(product);
+
+        UpdateProductOptionDto optionDto1 = new UpdateProductOptionDto(null, "brown", "F", 100);
+        UpdateProductOptionDto optionDto2 = new UpdateProductOptionDto(2L, "RED", "F", 700);
+        UpdateProductRequest request = new UpdateProductRequest("의자(수정)", 200000, "시디즈(수정)",
+            300, List.of(optionDto1, optionDto2)
+        );
+
+        //when
+        ResultActions result = mockMvc.perform(put(url, savedProduct.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request)));
+
+        //then
+        result.andExpect(status().isOk());
+
+        Product updatedProduct = productRepository.findById(savedProduct.getId()).get();
+        assertThat(updatedProduct.getName()).isEqualTo("의자(수정)");
+        assertThat(updatedProduct.getDescription()).isEqualTo("시디즈(수정)");
+        assertThat(updatedProduct.getProductOptions()).extracting("color")
+            .containsExactly("white", "RED", "brown");
+        assertThat(updatedProduct.getProductOptions().get(0).isDeleted()).isTrue();
+    }
+
+
 
     //옵션 생성 메서드
     private List<ProductOptionDto> getProductOptionDto() {
