@@ -12,6 +12,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         + " where p.isDeleted = false and po.isDeleted=false and p.productId = :id")
     Optional<Product> findProductDetailByProductId(Long id);
 
+    Optional<Product> findByProductIdAndIsDeletedFalse(Long id);
+
 
 
 }
