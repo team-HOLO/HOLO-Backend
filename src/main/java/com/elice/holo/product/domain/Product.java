@@ -41,7 +41,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private int stockQuantity;
 
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
