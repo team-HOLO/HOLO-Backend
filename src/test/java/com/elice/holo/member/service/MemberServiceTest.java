@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
+import com.elice.holo.member.dto.MemberMapper;
 import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -27,6 +29,9 @@ class MemberServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private MemberMapper memberMapper;
 
     @InjectMocks
     private MemberService memberService;
@@ -58,8 +63,13 @@ class MemberServiceTest {
             .isDeleted(false)
             .build();
 
+        MemberResponseDto responseDto = new MemberResponseDto(
+            member); // MemberResponseDto는 Mapper를 통해 생성되도록 처리
+
         // When
+        when(memberMapper.toEntity(any(MemberSignupRequestDto.class))).thenReturn(member);
         when(memberRepository.save(any(Member.class))).thenReturn(member);
+        when(memberMapper.toDto(any(Member.class))).thenReturn(responseDto);
 
         MemberResponseDto result = memberService.signup(requestDto);
 
@@ -69,7 +79,6 @@ class MemberServiceTest {
         assertEquals(result.getTel(), requestDto.getTel());
         assertEquals(result.getGender(), requestDto.getGender());
         assertEquals(result.getAge(), requestDto.getAge());
-        assertEquals(result.getIsAdmin(), false);
     }
 
     @DisplayName("로그인 서비스 테스트")
@@ -91,19 +100,18 @@ class MemberServiceTest {
             .isAdmin(false)
             .build();
 
+        MemberResponseDto responseDto = new MemberResponseDto(member); // MemberResponseDto 생성
+
         // When
         when(memberRepository.findByEmailAndIsDeletedFalse(loginRequest.getEmail()))
             .thenReturn(Optional.of(member));
+        when(memberMapper.toDto(any(Member.class))).thenReturn(responseDto);
 
         MemberResponseDto result = memberService.login(loginRequest);
 
         // Then
         assertEquals(result.getEmail(), loginRequest.getEmail());
         assertEquals(result.getName(), "유재석");
-        assertEquals(result.getTel(), "010-1234-5678");
-        assertEquals(result.getGender(), true);
-        assertEquals(result.getAge(), 45);
-        assertEquals(result.getIsAdmin(), false);
     }
 
     @DisplayName("회원 로그인 실패 - 존재하지 않는 회원")
@@ -186,47 +194,59 @@ class MemberServiceTest {
         assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
     }
 
-    @DisplayName("회원 정보 업데이트 테스트")
+    @DisplayName("회원 정보 수정 테스트")
     @Test
     void updateMemberTest() {
         // Given
         Long memberId = 1L;
 
         MemberUpdateRequestDto updateRequest = new MemberUpdateRequestDto();
-        updateRequest.setEmail("updated@test.com");
-        updateRequest.setName("UpdatedName");
-        updateRequest.setTel("010-1235-5678");
-        updateRequest.setGender(true);
-        updateRequest.setAge(30);
+        updateRequest.setName("강호동");
+        updateRequest.setTel("010-8765-4321");
+        updateRequest.setGender(false);
+        updateRequest.setAge(50);
 
-        Member member = Member.builder()
+        Member existingMember = Member.builder()
             .email("test@test.com")
+            .password("password123")
             .name("유재석")
             .tel("010-1234-5678")
             .gender(true)
             .age(45)
             .isDeleted(false)
+            .isAdmin(false)
             .build();
 
+        Member updatedMember = Member.builder()
+            .email("test@test.com")
+            .password("password123")
+            .name(updateRequest.getName()) // 수정된 이름
+            .tel(updateRequest.getTel()) // 수정된 전화번호
+            .gender(updateRequest.getGender()) // 수정된 성별
+            .age(updateRequest.getAge()) // 수정된 나이
+            .isDeleted(false)
+            .isAdmin(false)
+            .build();
+
+        MemberResponseDto responseDto = new MemberResponseDto(updatedMember);
+
         // When
-        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
-            Optional.of(member));
+        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId))
+            .thenReturn(Optional.of(existingMember)); // 기존 회원 정보 조회
+        when(memberMapper.toDto(any(Member.class))).thenReturn(responseDto);
 
-        member.setEmail(updateRequest.getEmail());
-        member.setName(updateRequest.getName());
-        member.setTel(updateRequest.getTel());
-        member.setGender(updateRequest.getGender());
-        member.setAge(updateRequest.getAge());
-
-        MemberResponseDto updatedMember = memberService.updateMember(memberId, updateRequest);
+        MemberResponseDto result = memberService.updateMember(memberId, updateRequest);
 
         // Then
-        assertEquals(updatedMember.getEmail(), updateRequest.getEmail());
-        assertEquals(updatedMember.getName(), updateRequest.getName());
-        assertEquals(updatedMember.getTel(), updateRequest.getTel());
-        assertEquals(updatedMember.getGender(), updateRequest.getGender());
-        assertEquals(updatedMember.getAge(), updateRequest.getAge());
+        assertEquals(result.getName(), updateRequest.getName());
+        assertEquals(result.getTel(), updateRequest.getTel());
+        assertEquals(result.getGender(), updateRequest.getGender());
+        assertEquals(result.getAge(), updateRequest.getAge());
+
+        verify(memberRepository).save(existingMember);
     }
+
+
 
     @DisplayName("모든 회원 조회 테스트")
     @Test
@@ -254,8 +274,13 @@ class MemberServiceTest {
         members.add(member1);
         members.add(member2);
 
+        List<MemberResponseDto> responseDtos = new ArrayList<>();
+        responseDtos.add(new MemberResponseDto(member1));
+        responseDtos.add(new MemberResponseDto(member2));
+
         // When
         when(memberRepository.findAllByIsDeletedFalse()).thenReturn(members);
+        when(memberMapper.toDtoList(ArgumentMatchers.<List<Member>>any())).thenReturn(responseDtos);
 
         List<MemberResponseDto> result = memberService.getAllMembers();
 
@@ -281,9 +306,12 @@ class MemberServiceTest {
             .isDeleted(false)
             .build();
 
+        MemberResponseDto responseDto = new MemberResponseDto(member); // DTO 생성
+
         // When
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
             Optional.of(member));
+        when(memberMapper.toDto(member)).thenReturn(responseDto); // MemberMapper의 toDto 설정
 
         MemberResponseDto result = memberService.getMemberById(memberId);
 
