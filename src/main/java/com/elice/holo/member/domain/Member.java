@@ -6,13 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
+@Builder
 @Table(name = "member")
 public class Member {
 
@@ -21,7 +24,7 @@ public class Member {
     @Column(name = "member_id", updatable = false)
     private Long memberId;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "password", nullable = false)
@@ -39,26 +42,11 @@ public class Member {
     @Column(name = "tel", nullable = false)
     private String tel;
 
-    @Column(name = "age", nullable = true)
+    @Column(name = "age", nullable = false)
     private Integer age;
 
-    @Column(name = "gender", nullable = true)
+    @Column(name = "gender", nullable = false)
     private Boolean gender; // (true = 남성, false = 여성 등)
-
-    @Builder
-    public Member(Long memberId, String email, String password, String name, Boolean isAdmin,
-        Boolean isDeleted,
-        String tel, Boolean gender, Integer age) {
-        this.memberId = memberId;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.isAdmin = isAdmin;
-        this.isDeleted = isDeleted;
-        this.tel = tel;
-        this.gender = gender;
-        this.age = age;
-    }
 
 
     // 회원 탈퇴 메서드 (isDeleted 값 변경)
@@ -67,8 +55,10 @@ public class Member {
     }
 
     // 회원 정보 수정 메서드
-    public void updateMemberInfo(String name, String email, String tel, Integer age,
+    public void updateMemberInfo(String name, String tel,
+        Integer age,
         Boolean gender) {
+        this.password = password;
         this.name = name;
         this.email = email;
         this.tel = tel;
@@ -76,8 +66,5 @@ public class Member {
         this.gender = gender;
     }
 
-    //비밀번호 업데이트 메소드
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
-    }
+
 }
