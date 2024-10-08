@@ -86,9 +86,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
-            categoryService.createCategory(categoryCreateDto);
-        });
+        assertThrows(NoSuchElementException.class,
+            () -> categoryService.createCategory(categoryCreateDto));
     }
 
     @Test
@@ -143,9 +142,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.updateCategory(invalidCategoryId, updateDto);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.updateCategory(invalidCategoryId, updateDto));
     }
 
     @Test
@@ -180,9 +178,8 @@ class CategoryServiceTest {
         when(categoryRepository.existsById(nonExistentCategoryId)).thenReturn(false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.deleteCategory(nonExistentCategoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.deleteCategory(nonExistentCategoryId));
     }
 
     @Test
@@ -256,9 +253,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.getCategoryById(invalidCategoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.getCategoryById(invalidCategoryId));
     }
 
     @Test
@@ -271,9 +267,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.getCategoryById(categoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.getCategoryById(categoryId));
     }
 
 
