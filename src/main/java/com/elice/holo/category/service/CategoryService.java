@@ -26,8 +26,6 @@ public class CategoryService {
     public CategoryResponseDto createCategory(CategoryCreateDto categoryCreateDto) {
         // Category 생성자 기반 매핑
         Category category = categoryMapper.toEntity(categoryCreateDto);
-        System.out.println("Name: " + category.getName()); // 확인용
-        System.out.println("Description: " + category.getDescription()); // 확인용
 
         if (categoryCreateDto.getParentCategory() != null) {
             Category parentCategory = categoryRepository.findByCategoryIdAndIsDeletedFalse(
