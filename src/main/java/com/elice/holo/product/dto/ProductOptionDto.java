@@ -1,4 +1,4 @@
-package com.elice.holo.product.service.dto;
+package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.ProductOption;
 import lombok.AllArgsConstructor;

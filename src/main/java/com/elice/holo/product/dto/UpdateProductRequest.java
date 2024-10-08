@@ -1,16 +1,15 @@
-package com.elice.holo.product.service.dto;
+package com.elice.holo.product.dto;
 
-import com.elice.holo.product.domain.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-//상품 등록 request DTO
+//상품 수정 request dto
 @Data
 @AllArgsConstructor
-public class AddProductRequest {
+public class UpdateProductRequest {
 
     @NotBlank
     private String name;
@@ -26,12 +25,7 @@ public class AddProductRequest {
     @Pattern(regexp = "[0-9]*$") //숫자만 허용
     private int stockQuantity;
 
-    private List<ProductOptionDto> productOptions;
+    private List<UpdateProductOptionDto> productOptions;
 
 //    private List<MultipartFile> multipartFiles; //상품 이미지들 TODO
-
-    public Product toEntity() {
-        return Product.createProduct(name, price, description, stockQuantity);
-    }
-
 }
