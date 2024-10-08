@@ -12,6 +12,7 @@ import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
 import com.elice.holo.category.dto.CategoryDetailsDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
+import com.elice.holo.category.mapper.CategoryMapper;
 import com.elice.holo.category.repository.CategoryRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,15 +21,20 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@Nested
 class CategoryServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private CategoryMapper categoryMapper;
 
     @InjectMocks
     private CategoryService categoryService;
@@ -44,14 +50,20 @@ class CategoryServiceTest {
 
         // given
         Long categoryId = 1L;
-        Category category = new Category();
-        category.setCategoryId(categoryId);
-        category.setName("가구");
-        category.setDescription("1인용 가구");
+        Category category = Category.builder()
+            .categoryId(categoryId)
+            .name("가구")
+            .description("1인용 가구")
+            .isDeleted(false)
+            .build();
 
         CategoryCreateDto categoryCreateDto = new CategoryCreateDto("가구", "1인용 가구", null);
+        CategoryResponseDto categoryResponseDto = new CategoryResponseDto(categoryId, "가구",
+            new ArrayList<>());
 
+        when(categoryMapper.toEntity(categoryCreateDto)).thenReturn(category);
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
+        when(categoryMapper.toCategoryResponseDto(category)).thenReturn(categoryResponseDto);
 
         // when
         CategoryResponseDto savedCategory = categoryService.createCategory(categoryCreateDto);
@@ -74,9 +86,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> {
-            categoryService.createCategory(categoryCreateDto);
-        });
+        assertThrows(NoSuchElementException.class,
+            () -> categoryService.createCategory(categoryCreateDto));
     }
 
     @Test
@@ -84,23 +95,40 @@ class CategoryServiceTest {
     void updateCategoryTest() {
         // given
         Long categoryId = 1L;
-        Category category = new Category();
-        category.setCategoryId(1L);
-        category.setName("카테고리1");
+        Long parentCategoryId = 2L;
 
-        CategoryCreateDto updateDto = new CategoryCreateDto("카테고리2",
-            "카테고리 업데이트", null);
+        // 기존 카테고리
+        Category category = Category.builder()
+            .categoryId(categoryId)
+            .name("카테고리1")
+            .isDeleted(false)
+            .build();
+
+        // 상위 카테고리
+        Category parentCategory = Category.builder()
+            .categoryId(parentCategoryId)
+            .name("상위 카테고리")
+            .isDeleted(false)
+            .build();
+
+        CategoryCreateDto updateDto = new CategoryCreateDto("카테고리2", "카테고리 업데이트", parentCategoryId);
+        CategoryResponseDto updatedResponseDto = new CategoryResponseDto(categoryId, "카테고리2",
+            new ArrayList<>());
 
         when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
             Optional.of(category));
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(parentCategoryId)).thenReturn(
+            Optional.of(parentCategory));
         when(categoryRepository.save(category)).thenReturn(category);
+        when(categoryMapper.toCategoryResponseDto(category)).thenReturn(updatedResponseDto);
 
         // when
         CategoryResponseDto result = categoryService.updateCategory(categoryId, updateDto);
 
         // then
+        assertNotNull(result);
         assertEquals("카테고리2", result.getName());
-
+        verify(categoryRepository, times(1)).save(category);
     }
 
     @Test
@@ -114,9 +142,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.updateCategory(invalidCategoryId, updateDto);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.updateCategory(invalidCategoryId, updateDto));
     }
 
     @Test
@@ -124,16 +151,22 @@ class CategoryServiceTest {
     void deleteCategoryTest() {
         // given
         Long categoryId = 1L;
-        Category category = new Category();
-        category.setCategoryId(categoryId);
+        Category category = Category.builder()
+            .categoryId(categoryId)
+            .name("카테고리")
+            .description("설명")
+            .isDeleted(false)
+            .build();
 
-        when(categoryRepository.existsById(categoryId)).thenReturn(true);
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
+            Optional.of(category));
 
         // when
         categoryService.deleteCategory(categoryId);
 
         // then
-        verify(categoryRepository, times(1)).deleteById(categoryId);
+        verify(categoryRepository, times(1)).save(category);
+        assertEquals(true, category.getIsDeleted());
     }
 
     @Test
@@ -145,27 +178,35 @@ class CategoryServiceTest {
         when(categoryRepository.existsById(nonExistentCategoryId)).thenReturn(false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.deleteCategory(nonExistentCategoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.deleteCategory(nonExistentCategoryId));
     }
 
     @Test
     @DisplayName("전체 카테고리 목록 조회")
     void findAllCategoriesTest() {
         // given
-        Category category1 = new Category();
-        category1.setCategoryId(1L);
-        category1.setName("category1");
-        category1.setSubCategories(new ArrayList<>());
-        Category category2 = new Category();
-        category2.setCategoryId(2L);
-        category2.setName("category2");
-        category2.setSubCategories(new ArrayList<>());
+        Category category1 = Category.builder()
+            .categoryId(1L)
+            .name("category1")
+            .subCategories(new ArrayList<>())
+            .isDeleted(false)
+            .build();
+
+        Category category2 = Category.builder()
+            .categoryId(2L)
+            .name("category2")
+            .subCategories(new ArrayList<>())
+            .isDeleted(false)
+            .build();
 
         List<Category> categories = Arrays.asList(category1, category2);
+        CategoryResponseDto dto1 = new CategoryResponseDto(1L, "category1", new ArrayList<>());
+        CategoryResponseDto dto2 = new CategoryResponseDto(2L, "category2", new ArrayList<>());
 
         when(categoryRepository.findByIsDeletedFalse()).thenReturn(categories);
+        when(categoryMapper.toCategoryResponseDto(category1)).thenReturn(dto1);
+        when(categoryMapper.toCategoryResponseDto(category2)).thenReturn(dto2);
 
         // when
         List<CategoryResponseDto> result = categoryService.getAllCategories();
@@ -180,18 +221,25 @@ class CategoryServiceTest {
     public void testGetCategoryById() {
         // given
         Long categoryId = 1L;
-        Category category = new Category();
-        category.setCategoryId(categoryId);
-        category.setName("Category1");
-        category.setDescription("Description");
+        Category category = Category.builder()
+            .categoryId(categoryId)
+            .name("Category1")
+            .description("Description")
+            .isDeleted(false)
+            .build();
+
+        CategoryDetailsDto categoryDetailsDto = new CategoryDetailsDto(categoryId, "Category1",
+            "Description", null);
 
         when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
             Optional.of(category));
+        when(categoryMapper.toCategoryDetailsDto(category)).thenReturn(categoryDetailsDto);
 
         // when
         CategoryDetailsDto result = categoryService.getCategoryById(categoryId);
 
         // then
+        assertNotNull(result);
         assertEquals("Category1", result.getName());
     }
 
@@ -205,9 +253,8 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.getCategoryById(invalidCategoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.getCategoryById(invalidCategoryId));
     }
 
     @Test
@@ -215,30 +262,34 @@ class CategoryServiceTest {
     public void testGetDeletedCategory() {
         // given
         Long categoryId = 1L;
-        Category deletedCategory = new Category();
-        deletedCategory.setCategoryId(categoryId);
-        deletedCategory.setIsDeleted(true);  // 삭제된 상태로 설정
 
         when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId))
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.getCategoryById(categoryId);
-        });
+        assertThrows(IllegalArgumentException.class,
+            () -> categoryService.getCategoryById(categoryId));
     }
+
 
     @Test
     @DisplayName("최상위 카테고리 조회")
     public void testGetTopLevelCategories() {
         // given
-        Category topCategory = new Category();
-        topCategory.setCategoryId(1L);
-        topCategory.setName("topCategory");
+        Category topCategory = Category.builder()
+            .categoryId(1L)
+            .name("topCategory")
+            .isDeleted(false)
+            .build();
+
+        CategoryResponseDto topCategoryDto = new CategoryResponseDto(1L, "topCategory",
+            new ArrayList<>());
+
         List<Category> topCategories = Arrays.asList(topCategory);
 
         when(categoryRepository.findByIsDeletedFalseAndParentCategoryIsNull()).thenReturn(
             topCategories);
+        when(categoryMapper.toCategoryResponseDto(topCategory)).thenReturn(topCategoryDto);
 
         // when
         List<CategoryResponseDto> result = categoryService.getTopLevelCategories();
@@ -253,20 +304,27 @@ class CategoryServiceTest {
     public void testGetSubCategories() {
         // given
         Long categoryId = 1L;
-        Category parentCategory = new Category();
-        parentCategory.setCategoryId(categoryId);
+        Category parentCategory = Category.builder()
+            .categoryId(categoryId)
+            .isDeleted(false)
+            .build();
 
-        Category subCategory = new Category();
-        subCategory.setCategoryId(2L);
-        subCategory.setName("subCategory");
-        subCategory.setDescription("SubCategory");
+        Category subCategory = Category.builder()
+            .categoryId(2L)
+            .name("subCategory")
+            .description("SubCategory")
+            .isDeleted(false)
+            .build();
 
         List<Category> subCategories = Arrays.asList(subCategory);
+        CategoryResponseDto subCategoryDto = new CategoryResponseDto(2L, "subCategory",
+            new ArrayList<>());
 
         when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
             Optional.of(parentCategory));
         when(categoryRepository.findByParentCategoryAndIsDeletedFalse(parentCategory)).thenReturn(
             subCategories);
+        when(categoryMapper.toCategoryResponseDto(subCategory)).thenReturn(subCategoryDto);
 
         // when
         List<CategoryResponseDto> result = categoryService.getSubCategories(categoryId);
