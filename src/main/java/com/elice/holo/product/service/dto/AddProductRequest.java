@@ -29,6 +29,7 @@ public class AddProductRequest {
     private List<ProductOptionDto> productOptions;
 
 //    private List<MultipartFile> multipartFiles; //상품 이미지들 TODO
+    
 
     public Product toEntity() {
         return Product.createProduct(name, price, description, stockQuantity);

@@ -48,8 +48,10 @@ public class Member {
     private Boolean gender; // (true = 남성, false = 여성 등)
 
     @Builder
-    public Member(String email, String password, String name, Boolean isAdmin, Boolean isDeleted,
+    public Member(Long memberId, String email, String password, String name, Boolean isAdmin,
+        Boolean isDeleted,
         String tel, Boolean gender, Integer age) {
+        this.memberId = memberId;
         this.email = email;
         this.password = password;
         this.name = name;
