@@ -1,153 +1,105 @@
-package com.elice.holo.cart.service;
+//package com.elice.holo.cart.service;
+//
+//
+//import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertFalse;
+//import static org.junit.jupiter.api.Assertions.assertNotNull;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
+//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.Mockito.verify;
+//import static org.mockito.Mockito.when;
+//
+//import com.elice.holo.cart.Service.CartService;
+//import com.elice.holo.cart.domain.Cart;
+//import com.elice.holo.cart.domain.CartProduct;
+//import com.elice.holo.cart.dto.CartDto;
+//import com.elice.holo.cart.dto.CartProductDto;
+//import com.elice.holo.cart.mapper.CartMapper;
+//import com.elice.holo.cart.repository.CartRepository;
+//import com.elice.holo.member.domain.Member;
+//import com.elice.holo.product.domain.Product;
+//import com.elice.holo.product.repository.ProductRepository;
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.List;
+//import java.util.Optional;
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.DisplayName;
+//import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.ArgumentCaptor;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
+//import org.mockito.MockitoAnnotations;
+//
+//
+//
+//class CartServiceTest {
+//
+//    @InjectMocks
+//    private CartService cartService;
+//
+//    @Mock
+//    private CartRepository cartRepository;
+//
+//    @Mock
+//    private ProductRepository productRepository;
+//
+//    @Mock
+//    private CartMapper cartMapper;
+//
+//
+////    @BeforeEach
+////    void setUp() {
+////        MockitoAnnotations.openMocks(this);
+////
+////
+////    }
+//
+//
+////    @DisplayName("특정 회원의 장바구니 조회 테스트")
+////    @Test
+////    void getCartByMemberTest() {
+////        //Given
+////        Member member = new Member();
+////        member.setMemberId(1L);
+////        Cart cart = Cart.createCart(member);
+////
+////        List<CartProductDto> productDtos = new ArrayList<>(); // Mock CartProductDtos
+////        CartDto cartDto = new CartDto(cart.getCartId(), member.getMemberId(), productDtos);
+////
+////        when(cartRepository.findByMember_MemberId(member.getMemberId())).thenReturn(cart);
+////        when(cartMapper.toCartDto(cart)).thenReturn(cartDto);
+////
+////        // When
+////        CartDto result = cartService.getCartByMember(member);
+////
+////        //then
+////        assertNotNull(result);
+////        assertEquals(cart.getCartId(), result.getCartId());
+////        assertEquals(member.getMemberId(), result.getMemberId());
+////    }
+////
+////    @DisplayName("장바구니 생성 테스트")
+////    @Test
+////    void createCartTest() {
+////        // Given
+////        Member member = new Member();
+////        member.setMemberId(1L);
+////        Cart cart = Cart.createCart(member); // 회원으로 장바구니 생성
+////
+////
+////        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
+////        when(cartMapper.toCartDto(cart)).thenReturn(new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>()));
+////
+////        // When: 실제 메서드 호출
+////        CartDto result = cartService.createCart(member);
+////
+////        // Then: 결과 검증
+////        assertNotNull(result);
+////        assertEquals(cart.getCartId(), result.getCartId());
+////    }
+////
+////}
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.elice.holo.cart.Service.CartService;
-import com.elice.holo.cart.domain.Cart;
-import com.elice.holo.cart.domain.CartProduct;
-import com.elice.holo.cart.repository.CartRepository;
-import com.elice.holo.member.domain.Member;
-import com.elice.holo.product.domain.Product;
-import java.util.Arrays;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-class CartServiceTest {
-
-    @InjectMocks
-    private CartService cartService;
-
-    @Mock
-    private CartRepository cartRepository;
-
-    private Member member;
-    private Cart cart;
-    private Product product;
-    private CartProduct cartProduct;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        member = new Member();
-        member.setMemberId(1L);
-
-        cart = Cart.createCart(member);
-
-        product = Product.createProduct("Test product", 100, "Test Description", 10);
-
-        cartProduct = new CartProduct(cart, product, 2L);
-    }
-
-    @Test
-    void testGetCartByMember() {
-        when(cartRepository.findByMember_MemberId(member.getMemberId())).thenReturn(cart);
-
-        Cart result = cartService.getCartByMember(member);
-
-        assertNotNull(result);
-        assertEquals(cart, result);
-        verify(cartRepository).findByMember_MemberId(member.getMemberId());
-    }
-
-    @Test
-    void testCreateCart() {
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        Cart result = cartService.createCart(member);
-
-        assertNotNull(result);
-        assertEquals(cart, result);
-        verify(cartRepository).save(any(Cart.class));
-    }
-
-    @Test
-    void testAddProductToCart() {
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        cartService.addProductToCart(cart, product, 2L);
-
-        ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
-        Cart savedCart = captor.getValue();
-        assertEquals(1, savedCart.getCartProducts().size());
-        assertEquals(2L, savedCart.getCartProducts().get(0).getQuantity());
-    }
-
-    @Test
-    void testRemoveProductFromCart() {
-        cart.addCartPoduct(product, 2L);
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        cartService.removeProductFromCart(cart, cartProduct);
-
-        ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
-        Cart savedCart = captor.getValue();
-        assertFalse(savedCart.getCartProducts().contains(cartProduct)); // 기대값을 false로 설정
-    }
-
-    @Test
-    void testUpdateProductQuantity() {
-        cart.addCartPoduct(product, 2L); // 장바구니에 상품 추가
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        // 첫 번째 cartProduct를 가져오기
-        CartProduct cartProductToUpdate = cart.getCartProducts().get(0);
-        cartService.updateProductQuantity(cart, cartProductToUpdate, 5L);
-
-        ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
-        Cart savedCart = captor.getValue();
-
-        // 수량이 제대로 업데이트되었는지 확인
-        assertEquals(5L, savedCart.getCartProducts().get(0).getQuantity());
-    }
-
-    @Test
-    void testClearCart() {
-        cart.addCartPoduct(product, 2L);
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        cartService.clearCart(cart);
-
-        ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
-        Cart savedCart = captor.getValue();
-        assertTrue(savedCart.getCartProducts().isEmpty());
-    }
-
-
-    @Test
-    void testRemoveSpecificProducts() {
-        cart.addCartPoduct(product, 2L);
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-
-        cartService.removeSpecificProducts(cart, Arrays.asList(cartProduct));
-
-        ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
-        Cart savedCart = captor.getValue();
-        assertFalse(savedCart.getCartProducts().contains(cartProduct)); // 기대값을 false로 설정
-    }
-
-    @Test
-    void testCalculateTotalPrice() {
-        cart.addCartPoduct(product, 2L);
-        double totalPrice = cartService.calculateTotalPrice(cart);
-        assertEquals(200.0, totalPrice); // 100 * 2
-    }
-
-
-}

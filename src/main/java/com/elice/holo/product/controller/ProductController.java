@@ -1,4 +1,4 @@
-package com.elice.holo.product;
+package com.elice.holo.product.controller;
 
 import com.elice.holo.product.service.dto.AddProductRequest;
 import com.elice.holo.product.dto.AddProductResponse;
