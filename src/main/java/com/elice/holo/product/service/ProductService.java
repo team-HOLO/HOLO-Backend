@@ -29,11 +29,16 @@ public class ProductService {
     public Product saveProduct(AddProductRequest request) {
 
         Product newProduct = request.toEntity();
+//        Product newProduct = productMapper.toEntity(request);
 
         //옵션 리스트 받아와서 Product 에 추가
         request.getProductOptions().stream()
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList()).forEach(newProduct::addProductOption);
+
+//        request.getProductOptions().stream()
+//            .map(productMapper::optionToEntity)
+//            .collect(Collectors.toList()).forEach(newProduct::addProductOption);
 
         return productRepository.save(newProduct);
     }
@@ -49,6 +54,10 @@ public class ProductService {
         return productRepository.findAll().stream()
             .map(ProductsResponseDto::new)
             .collect(Collectors.toList());
+
+//        return productRepository.findAll().stream()
+//            .map(productMapper::toProductsDto)
+//            .collect(Collectors.toList());
     }
 
     //상품 수정 메서드
@@ -64,6 +73,15 @@ public class ProductService {
         addProductOptions(request, product);
 
         return product.getProductId();
+    }
+
+    //상품 삭제 메서드(soft delete)
+    @Transactional
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.findByProductIdAndIsDeletedFalse(productId)
+            .orElseThrow(() -> new ProductNotFoundException("삭제할 상품이 존재하지 않습니다."));
+
+        product.updateIsDeleted(true);
     }
 
     //상품 옵션 수정시 추가 메서드
@@ -85,6 +103,7 @@ public class ProductService {
         newProductOptions.forEach(newOption -> {
             if (newOption.getId() == null) {
                 product.addProductOption(newOption.toEntity());
+//                product.addProductOption(productMapper.optionDtoToEntity(newOption));
             } else {
                 existProductOptions.stream()
                     .filter(exist -> exist.getProductOptionId().equals(newOption.getId()))
@@ -96,8 +115,4 @@ public class ProductService {
             }
         });
     }
-
-
-
-
 }
