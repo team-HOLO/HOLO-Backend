@@ -31,7 +31,7 @@ public class MemberController {
 
     public ResponseEntity<MemberResponseDto> signup(
         @RequestBody MemberSignupRequestDto requestDto) {
-        //requestbody로 json을 dto로 변환해 매핑
+
         MemberResponseDto memberResponseDto = memberService.signup(requestDto);
         return ResponseEntity.status(201).body(memberResponseDto);
     }

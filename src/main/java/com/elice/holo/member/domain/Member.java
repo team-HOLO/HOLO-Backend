@@ -18,7 +18,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id", updatable = false) // 스네이크 케이스로 수정
+    @Column(name = "member_id", updatable = false)
     private Long memberId;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -76,7 +76,7 @@ public class Member {
         this.gender = gender;
     }
 
-
+    //비밀번호 업데이트 메소드
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
