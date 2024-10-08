@@ -6,7 +6,6 @@ import lombok.Data;
 
 //상품 등록 Response DTO
 @Data
-@AllArgsConstructor
 public class AddProductResponse {
 
     private Long productId;

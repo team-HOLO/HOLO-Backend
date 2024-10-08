@@ -8,7 +8,6 @@ import lombok.Data;
 
 //상품 단일 조회 DTO
 @Data
-@AllArgsConstructor
 public class ProductResponseDto {
 
     private Long productId;
