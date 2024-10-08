@@ -161,7 +161,6 @@ class MemberControllerTest {
             .andExpect(jsonPath("$.age").value(30))
             .andExpect(jsonPath("$.isAdmin").value(false));
     }
-
     @DisplayName("회원 정보 수정 API 테스트")
     @Test
     void updateMemberTest() throws Exception {
@@ -182,11 +181,10 @@ class MemberControllerTest {
         Member savedMember = memberRepository.save(member);
 
         MemberUpdateRequestDto updateRequest = new MemberUpdateRequestDto();
-        updateRequest.setEmail("updated@test.com");
-        updateRequest.setName("UpdatedName");
-        updateRequest.setTel("010-1235-5678");
-        updateRequest.setGender(true);
-        updateRequest.setAge(30);
+        updateRequest.setName("강호동");
+        updateRequest.setTel("010-8765-4321");
+        updateRequest.setGender(false);
+        updateRequest.setAge(50);
 
         String requestBody = objectMapper.writeValueAsString(updateRequest);
 
@@ -199,11 +197,11 @@ class MemberControllerTest {
 
         // Then
         result.andExpect(status().isOk())
-            .andExpect(jsonPath("$.email").value("updated@test.com"))
-            .andExpect(jsonPath("$.name").value("UpdatedName"))
-            .andExpect(jsonPath("$.tel").value("010-1235-5678"))
-            .andExpect(jsonPath("$.gender").value(true))
-            .andExpect(jsonPath("$.age").value(30))
+            .andExpect(jsonPath("$.email").value("test@test.com"))
+            .andExpect(jsonPath("$.name").value("강호동"))
+            .andExpect(jsonPath("$.tel").value("010-8765-4321"))
+            .andExpect(jsonPath("$.gender").value(false))
+            .andExpect(jsonPath("$.age").value(50))
             .andExpect(jsonPath("$.isAdmin").value(false));
     }
 

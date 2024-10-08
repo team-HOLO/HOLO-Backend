@@ -31,7 +31,7 @@ public class MemberController {
 
     public ResponseEntity<MemberResponseDto> signup(
         @RequestBody MemberSignupRequestDto requestDto) {
-        //requestbody로 json을 dto로 변환해 매핑
+
         MemberResponseDto memberResponseDto = memberService.signup(requestDto);
         return ResponseEntity.status(201).body(memberResponseDto);
     }
@@ -58,15 +58,15 @@ public class MemberController {
         return ResponseEntity.ok(memberResponseDto);
     }
 
-    // 회원 정보 수정 API
+
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> updateMember(
         @PathVariable(name = "memberId") Long memberId,
         @RequestBody MemberUpdateRequestDto requestDto) {
+
         MemberResponseDto updatedMember = memberService.updateMember(memberId, requestDto);
         return ResponseEntity.ok(updatedMember);
     }
-
     // 회원 삭제 API
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId) {

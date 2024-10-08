@@ -1,12 +1,15 @@
 package com.elice.holo.member.dto;
 
 import com.elice.holo.member.domain.Member;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberResponseDto {
 
     private Long memberId;
@@ -17,7 +20,6 @@ public class MemberResponseDto {
     private Integer age;
     private Boolean isAdmin;
 
-    // 생성자
     public MemberResponseDto(Member member) {
         this.memberId = member.getMemberId();
         this.email = member.getEmail();
