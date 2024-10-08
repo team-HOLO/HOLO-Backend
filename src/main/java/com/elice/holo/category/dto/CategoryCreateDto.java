@@ -1,12 +1,12 @@
 package com.elice.holo.category.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
 public class CategoryCreateDto {
 
     private String name;
