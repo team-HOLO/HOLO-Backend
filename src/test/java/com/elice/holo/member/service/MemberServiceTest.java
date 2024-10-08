@@ -243,7 +243,7 @@ class MemberServiceTest {
         assertEquals(result.getGender(), updateRequest.getGender());
         assertEquals(result.getAge(), updateRequest.getAge());
 
-        verify(memberRepository).save(existingMember); /
+        verify(memberRepository).save(existingMember);
     }
 
 
