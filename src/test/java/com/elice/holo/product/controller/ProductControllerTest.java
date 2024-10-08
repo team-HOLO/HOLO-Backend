@@ -1,6 +1,7 @@
 package com.elice.holo.product.controller;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -51,11 +50,6 @@ class ProductControllerTest {
 
     @Autowired
     ProductRepository productRepository;
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private ProductMapper mapper;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -187,6 +181,30 @@ class ProductControllerTest {
         assertThat(updatedProduct.getProductOptions().get(0).isDeleted()).isTrue();
     }
 
+    @Test
+    @DisplayName("상품 삭제 테스트")
+    public void deleteProductTest() throws Exception {
+
+        //given
+        final String url = "/api/products/{id}";
+        Product product = Product.createProduct("선반", 200000, "선반선반", 100);
+        getProductOptionDto().stream()
+            .map(ProductOptionDto::toEntity)
+            .forEach(product::addProductOption);
+
+        Product savedProduct = productRepository.save(product);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete(url, savedProduct.getProductId()));
+
+        //then
+        resultActions.andExpect(status().isNoContent());
+
+        Product deletedProduct = productRepository.findById(savedProduct.getProductId()).get();
+        assertThat(deletedProduct.getIsDeleted()).isTrue();
+
+    }
+
 
 
     //옵션 생성 메서드
@@ -200,7 +218,8 @@ class ProductControllerTest {
         optionList.add(option2);
 
         List<ProductOptionDto> productOptionDtoList = optionList.stream()
-            .map(ol -> new ProductOptionDto(ol.getColor(), ol.getSize(), ol.getOptionQuantity()))
+//            .map(ol -> new ProductOptionDto(ol.getColor(), ol.getSize(), ol.getOptionQuantity()))
+            .map(ol -> new ProductOptionDto(ol))
             .collect(Collectors.toList());
 
         return productOptionDtoList;

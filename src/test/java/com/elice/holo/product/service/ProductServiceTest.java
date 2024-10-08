@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
@@ -55,7 +56,7 @@ class ProductServiceTest {
         assertNotNull(savedProduct);
         assertThat(savedProduct.getDescription()).isEqualTo("시디즈");
         assertThat(savedProduct.getPrice()).isEqualTo(300000);
-        assertThat(savedProduct.isDeleted()).isFalse();
+        assertThat(savedProduct.getIsDeleted()).isFalse();
     }
 
     @Test
@@ -155,9 +156,46 @@ class ProductServiceTest {
         assertThat(updatedProduct.getProductOptions().get(2).getColor()).isEqualTo("brown");
         assertThat(updatedProduct.getProductOptions().get(0).isDeleted()).isTrue();
         assertThat(updatedProduct.getProductOptions().get(1).isDeleted()).isTrue();
-
-
     }
+
+    @Test
+    @DisplayName("상품 삭제 테스트")
+    public void softDeleteProductTest() throws Exception {
+
+        //given
+        Long productId = 1L;
+        Product product = Product.createProduct("침대", 777777, "시몬스 침대", 100);
+
+        when(productRepository.findByProductIdAndIsDeletedFalse(productId)).thenReturn(
+            Optional.of(product));
+
+        //when
+        productService.deleteProduct(productId);
+
+        //then
+        Product deletedProduct = productRepository.findByProductIdAndIsDeletedFalse(productId).get();
+        assertThat(deletedProduct.getIsDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("삭제할 상품이 존재하지 않으면 NotFoundException 발생")
+    void deleteProductNotFoundExceptionTest() {
+
+        //given
+        Long id = 999L;
+        when(productRepository.findByProductIdAndIsDeletedFalse(id)).thenReturn(Optional.empty());
+
+        //when
+        ProductNotFoundException exception =
+            assertThrows(ProductNotFoundException.class, () -> {
+                productService.deleteProduct(id);
+            });
+
+        //then
+        assertThat(exception.getMessage()).contains("삭제할 상품이 존재하지 않습니다.");
+        verify(productRepository, times(1)).findByProductIdAndIsDeletedFalse(id);
+    }
+
 
 
     //옵션 생성 메서드
@@ -172,7 +210,8 @@ class ProductServiceTest {
         optionList.add(option2);
 
         List<ProductOptionDto> productOptionDtoList = optionList.stream()
-            .map(ol -> new ProductOptionDto(ol.getColor(), ol.getSize(), ol.getOptionQuantity()))
+//            .map(ol -> new ProductOptionDto(ol.getColor(), ol.getSize(), ol.getOptionQuantity()))
+            .map(ol -> new ProductOptionDto(ol))
             .collect(Collectors.toList());
 
         return productOptionDtoList;
