@@ -6,7 +6,6 @@ import lombok.Data;
 
 //상품 등록 Response DTO
 @Data
-@AllArgsConstructor
 public class AddProductResponse {
 
     private Long productId;
@@ -15,7 +14,7 @@ public class AddProductResponse {
     private String description;
 
     public AddProductResponse(Product product) {
-        productId = product.getId();
+        productId = product.getProductId();
         name = product.getName();
         price = product.getPrice();
         description = product.getDescription();

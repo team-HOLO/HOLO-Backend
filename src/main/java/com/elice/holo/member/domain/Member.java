@@ -6,30 +6,31 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
-@Setter
+@Builder
 @Table(name = "member")
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id", updatable = false) // 스네이크 케이스로 수정
+    @Column(name = "member_id", updatable = false)
     private Long memberId;
 
-    @Column(name = "email", nullable = false, length = 255, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "name", nullable = false, length = 255)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "is_admin", nullable = false)
@@ -38,25 +39,32 @@ public class Member {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted; // 회원탈퇴 여부 true : 탈퇴
 
-    @Column(name = "tel", nullable = false, length = 255)
+    @Column(name = "tel", nullable = false)
     private String tel;
 
-    @Column(name = "age", nullable = true)
+    @Column(name = "age", nullable = false)
     private Integer age;
 
-    @Column(name = "gender", nullable = true)
+    @Column(name = "gender", nullable = false)
     private Boolean gender; // (true = 남성, false = 여성 등)
 
-    @Builder
-    public Member(String email, String password, String name, Boolean isAdmin, Boolean isDeleted,
-        String tel, Boolean gender, Integer age) {
-        this.email = email;
+
+    // 회원 탈퇴 메서드 (isDeleted 값 변경)
+    public void deactivateMember() {
+        this.isDeleted = true;
+    }
+
+    // 회원 정보 수정 메서드
+    public void updateMemberInfo(String name, String tel,
+        Integer age,
+        Boolean gender) {
         this.password = password;
         this.name = name;
-        this.isAdmin = isAdmin;
-        this.isDeleted = isDeleted;
+        this.email = email;
         this.tel = tel;
-        this.gender = gender;
         this.age = age;
+        this.gender = gender;
     }
+
+
 }
