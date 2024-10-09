@@ -1,8 +1,6 @@
-package com.elice.holo.product.service.dto;
+package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.Product;
-import com.elice.holo.product.domain.ProductImage;
-import java.util.Optional;
 import lombok.Data;
 
 /**
@@ -20,7 +18,7 @@ public class ProductsResponseDto {
 //    private ProductImageDto thumbNailImage
 
     public ProductsResponseDto(Product product) {
-        productId = product.getId();
+        productId = product.getProductId();
         name = product.getName();
         price = product.getPrice();
 

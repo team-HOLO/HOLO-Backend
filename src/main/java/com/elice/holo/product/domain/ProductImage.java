@@ -16,14 +16,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class ProductImage {
 
     @Id
-    @Column(name = "product_image_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long productImageId;
 
     @Column(nullable = false)
     private String originName;  //원본 파일명
@@ -38,7 +36,6 @@ public class ProductImage {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @Builder
     private ProductImage(String originName, String storeName) {
         this.originName = originName;
         this.storeName = storeName;
@@ -46,10 +43,7 @@ public class ProductImage {
 
     //==생성 메서드==//
     public static ProductImage createProductImage(String originName, String storeName) {
-        return ProductImage.builder()
-            .originName(originName)
-            .storeName(storeName)
-            .build();
+        return new ProductImage(originName, storeName);
     }
 
     public void assignProduct(Product product) {

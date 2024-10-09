@@ -1,18 +1,21 @@
-package com.elice.holo.product;
+package com.elice.holo.product.controller;
 
-import com.elice.holo.product.service.dto.AddProductRequest;
+import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.domain.Product;
+import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.service.ProductService;
-import com.elice.holo.product.service.dto.ProductsResponseDto;
+import com.elice.holo.product.dto.ProductsResponseDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,5 +52,24 @@ public class ProductController {
         List<ProductsResponseDto> products = productService.findProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
+    //상품 수정
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Void> updateProduct(@PathVariable(name = "id") Long id,
+            @RequestBody UpdateProductRequest updateProductRequest
+        ) {
+        productService.updateProduct(id, updateProductRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
+    //상품 삭제
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable(name = "id") Long id) {
+        productService.deleteProduct(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
