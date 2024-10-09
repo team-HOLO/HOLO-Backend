@@ -7,21 +7,21 @@ import com.elice.holo.cart.dto.CartDto;
 import com.elice.holo.cart.dto.CartProductDto;
 import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CartMapper {
 
-    CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);
-
+    @Mapping(source = "cartProducts", target = "products")
     CartDto toCartDto(Cart cart);
 
-    Cart toEntity(CartDto cartDto);
-
-    CartProductDto toCartProductDto(CartProduct cartProduct);
-
+    @Mapping(target = "cart", ignore = true)
+    @Mapping(target = "product", ignore = true)
     CartProduct toEntity(CartProductDto productDto);
 
-    List<CartDto> toCartDtoList(List<Cart> carts);
+    @Mapping(source = "cartProductId", target = "cartProductId")
+    @Mapping(source = "product.id", target = "productId")
+    CartProductDto toCartProductDto(CartProduct cartProduct);
 
+    List<CartDto> toCartDtoList(List<Cart> carts);
 }

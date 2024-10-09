@@ -20,7 +20,7 @@ public class CartProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cart_productId; // PK
+    private Long cartProductId; // PK
 
     @ManyToOne
     @JoinColumn(name = "cartId", nullable = false)
@@ -34,14 +34,16 @@ public class CartProduct {
     private Long quantity; // 수량
 
     public CartProduct(Cart cart, Product product, Long quantity) {
+
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
     }
 
     public int getPrice() {
-        return (int)(product.getPrice()*quantity);
+        return (product != null && quantity != null) ? (int)(product.getPrice() * quantity) : 0;
     }
+
 
     public void updateQuantity(Long quantity) {
         this.quantity = quantity; // 장바구니 업데이트

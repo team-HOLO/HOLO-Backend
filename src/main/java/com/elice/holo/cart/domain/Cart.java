@@ -47,11 +47,10 @@ public class Cart {
             .member(member)
             .build();
     }
-
     //새로운 상품을 장바구니에 추가//
     public void addCartProduct(Product product, Long quantity) {
         CartProduct cartProduct = new CartProduct(this, product, quantity);
-        cartProducts.add(cartProduct);
+        this.cartProducts.add(cartProduct);
     }
     //장바구니 특정 상품 제거 //
     public void removeCartProduct(CartProduct cartProduct) {
@@ -67,6 +66,7 @@ public class Cart {
             cartProduct.updateQuantity(quantity); // 수량 업데이트
         }
     }
+
 
 }
 

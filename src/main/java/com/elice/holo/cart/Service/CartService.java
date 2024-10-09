@@ -8,7 +8,6 @@ import com.elice.holo.cart.repository.CartRepository;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.repository.ProductRepository;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,11 +51,12 @@ public class CartService {
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다"));
 
-        Product product = productRepository.findById(cartId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다"));
+        Product product = productRepository.findById(productID)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다"));
 
         cart.addCartProduct(product, quantity);
         cartRepository.save(cart);
+
         return cartMapper.toCartDto(cart);
     }
 
@@ -66,7 +66,7 @@ public class CartService {
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다"));
         CartProduct cartProduct = cart.getCartProducts().stream()
-            .filter(cp ->cp.getCart_productId().equals(cartProductId))
+            .filter(cp ->cp.getCartProductId().equals(cartProductId))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다"));
 
@@ -77,17 +77,23 @@ public class CartService {
 
     //상품 수량 업데이트
     @Transactional
-    public void updateProductQuantity(Long cartId, Long cartProductId, Long quantity) {
+    public CartDto updateProductQuantity(Long cartId, Long cartProductId, Long quantity) {
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다."));
 
         CartProduct cartProduct = cart.getCartProducts().stream()
-            .filter(cp -> cp.getCart_productId().equals(cartProductId))
+            .filter(cp -> cp.getCartProductId().equals(cartProductId))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니입니다."));
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장바구니 상품입니다."));
+
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
+        }
 
         cart.updateCartProductQuantity(cartProduct, quantity);
         cartRepository.save(cart);
+
+        return cartMapper.toCartDto(cart); // 수정된 장바구니 반환
     }
 
     //장바구니 전체 비우기
@@ -108,16 +114,6 @@ public class CartService {
             .mapToInt(CartProduct::getPrice)
             .sum();
     }
-
-
-
-//    //특정 상품 삭제
-//    public void removeSpecificProducts(Cart cart, List<CartProduct> productsToRemove) {
-//        for (CartProduct cartProduct : productsToRemove) {
-//            cart.removeCartProduct(cartProduct);
-//        }
-//        cartRepository.save(cart);
-//    }
 
 
 
