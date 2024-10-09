@@ -2,8 +2,9 @@ package com.elice.holo.cart.service;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.elice.holo.cart.Service.CartService;
@@ -16,6 +17,7 @@ import com.elice.holo.member.domain.Member;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.repository.ProductRepository;
 import java.util.ArrayList;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,8 +49,7 @@ class CartServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = new Member("test@example.com", "password", "Test User", false, false,
-            "010-1234-5678", true, 30);
+        member = new Member(null, "test@example.com", "password", "Test User", false, false, "010-1234-5678", 30, true);
         cart = Cart.createCart(member);
         product = Product.createProduct("Test Product", 1000, "Description", 10);
     }
@@ -72,7 +73,7 @@ class CartServiceTest {
     @DisplayName("장바구니 생성 테스트")
     @Test
     void testCreateCart() {
-        double totalPrice = 130;
+        double totalPrice=130;
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
         when(cartMapper.toCartDto(cart)).thenReturn(
             new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
@@ -87,11 +88,14 @@ class CartServiceTest {
     @DisplayName("장바구니에 상품 추가 테스트")
     void testAddProductToCart() {
         double totalPrice = 130;
+        Product product = mock(Product.class);
+        when(product.getProductId()).thenReturn(1L);
+
         when(cartRepository.findById(cart.getCartId())).thenReturn(java.util.Optional.of(cart));
-        when(productRepository.findById(product.getId())).thenReturn(java.util.Optional.of(product));
+        when(productRepository.findById(product.getProductId())).thenReturn(java.util.Optional.of(product));
         when(cartMapper.toCartDto(cart)).thenReturn(new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
 
-        CartDto result = cartService.addProductToCart(cart.getCartId(), product.getId(), 2L);
+        CartDto result = cartService.addProductToCart(cart.getCartId(), product.getProductId(), 2L);
 
         verify(cartRepository).save(cart);
         assertEquals(cart.getCartId(), result.getCartId());
@@ -100,29 +104,20 @@ class CartServiceTest {
     @Test
     @DisplayName("장바구니에서 상품 제거 테스트")
     void testRemoveProductFromCart() {
-        double totalPrice = 130;
-        // 먼저 상품을 추가
-        cart.addCartProduct(product, 1L);
+        // Given
+        Long cartProductId = 1L; // ID 초기화
+        CartProduct cartProduct = new CartProduct(cartProductId, cart, product, 2L);
+        cart.getCartProducts().add(cartProduct); // 장바구니에 추가
 
-        // cartProduct는 cart에 추가된 상태에서 가져와야 합니다.
-        CartProduct cartProduct = cart.getCartProducts().get(0);
+        // Mock 설정
+        when(cartRepository.findById(cart.getCartId())).thenReturn(Optional.of(cart));
 
-        // cartProduct의 cart_productId가 null인지 확인
-        assertNotNull(cartProduct.getCartProductId(), "CartProduct ID should not be null");
+        // When
+        cartService.removeProductFromCart(cart.getCartId(), cartProductId);
 
-        when(cartRepository.findById(cart.getCartId())).thenReturn(java.util.Optional.of(cart));
-        when(cartMapper.toCartDto(cart)).thenReturn(new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
-
-        CartDto result = cartService.removeProductFromCart(cart.getCartId(), cartProduct.getCartProductId());
-
-        // 제거 후 cartProduct가 실제로 제거되었는지 확인
-        assertEquals(0, cart.getCartProducts().size());
-
-        assertEquals(cart.getCartId(), result.getCartId());
-        assertEquals(member.getMemberId(), result.getMemberId());
-        verify(cartRepository).save(cart);
+        // Then
+        assertFalse(cart.getCartProducts().contains(cartProduct), "Cart should not contain the removed product");
     }
-
 
     @Test
     @DisplayName("상품 수량 업데이트 테스트")

@@ -5,6 +5,7 @@ import com.elice.holo.cart.domain.Cart;
 import com.elice.holo.cart.domain.CartProduct;
 import com.elice.holo.cart.dto.CartDto;
 import com.elice.holo.cart.dto.CartProductDto;
+import com.elice.holo.product.domain.Product;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +14,8 @@ import org.mapstruct.Mapping;
 public interface CartMapper {
 
     @Mapping(source = "cartProducts", target = "products")
+    @Mapping(source = "member.memberId",target = "memberId")
+    @Mapping(target = "totalPrice", ignore = true)
     CartDto toCartDto(Cart cart);
 
     @Mapping(target = "cart", ignore = true)
@@ -20,8 +23,11 @@ public interface CartMapper {
     CartProduct toEntity(CartProductDto productDto);
 
     @Mapping(source = "cartProductId", target = "cartProductId")
-    @Mapping(source = "product.id", target = "productId")
+    @Mapping(source = "product", target = "productId")
     CartProductDto toCartProductDto(CartProduct cartProduct);
 
+    default Long map(Product product) {
+        return product != null ? product.getProductId() : null; // product가 null이 아닐 경우 ID 반환
+    }
     List<CartDto> toCartDtoList(List<Cart> carts);
 }

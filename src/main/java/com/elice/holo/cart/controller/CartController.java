@@ -29,7 +29,7 @@ public class CartController {
     }
 
     //특정 회원의 장바구니 조회
-    @GetMapping("/{cartId}")
+    @GetMapping("/member/{memberId}")
     public ResponseEntity<CartDto>getCartByMemberId(@PathVariable Long memberId){
         Member member = new Member();
         CartDto cartDto = cartService.getCartByMember(member);

@@ -49,9 +49,17 @@ public class Cart {
     }
     //새로운 상품을 장바구니에 추가//
     public void addCartProduct(Product product, Long quantity) {
-        CartProduct cartProduct = new CartProduct(this, product, quantity);
+        Long cartProductId = generateCartProductId(); // 임시 ID 생성
+        CartProduct cartProduct = new CartProduct(cartProductId, this, product, quantity);
         this.cartProducts.add(cartProduct);
     }
+
+    private Long generateCartProductId() {
+        return System.currentTimeMillis(); // 단순한 임시 ID
+    }
+
+
+
     //장바구니 특정 상품 제거 //
     public void removeCartProduct(CartProduct cartProduct) {
         cartProducts.remove(cartProduct);

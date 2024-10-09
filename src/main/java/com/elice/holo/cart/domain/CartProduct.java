@@ -33,8 +33,8 @@ public class CartProduct {
     @Column(nullable = false)
     private Long quantity; // 수량
 
-    public CartProduct(Cart cart, Product product, Long quantity) {
-
+    public CartProduct(Long cartProductIdCart,Cart cart, Product product, Long quantity) {
+        this.cartProductId=cartProductIdCart;
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
