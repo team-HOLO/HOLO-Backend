@@ -8,6 +8,7 @@ import com.elice.holo.product.dto.ProductImageDto;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.ProductResponseDto;
+import com.elice.holo.product.dto.ProductSearchCond;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,10 +70,8 @@ public class ProductService {
     }
 
     //상품 다수 조회(목록 조회)를 위한 메서드
-    public List<ProductsResponseDto> findProducts() {
-        return productRepository.findAllWithProductImage().stream()
-            .map(ProductsResponseDto::new)
-            .collect(Collectors.toList());
+    public Page<ProductsResponseDto> findProducts(Pageable pageable, ProductSearchCond cond) {
+        return productRepository.findProductsPage(pageable, cond);
 
 //        return productRepository.findAll().stream()
 //            .map(productMapper::toProductsDto)

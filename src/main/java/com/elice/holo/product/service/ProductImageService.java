@@ -43,7 +43,7 @@ public class ProductImageService {
 
     //상품 상세 화면 -> 상품 이미지 조회
     public List<ProductImageDto> findProductImageDetail(Long productId) {
-        List<ProductImage> productImages = productImageRepository.findByProductImageIdAndIsDeletedFalse(
+        List<ProductImage> productImages = productImageRepository.findByProductIdAndIsDeletedFalse(
             productId);
 
         return productImages.stream()
