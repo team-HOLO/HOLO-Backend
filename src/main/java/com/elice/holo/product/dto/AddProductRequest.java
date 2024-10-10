@@ -35,4 +35,6 @@ public class AddProductRequest {
         return Product.createProduct(name, price, description, stockQuantity);
     }
 
+
+
 }

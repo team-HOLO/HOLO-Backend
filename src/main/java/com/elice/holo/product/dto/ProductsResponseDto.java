@@ -2,6 +2,8 @@ package com.elice.holo.product.dto;
 
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductImage;
+import com.querydsl.core.annotations.QueryProjection;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -16,16 +18,18 @@ public class ProductsResponseDto {
     private Long productId;
     private String name;
     private int price;
-    private ProductImageDto thumbNailImage;  //TODO 썸네일 이미지 개수 결정
+    private List<ProductImageDto> thumbNailImage;  //TODO 썸네일 이미지 개수 결정
 
     public ProductsResponseDto(Product product) {
         productId = product.getProductId();
         name = product.getName();
         price = product.getPrice();
-        thumbNailImage = product.getProductImages().stream()
-            .filter(ProductImage::getIsThumbnail)
-            .map(ProductImageDto::new)
-            .findFirst().get();
+    }
 
+    @QueryProjection
+    public ProductsResponseDto(Long productId, String name, int price) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
     }
 }
