@@ -15,7 +15,7 @@ public interface OrderMapper {
     OrderDto toOrderDto(Order order);
 
     // OrderProduct 엔티티를 OrderProductDto로 매핑
-    @Mapping(source = "product.id", target = "productId")
+    @Mapping(source = "product.productId", target = "productId")
     OrderProductDto toOrderProductDto(OrderProduct orderProduct);
 
     // OrderDto를 Order 엔티티로 매핑
@@ -27,3 +27,4 @@ public interface OrderMapper {
     @Mapping(target = "order", ignore = true)
     OrderProduct toOrderProduct(OrderProductDto orderProductDto, Order order, Product product);
 }
+

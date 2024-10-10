@@ -106,8 +106,7 @@ public class OrderService {
     public List<AddProductResponse> getProductsId(List<Long> productIds) {
         return productRepository.findAllById(productIds)
             .stream()
-            .map(product -> new AddProductResponse(product.getId(), product.getName(),
-                product.getPrice(), product.getDescription()))
+            .map(AddProductResponse::new)
             .collect(Collectors.toList());
     }
 }
