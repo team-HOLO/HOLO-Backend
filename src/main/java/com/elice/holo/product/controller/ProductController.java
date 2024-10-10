@@ -61,7 +61,7 @@ public class ProductController {
     @PutMapping("/products/{id}")
     public ResponseEntity<Void> updateProduct(@PathVariable(name = "id") Long id,
         @RequestPart UpdateProductRequest updateProductRequest,
-        @RequestPart(name = "productImages") List<MultipartFile> multipartFiles
+        @RequestPart(name = "productImages", required = false) List<MultipartFile> multipartFiles
         ) {
         productService.updateProduct(id, updateProductRequest);
 
