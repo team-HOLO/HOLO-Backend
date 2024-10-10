@@ -7,6 +7,7 @@ import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.dto.ProductsResponseDto;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,19 +33,17 @@ public class ProductController {
     //상품 등록
     @PostMapping("/products")
     public ResponseEntity<AddProductResponse> saveProduct(
-        @RequestBody AddProductRequest addProductRequest) {
+        @RequestPart AddProductRequest addProductRequest,
+        @RequestPart(name = "productImages") List<MultipartFile> multipartFiles
+    ) throws IOException {
 
-        Product product = productService.saveProduct(addProductRequest);
-
-        return new ResponseEntity<>(new AddProductResponse(product), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.saveProduct(addProductRequest, multipartFiles), HttpStatus.CREATED);
     }
 
     //상품 상세 조회
     @GetMapping("/products/{id}")
     public ResponseEntity<ProductResponseDto> getProductDetails(@PathVariable(name = "id") Long id) {
-        Product findProduct = productService.findProductById(id);
-
-        return new ResponseEntity<>(new ProductResponseDto(findProduct), HttpStatus.OK);
+        return new ResponseEntity<>(productService.findProductById(id), HttpStatus.OK);
     }
 
     //상품 목록 조회
@@ -56,7 +57,8 @@ public class ProductController {
     //상품 수정
     @PutMapping("/products/{id}")
     public ResponseEntity<Void> updateProduct(@PathVariable(name = "id") Long id,
-            @RequestBody UpdateProductRequest updateProductRequest
+        @RequestPart UpdateProductRequest updateProductRequest,
+        @RequestPart(name = "productImages") List<MultipartFile> multipartFiles
         ) {
         productService.updateProduct(id, updateProductRequest);
 

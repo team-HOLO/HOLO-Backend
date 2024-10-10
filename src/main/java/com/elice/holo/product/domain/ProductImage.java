@@ -30,7 +30,9 @@ public class ProductImage {
     private String storeName; //서버에 저장될 경로명
 
     @Column(nullable = false)
-    private boolean isThumbnail = false; //대표 이미지 여부
+    private Boolean isThumbnail = false; //대표 이미지 여부
+
+    private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
