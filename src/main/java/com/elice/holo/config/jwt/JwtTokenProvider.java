@@ -37,14 +37,14 @@ public class JwtTokenProvider {
         Date now = new Date();
 
         return Jwts.builder()
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // JWT 타입 설정
-            .setIssuer(jwtProperties.getIssuer()) // 발급자 설정
+            .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // JWT 타입
+            .setIssuer(jwtProperties.getIssuer()) // 발급자
             .setIssuedAt(now) // 발급 시간
             .setExpiration(expiry) // 만료 시간
-            .setSubject(member.getEmail()) // 이메일을 주체로 설정
-            .claim("memberId", member.getMemberId()) // 사용자 ID 클레임 설정
+            .setSubject(member.getEmail()) // 주체
+            .claim("memberId", member.getMemberId()) // 클레임
             .signWith(SignatureAlgorithm.HS256,
-                jwtProperties.getSecretKey()) // 인코딩 없이 Secret Key 그대로 사용
+                jwtProperties.getSecretKey()) // Secret Key 그대로 사용
             .compact(); // 토큰 생성 및 반환
     }
 
