@@ -4,7 +4,6 @@ package com.elice.holo.cart.domain;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.product.domain.Product;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,8 +27,7 @@ public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
-    private Long id;
+    private Long cartId;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -50,15 +48,17 @@ public class Cart {
             .build();
     }
 
-    //새로운 상품을 장바구니에 추가//
-    public void addCartPoduct(Product product, Long quantity) {
-        CartProduct cartProduct = new CartProduct(this, product, quantity);
-        cartProducts.add(cartProduct);
+    // 장바구니에 새로운 상품 추가
+    public void addCartProduct(Product product, Long quantity) {
+        CartProduct cartProduct = new CartProduct(null, this, product, quantity); // ID는 null로 설정
+        this.cartProducts.add(cartProduct);
     }
+
+
     //장바구니 특정 상품 제거 //
     public void removeCartProduct(CartProduct cartProduct) {
         cartProducts.remove(cartProduct);
-        cartProduct.setCart(null);
+        cartProduct.clearCart(); // 장바구니를 null로 설정
     }
 
     //상품 수량 업데이트//
@@ -66,10 +66,10 @@ public class Cart {
         if (quantity <= 0) {
             removeCartProduct(cartProduct);
         } else {
-            cartProduct.setQuantity(quantity);
+            cartProduct.updateQuantity(quantity); // 수량 업데이트
         }
-
     }
+
 
 }
 
