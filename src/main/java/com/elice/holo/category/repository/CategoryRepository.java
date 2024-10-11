@@ -39,4 +39,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      */
     List<Category> findByIsDeletedFalseAndParentCategoryIsNull();
 
+    // 같은 이름의 카테고리가 존재하는지 확인
+    boolean existsByNameAndIsDeletedFalse(String name);
 }
