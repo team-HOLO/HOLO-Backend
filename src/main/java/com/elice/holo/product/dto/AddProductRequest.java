@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 //상품 등록 request DTO
 @Data
@@ -34,7 +33,6 @@ public class AddProductRequest {
     public Product toEntity() {
         return Product.createProduct(name, price, description, stockQuantity);
     }
-
 
 
 }

@@ -1,9 +1,10 @@
 package com.elice.holo.order.domain;
 
+import com.elice.holo.common.BaseEntity;
 import com.elice.holo.member.domain.Member;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -17,48 +18,92 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Data
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "orders") // 테이블 이름을 orders로 변경하여 SQL 예약어 충돌 해결
-public class Order {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Builder
+@Table(name = "orders")
+public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 한 명의 회원은 여러개 주문을 할 수 있다
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "order")
-    private List<OrderProduct> orderProducts; //주문 상품 리스트
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)//주문 상태
-    private OrderStatus status; //OrderStatus는 enum으로 관리(확정x)
+    @Column(nullable = false, length = 50)
+    private OrderStatus status;
 
     @Column(nullable = false)
-    private LocalDateTime orderDate; //주문 날짜
+    private LocalDateTime orderDate;
 
-    @LastModifiedDate
-    @Column(name = "modified_at")
-    private LocalDateTime modifiedAt; //마지막 수정 시간
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalPrice;
 
-    @Column(nullable = false, precision = 19, scale = 2) // DECIMAL (소수점 2자리까지 19자리 숫자 저장가능)
-    private BigDecimal totalPrice; // 총 가격
+    @Column(nullable = false)
+    private String shippingAddress;
 
+    // private 생성자
+    private Order(Member member, BigDecimal totalPrice, String shippingAddress,
+        List<OrderProduct> orderProducts) {
+        this.member = member;
+        this.totalPrice = totalPrice;
+        this.shippingAddress = shippingAddress;
+        this.status = OrderStatus.ORDER;
+        this.orderProducts = new ArrayList<>(orderProducts);
+
+        // 각 주문 상품에 현재 주문 연결
+        for (OrderProduct orderProduct : orderProducts) {
+            orderProduct.setOrder(this);
+        }
+    }
+
+    // 팩토리 메서드
+    public static Order createOrder(Member member, BigDecimal totalPrice, String shippingAddress,
+        List<OrderProduct> orderProducts) {
+        return new Order(member, totalPrice, shippingAddress, orderProducts);
+    }
 
     @PrePersist
     protected void onCreate() {
-        orderDate = LocalDateTime.now(); // 주문 할떄 현재 시간으로 설정
+        this.orderDate = LocalDateTime.now();
     }
 
+    // 상태 변경 메서드
+    public void updateOrderStatus(OrderStatus newStatus) {
+        this.status = newStatus;
+    }
 
+    // 총 가격 업데이트
+    public void updateTotalPrice(BigDecimal newTotalPrice) {
+        this.totalPrice = newTotalPrice;
+    }
+
+    // 배송 주소 업데이트
+    public void updateShippingAddress(String newAddress) {
+        this.shippingAddress = newAddress;
+    }
+
+    // 주문 상품 추가 메서드
+    public void addOrderProducts(List<OrderProduct> newOrderProducts) {
+        this.orderProducts.clear();
+        this.orderProducts.addAll(newOrderProducts);
+        for (OrderProduct orderProduct : newOrderProducts) {
+            orderProduct.setOrder(this);
+        }
+    }
 }
