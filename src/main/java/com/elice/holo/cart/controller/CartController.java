@@ -3,6 +3,7 @@ package com.elice.holo.cart.controller;
 import com.elice.holo.cart.Service.CartService;
 import com.elice.holo.cart.dto.CartDto;
 import com.elice.holo.member.domain.Member;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,16 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/cart")
 public class CartController {
 
     private final CartService cartService;
 
-
-    public CartController(CartService cartService) {
-
-        this.cartService = cartService;
-    }
 
     //특정 회원의 장바구니 조회
     @GetMapping("/member/{memberId}")
