@@ -6,13 +6,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
-import javax.crypto.SecretKey;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,7 +36,6 @@ public class JwtTokenProvider {
     private String makeToken(Date expiry, Member member) {
         Date now = new Date();
 
-
         return Jwts.builder()
             .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // JWT 타입 설정
             .setIssuer(jwtProperties.getIssuer()) // 발급자 설정
@@ -47,9 +43,23 @@ public class JwtTokenProvider {
             .setExpiration(expiry) // 만료 시간
             .setSubject(member.getEmail()) // 이메일을 주체로 설정
             .claim("memberId", member.getMemberId()) // 사용자 ID 클레임 설정
-            .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey()) // 인코딩 없이 Secret Key 그대로 사용
+            .signWith(SignatureAlgorithm.HS256,
+                jwtProperties.getSecretKey()) // 인코딩 없이 Secret Key 그대로 사용
             .compact(); // 토큰 생성 및 반환
     }
+
+//    //refresh 토큰 생성
+//    public String generateRefreshToken(Member member, Duration expiredAt) {
+//        Date now = new Date();
+//        return Jwts.builder()
+//            .setIssuer(jwtProperties.getIssuer())
+//            .setIssuedAt(now)
+//            .setExpiration(new Date(now.getTime() + expiredAt.toMillis()))
+//            .setSubject(member.getEmail())
+//            .claim("memberId", member.getMemberId())
+//            .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
+//            .compact();
+//    }
 
     // JWT 토큰의 유효성을 검사하는 메서드
     public boolean validToken(String token) {
@@ -64,23 +74,25 @@ public class JwtTokenProvider {
         }
     }
 
-    // 토큰에서 인증 정보를 추출하는 메서드
+    // 토큰에서 인증 정보를 추출
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+        Set<SimpleGrantedAuthority> authorities = Collections.singleton(
+            new SimpleGrantedAuthority("ROLE_USER"));
 
         // 인증 객체 생성 및 반환
         return new UsernamePasswordAuthenticationToken(
-            new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities), token, authorities);
+            new org.springframework.security.core.userdetails.User(claims.getSubject(), "",
+                authorities), token, authorities);
     }
 
-    // 토큰에서 사용자 ID를 추출하는 메서드
+    // 토큰에서 사용자 ID를 추출
     public Long getMemberId(String token) {
         Claims claims = getClaims(token);  // 토큰에서 클레임을 가져옴
         return claims.get("memberId", Long.class);  // 클레임에서 사용자 ID를 추출
     }
 
-    // JWT 토큰에서 클레임을 추출하는 메서드
+    // JWT 토큰에서 클레임을 추출
     private Claims getClaims(String token) {
         return Jwts.parser()
             .setSigningKey(jwtProperties.getSecretKey()) // 비밀 키 그대로 사용

@@ -1,6 +1,8 @@
 package com.elice.holo.config;
 
 
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
+
 import com.elice.holo.config.jwt.JwtAuthenticationFilter;
 import com.elice.holo.config.jwt.JwtTokenProvider;
 import com.elice.holo.member.service.MemberService;
@@ -17,8 +19,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @Configuration
 @RequiredArgsConstructor
@@ -39,16 +39,20 @@ public class SecurityConfig {
 
         http
             .csrf(AbstractHttpConfigurer::disable) // CSRF 설정 비활성화
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션을 Stateless로 설정
+            .sessionManagement(session -> session.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS)) // 세션을 Stateless로 설정
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/members/signup", "/api/members/login").permitAll() // 회원 가입, 로그인 API는 인증 없이 접근 가능
-                .requestMatchers("/api/**").authenticated() // 그 외 /api/** 경로는 인증 필요
+                .requestMatchers("/api/members/signup", "/api/members/login")
+                .permitAll() // 회원 가입, 로그인 API는 인증 없이 접근 가능
+                .requestMatchers("/api/members/**").authenticated() // 그 외 /api/members 경로는 인증 필요
                 .anyRequest().permitAll() // 나머지 요청은 모두 허용
             )
-            .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
+            .addFilterBefore(tokenAuthenticationFilter(),
+                UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
             .exceptionHandling(exception -> exception
-                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                    new AntPathRequestMatcher("/api/**"))
+                .defaultAuthenticationEntryPointFor(
+                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                    new AntPathRequestMatcher("/api/members/**"))
             );
 
         return http.build();
