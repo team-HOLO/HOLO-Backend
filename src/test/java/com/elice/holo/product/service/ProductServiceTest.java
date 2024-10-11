@@ -5,15 +5,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.elice.holo.product.ProductMapper;
+import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
+import com.elice.holo.product.dto.ProductResponseDto;
+import com.elice.holo.product.dto.ProductSearchCond;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductsResponseDto;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +29,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 class ProductServiceTest {
 
@@ -34,6 +45,12 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
+    @Mock
+    private ProductImageService productImageService;
+
+    @Mock
+    private LocalStorageService localStorageService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -41,22 +58,28 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("상품 등록 테스트")
-    void saveProductTest() {
+    void saveProductTest() throws IOException {
 
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        boolean isThumbnail = false;
         AddProductRequest request = new AddProductRequest("의자", 300000, "시디즈", 100,
-            getProductOptionDto());
+            getProductOptionDto(), List.of(isThumbnail));
+
+        //mockMultipartFile
+        MockMultipartFile mockFile = new MockMultipartFile("file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
+        List<MultipartFile> multipartFiles = List.of(mockFile);
+
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         //when
-        Product savedProduct = productService.saveProduct(request);
+        AddProductResponse response = productService.saveProduct(request, multipartFiles);
 
         //then
-        assertNotNull(savedProduct);
-        assertThat(savedProduct.getDescription()).isEqualTo("시디즈");
-        assertThat(savedProduct.getPrice()).isEqualTo(300000);
-        assertThat(savedProduct.getIsDeleted()).isFalse();
+        assertNotNull(response);
+        assertThat(response.getDescription()).isEqualTo("시디즈");
+        assertThat(response.getPrice()).isEqualTo(300000);
+        assertThat(response.getName()).isEqualTo("의자");
     }
 
     @Test
@@ -73,13 +96,12 @@ class ProductServiceTest {
         when(productRepository.findProductDetailByProductId(any(Long.class))).thenReturn(Optional.of(product));
 
         //when
-        Product findProduct = productService.findProductById(1L);
+        ProductResponseDto response = productService.findProductById(1L);
 
         //then
-        assertThat(findProduct.getName()).isEqualTo("의자");
-        assertThat(findProduct.getStockQuantity()).isEqualTo(100);
-        assertThat(findProduct.getProductOptions().get(0).getSize()).isEqualTo("L");
-        assertThat(findProduct.getProductOptions())
+        assertThat(response.getName()).isEqualTo("의자");
+        assertThat(response.getProductOptions().get(0).getSize()).isEqualTo("L");
+        assertThat(response.getProductOptions())
             .extracting("color")
             .containsExactly("white", "black");
     }
@@ -111,16 +133,23 @@ class ProductServiceTest {
         Product product1 = Product.createProduct("의자", 300000, "시디즈", 100);
         Product product2 = Product.createProduct("책상", 100000, "데스크", 200);
         List<Product> productList = Arrays.asList(product1, product2);
+        ProductSearchCond cond = new ProductSearchCond();
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
         getProductOptionDto().stream()
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList())
             .forEach(product2::addProductOption);
 
-        when(productRepository.findAll()).thenReturn(productList);
+        List<ProductsResponseDto> result = productList.stream()
+            .map(ProductsResponseDto::new)
+            .collect(Collectors.toList());
+
+        when(productRepository.findProductsPage(pageRequest, cond)).thenReturn(new PageImpl<>(result, pageRequest, result.size()));
 
         //when
-        List<ProductsResponseDto> products = productService.findProducts();
+        Page<ProductsResponseDto> productsPage = productService.findProducts(pageRequest, cond);
+        List<ProductsResponseDto> products = productsPage.getContent();
 
         //then
         assertThat(products.get(1).getName()).isEqualTo("책상");
@@ -140,16 +169,19 @@ class ProductServiceTest {
 
         UpdateProductOptionDto updateDto = new UpdateProductOptionDto(null, "brown", "M", 30);
 //        UpdateProductOptionDto existingOptionDto = new UpdateProductOptionDto(1L, "white", "L", 30);
+        boolean isThumbnail = false;
         UpdateProductRequest updateRequest = new UpdateProductRequest(
-            "침대 수정", 200000, "에이스 침대", 100, List.of(updateDto));
+            "침대 수정", 200000, "에이스 침대", 100, List.of(updateDto), List.of(isThumbnail));
 
         when(productRepository.findProductDetailByProductId(productId)).thenReturn(Optional.of(product));
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         //when
         productService.updateProduct(productId, updateRequest);
 
         //then
-        Product updatedProduct = productService.findProductById(productId);
+        ProductResponseDto response = productService.findProductById(productId);
+        Product updatedProduct = productRepository.findById(productId).get();
         assertThat(updatedProduct.getName()).isEqualTo("침대 수정");
         assertThat(updatedProduct.getDescription()).isEqualTo("에이스 침대");
         assertThat(updatedProduct.getProductOptions().size()).isEqualTo(3);

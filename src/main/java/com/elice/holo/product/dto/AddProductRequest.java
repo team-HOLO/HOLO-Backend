@@ -30,9 +30,9 @@ public class AddProductRequest {
 
     private List<Boolean> isThumbnails;
 
-
     public Product toEntity() {
         return Product.createProduct(name, price, description, stockQuantity);
     }
+
 
 }
