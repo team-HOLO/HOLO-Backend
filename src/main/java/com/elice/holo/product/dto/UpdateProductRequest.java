@@ -27,5 +27,6 @@ public class UpdateProductRequest {
 
     private List<UpdateProductOptionDto> productOptions;
 
-//    private List<MultipartFile> multipartFiles; //상품 이미지들 TODO
+    private List<Boolean> isThumbnails;
+
 }

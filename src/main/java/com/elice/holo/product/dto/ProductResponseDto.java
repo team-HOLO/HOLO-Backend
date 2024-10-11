@@ -15,7 +15,7 @@ public class ProductResponseDto {
     private int price;
     private String description;
     private List<ProductOptionDto> productOptions;  //TODO Fetch JOIN 적용
-//    private List<ProductImageDto>  TODO 상품 이미지 반환
+    private List<ProductImageDto>  productImageDtos;
 
     public ProductResponseDto(Product product) {
         productId = product.getProductId();
@@ -23,6 +23,7 @@ public class ProductResponseDto {
         price = product.getPrice();
         description = product.getDescription();
         productOptions = product.getProductOptions().stream()
+            .filter(po -> !po.isDeleted())
             .map(ProductOptionDto::new)
             .collect(Collectors.toList());
     }

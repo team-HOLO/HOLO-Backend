@@ -27,7 +27,7 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Column
@@ -42,7 +42,7 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories;
-    
+
     // 상위 카테고리 설정 메서드
     public void updateParentCategory(Category parentCategory) {
         this.parentCategory = parentCategory;

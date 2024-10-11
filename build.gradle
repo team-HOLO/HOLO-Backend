@@ -49,3 +49,8 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+//QueryDsl 추가
+clean {
+    delete file('src/main/generated')
+}

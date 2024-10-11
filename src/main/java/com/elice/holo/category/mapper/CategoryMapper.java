@@ -4,6 +4,7 @@ import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
 import com.elice.holo.category.dto.CategoryDetailsDto;
 import com.elice.holo.category.dto.CategoryDto;
+import com.elice.holo.category.dto.CategoryListDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -33,4 +34,12 @@ public interface CategoryMapper {
 
     // List<Category>를 List<CategoryDto>로 변환
     List<CategoryDto> toCategoryDtoList(List<Category> categories);
+
+    // Category Entity를 CategoryListDto로 변환
+    @Mapping(target = "categoryId", source = "categoryId")
+    // parentCategory가 null일 경우 자동으로 null 처리됨
+    @Mapping(target = "parentId", source = "parentCategory.categoryId")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "description", source = "description")
+    CategoryListDto toCategoryListDto(Category category);
 }

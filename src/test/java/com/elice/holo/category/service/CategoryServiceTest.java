@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,13 +12,15 @@ import static org.mockito.Mockito.when;
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
 import com.elice.holo.category.dto.CategoryDetailsDto;
+import com.elice.holo.category.dto.CategoryListDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
+import com.elice.holo.category.exception.CategoryNotFoundException;
+import com.elice.holo.category.exception.DuplicateCategoryNameException;
 import com.elice.holo.category.mapper.CategoryMapper;
 import com.elice.holo.category.repository.CategoryRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Nested
 class CategoryServiceTest {
@@ -75,18 +83,36 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 부모 카테고리로 카테고리 등록 시 예외 발생")
+    @DisplayName("카테고리 등록 테스트 - 중복된 이름으로 카테고리 등록시 예외 발생")
+    void createCategoryDuplicateNameTest() {
+        // given
+        CategoryCreateDto categoryCreateDto = new CategoryCreateDto("가구", "1인용 가구", null);
+
+        when(categoryRepository.existsByNameAndIsDeletedFalse(
+            categoryCreateDto.getName())).thenReturn(true);
+
+        // when & then
+        assertThrows(DuplicateCategoryNameException.class,
+            () -> categoryService.createCategory(categoryCreateDto));
+    }
+
+    @Test
+    @DisplayName("카테고리 등록 테스트 - 존재하지 않는 부모 카테고리로 카테고리 등록 시 예외 발생")
     void createCategoryWithInvalidParentTest() {
         // given
         Long invalidParentCategoryId = 999L;
         CategoryCreateDto categoryCreateDto = new CategoryCreateDto("가구", "1인용 가구",
             invalidParentCategoryId);
 
-        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(invalidParentCategoryId))
-            .thenReturn(Optional.empty());
+        // 이름은 중복되지 않음
+        when(categoryRepository.existsByNameAndIsDeletedFalse(
+            categoryCreateDto.getName())).thenReturn(false);
+        // 존재하지 않는 부모 카테고리
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(
+            invalidParentCategoryId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class,
+        assertThrows(CategoryNotFoundException.class,
             () -> categoryService.createCategory(categoryCreateDto));
     }
 
@@ -132,7 +158,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("잘못된 ID로 카테고리 업데이트 시 예외 발생")
+    @DisplayName("카테고리 업데이트 테스트 - 잘못된 ID로 카테고리 업데이트 시 예외 발생")
     void updateCategoryWithInvalidIdTest() {
         // given
         Long invalidCategoryId = 999L;
@@ -142,7 +168,7 @@ class CategoryServiceTest {
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CategoryNotFoundException.class,
             () -> categoryService.updateCategory(invalidCategoryId, updateDto));
     }
 
@@ -170,20 +196,22 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 카테고리 삭제 시 예외 발생")
+    @DisplayName("카테고리 삭제 테스트 - 존재하지 않는 카테고리 삭제 시 예외 발생")
     void deleteNonExistentCategoryTest() {
         // given
         Long nonExistentCategoryId = 999L;
 
-        when(categoryRepository.existsById(nonExistentCategoryId)).thenReturn(false);
+        when(
+            categoryRepository.findByCategoryIdAndIsDeletedFalse(nonExistentCategoryId)).thenReturn(
+            Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CategoryNotFoundException.class,
             () -> categoryService.deleteCategory(nonExistentCategoryId));
     }
 
     @Test
-    @DisplayName("전체 카테고리 목록 조회")
+    @DisplayName("전체 카테고리 목록 조회 테스트")
     void findAllCategoriesTest() {
         // given
         Category category1 = Category.builder()
@@ -213,11 +241,11 @@ class CategoryServiceTest {
 
         // then
         assertEquals(2, result.size());
-        assertEquals("category1", result.get(0).getName());
+        assertEquals("category1", result.getFirst().getName());
     }
 
     @Test
-    @DisplayName("카테고리 상세정보 조회")
+    @DisplayName("카테고리 상세정보 조회 테스트")
     public void testGetCategoryById() {
         // given
         Long categoryId = 1L;
@@ -244,16 +272,16 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("잘못된 ID로 카테고리 상세정보 조회시 예외 발생")
+    @DisplayName("카테고리 상세정보 조회 테스트 - 존재하지 않는 ID로 카테고리 상세정보 조회시 예외 발생")
     public void testGetCategoryByIdWithInvalidId() {
         // given
         Long invalidCategoryId = 999L;
 
-        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(invalidCategoryId))
-            .thenReturn(Optional.empty());
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(invalidCategoryId)).thenReturn(
+            Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CategoryNotFoundException.class,
             () -> categoryService.getCategoryById(invalidCategoryId));
     }
 
@@ -263,17 +291,17 @@ class CategoryServiceTest {
         // given
         Long categoryId = 1L;
 
-        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId))
-            .thenReturn(Optional.empty());
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
+            Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CategoryNotFoundException.class,
             () -> categoryService.getCategoryById(categoryId));
     }
 
 
     @Test
-    @DisplayName("최상위 카테고리 조회")
+    @DisplayName("최상위 카테고리 조회 테스트")
     public void testGetTopLevelCategories() {
         // given
         Category topCategory = Category.builder()
@@ -296,11 +324,11 @@ class CategoryServiceTest {
 
         // then
         assertEquals(1, result.size());
-        assertEquals("topCategory", result.get(0).getName());
+        assertEquals("topCategory", result.getFirst().getName());
     }
 
     @Test
-    @DisplayName("하위 카테고리 목록 조회")
+    @DisplayName("하위 카테고리 목록 조회 테스트")
     public void testGetSubCategories() {
         // given
         Long categoryId = 1L;
@@ -331,7 +359,90 @@ class CategoryServiceTest {
 
         // then
         assertEquals(1, result.size());
-        assertEquals("subCategory", result.get(0).getName());
+        assertEquals("subCategory", result.getFirst().getName());
+    }
+
+    @Test
+    @DisplayName("페이지네이션 및 검색 기능 테스트 - 검색어 포함")
+    public void testGetCategoriesPageableWithSearch() {
+        // given
+        String searchName = "Test";
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("name"));
+        Category category1 = Category.builder()
+            .categoryId(1L)
+            .name("Test Category 1")
+            .isDeleted(false)
+            .build();
+
+        Category category2 = Category.builder()
+            .categoryId(2L)
+            .name("Another Category")
+            .isDeleted(false)
+            .build();
+
+        Category category3 = Category.builder()
+            .categoryId(3L)
+            .name("Test Category 2")
+            .isDeleted(false)
+            .build();
+
+        List<Category> categories = Arrays.asList(category1, category3);
+        Page<Category> categoryPage = new PageImpl<>(categories);
+
+        when(categoryRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(eq(searchName),
+            any(Pageable.class)))
+            .thenReturn(categoryPage);
+        when(categoryMapper.toCategoryListDto(category1))
+            .thenReturn(new CategoryListDto(1L, null, "Test Category 1", "Description"));
+        when(categoryMapper.toCategoryListDto(category3))
+            .thenReturn(new CategoryListDto(3L, null, "Test Category 2", "Description"));
+
+        // when
+        Page<CategoryListDto> result = categoryService.getCategoriesPageable(0, 5, "name", "asc",
+            searchName);
+
+        // then
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Test Category 1", result.getContent().get(0).getName());
+        assertEquals("Test Category 2", result.getContent().get(1).getName());
+    }
+
+    @Test
+    @DisplayName("페이지네이션 및 검색 기능 테스트 - 검색어 없음")
+    public void testGetCategoriesPageableWithoutSearch() {
+        // given
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("name"));
+        Category category1 = Category.builder()
+            .categoryId(1L)
+            .name("Test Category 1")
+            .isDeleted(false)
+            .build();
+
+        Category category2 = Category.builder()
+            .categoryId(2L)
+            .name("Test Category 2")
+            .isDeleted(false)
+            .build();
+
+        List<Category> categories = Arrays.asList(category1, category2);
+        Page<Category> categoryPage = new PageImpl<>(categories);
+
+        when(categoryRepository.findByIsDeletedFalse(any(Pageable.class)))
+            .thenReturn(categoryPage);
+        when(categoryMapper.toCategoryListDto(category1))
+            .thenReturn(new CategoryListDto(1L, null, "Test Category 1", "Description"
+            ));
+        when(categoryMapper.toCategoryListDto(category2))
+            .thenReturn(new CategoryListDto(2L, null, "Test Category 2", "Description"));
+
+        // when
+        Page<CategoryListDto> result = categoryService.getCategoriesPageable(0, 5, "name", "asc",
+            null);
+
+        // then
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Test Category 1", result.getContent().get(0).getName());
+        assertEquals("Test Category 2", result.getContent().get(1).getName());
     }
 
 }

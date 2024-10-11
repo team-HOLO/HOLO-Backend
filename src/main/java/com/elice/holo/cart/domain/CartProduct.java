@@ -12,38 +12,45 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_product_id")
-    private Long id; // PK
+    private Long cartProductId; // PK
 
     @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
+    @JoinColumn(name = "cartId", nullable = false)
     private Cart cart; // 장바구니
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "productId", nullable = false)
     private Product product; // 상품
 
     @Column(nullable = false)
     private Long quantity; // 수량
 
-    public CartProduct(Cart cart, Product product, Long quantity) {
+    public CartProduct(Long cartProductId, Cart cart, Product product, Long quantity) {
+        this.cartProductId = cartProductId;
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
     }
 
     public int getPrice() {
-        return (int)(product.getPrice()*quantity);
+        return (product != null && quantity != null) ? (int) (product.getPrice() * quantity) : 0;
+    }
+
+
+    public void updateQuantity(Long quantity) {
+        this.quantity = quantity; // 장바구니 업데이트
+    }
+
+    public void clearCart() {
+        this.cart = null; // 장바구니를 null로 설정
     }
 
 }
