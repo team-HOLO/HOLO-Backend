@@ -47,20 +47,25 @@ public class LocalStorageService implements StorageService{
         return ProductImage.createProductImage(originName, storeImageName);
     }
 
+    @Override
+    public String getProductImageUrl(String storeName) {
+        return getFullPath(storeName);
+    }
+
 
 //    @Override
 //    public void deleteFile(String fileName) {
 //
 //    }
 
-    private String getStoreImageName(String originName) {
+    protected static String getStoreImageName(String originName) {
         String ext = extractExt(originName);  //jpeg
         String uuid = UUID.randomUUID().toString();
         return uuid + "." + ext;
     }
 
     //확장자 추출
-    private String extractExt(String oriImageName) {
+    protected static String extractExt(String oriImageName) {
         int pos = oriImageName.lastIndexOf(".");
         return oriImageName.substring(pos + 1);
     }

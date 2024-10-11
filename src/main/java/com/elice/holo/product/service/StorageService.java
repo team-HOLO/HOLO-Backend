@@ -11,5 +11,7 @@ public interface StorageService {
 
     List<ProductImage> uploadImages(List<MultipartFile> multipartFiles) throws IOException;
 
+    String getProductImageUrl(String storeName);
+
 //    void deleteFile(String fileName);
 }

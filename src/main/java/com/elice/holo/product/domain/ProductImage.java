@@ -27,7 +27,7 @@ public class ProductImage {
     private String originName;  //원본 파일명
 
     @Column(nullable = false)
-    private String storeName; //서버에 저장될 경로명
+    private String storeName; //서버에 저장될 파일명
 
     @Column(nullable = false)
     private Boolean isThumbnail = false; //대표 이미지 여부
