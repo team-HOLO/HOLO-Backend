@@ -109,6 +109,7 @@ class OrderServiceTest {
 
         // Then
         assertNotNull(orderId);
+        assertEquals(1L, orderId);  // 새로운 리턴 값에 대한 검증
         System.out.println("주문 생성 테스트 통과: Order ID = " + orderId);
         verify(orderRepository, times(1)).save(any(Order.class));
     }
@@ -128,6 +129,7 @@ class OrderServiceTest {
         // Then
         assertNotNull(orderList);
         assertEquals(1, orderList.size());
+        assertEquals(orderDto, orderList.get(0));  // DTO 내용 비교
         System.out.println("주문 목록 조회 테스트 통과: 주문 수 = " + orderList.size());
     }
 
@@ -143,6 +145,7 @@ class OrderServiceTest {
         // Then
         assertNotNull(allOrders);
         assertEquals(1, allOrders.size());
+        assertEquals(orderDto, allOrders.get(0));  // DTO 내용 비교
         System.out.println("모든 주문 조회 테스트 통과: 주문 수 = " + allOrders.size());
     }
 

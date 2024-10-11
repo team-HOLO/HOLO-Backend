@@ -1,5 +1,6 @@
 package com.elice.holo.order.controller;
 
+import com.elice.holo.order.domain.OrderStatus;
 import com.elice.holo.order.dto.OrderDto;
 import com.elice.holo.order.service.OrderService;
 import com.elice.holo.product.dto.AddProductResponse;
@@ -36,14 +37,14 @@ public class OrderController {
     public ResponseEntity<Long> createOrder(@RequestBody OrderDto orderDto,
         @RequestParam String email) {
         Long orderId = orderService.createOrder(orderDto, email);
-        return new ResponseEntity<>(orderId, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
     }
 
     // 주문 취소
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
         orderService.cancelOrder(orderId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok().build();  // OK 반환
     }
 
     // 배송지 수정
@@ -75,4 +76,13 @@ public class OrderController {
         orderService.cancelOrder(orderId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    // 관리자에 의한 주문 상태 수정
+    @PutMapping("/admin/orders/{orderId}/status")
+    public ResponseEntity<Void> updateOrderStatusByAdmin(@PathVariable Long orderId,
+        @RequestBody OrderStatus newStatus) {
+        orderService.updateOrderStatus(orderId, newStatus);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

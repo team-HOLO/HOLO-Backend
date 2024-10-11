@@ -1,5 +1,6 @@
 package com.elice.holo.order.service;
 
+import com.elice.holo.common.exception.ErrorCode;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.repository.MemberRepository;
 import com.elice.holo.order.domain.Order;
@@ -7,6 +8,8 @@ import com.elice.holo.order.domain.OrderProduct;
 import com.elice.holo.order.domain.OrderStatus;
 import com.elice.holo.order.dto.OrderDto;
 import com.elice.holo.order.dto.OrderMapper;
+import com.elice.holo.order.exception.OrderNotCancelableException;
+import com.elice.holo.order.exception.OrderNotFoundException;
 import com.elice.holo.order.repository.OrderRepository;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.AddProductResponse;
@@ -33,26 +36,18 @@ public class OrderService {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(email)
             .orElseThrow(() -> new EntityNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        Order order = Order.builder()
-            .member(member)
-            .status(OrderStatus.ORDER)
-            .totalPrice(orderDto.getTotalPrice())
-            .shippingAddress(orderDto.getShippingAddress())
-            .build();
-
         List<OrderProduct> orderProducts = orderDto.getOrderProducts().stream()
             .map(dto -> {
                 Product product = productRepository.findById(dto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("해당 상품을 찾을 수 없습니다."));
-                return OrderProduct.builder()
-                    .order(order)
-                    .product(product)
-                    .count(dto.getCount())
-                    .build();
+                return OrderProduct.createOrderProduct(null, product, dto.getCount());
             })
             .collect(Collectors.toList());
 
+        Order order = Order.createOrder(member, orderDto.getTotalPrice(),
+            orderDto.getShippingAddress(), orderProducts);
         order.addOrderProducts(orderProducts);
+
         Order savedOrder = orderRepository.save(order);
         return savedOrder.getOrderId();
     }
@@ -68,7 +63,7 @@ public class OrderService {
             .collect(Collectors.toList());
     }
 
-    // 관리자가 모든 회원의 주문 목록 조회
+    // 모든 회원의 주문 목록 조회(관리자)
     @Transactional(readOnly = true)
     public List<OrderDto> getAllOrders() {
         List<Order> orders = orderRepository.findAllOrders();
@@ -77,13 +72,27 @@ public class OrderService {
             .collect(Collectors.toList());
     }
 
+    // 주문 상태 수정 (관리자)
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(
+                () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
+
+        order.updateOrderStatus(newStatus);  // 주문 상태 업데이트
+        orderRepository.save(order);
+    }
+
+
     // 배송지 수정
     @Transactional
     public void updateOrder(Long orderId, OrderDto updatedOrderDto) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new EntityNotFoundException("해당 주문을 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
         if (order.getStatus() != OrderStatus.ORDER) {
-            throw new IllegalStateException("배송 중이거나 배달 완료된 주문은 수정할 수 없습니다.");
+            throw new OrderNotCancelableException(ErrorCode.ORDER_NOT_CANCELABLE,
+                "배송 중이거나 배달 완료된 주문은 수정할 수 없습니다.");
         }
         order.updateShippingAddress(updatedOrderDto.getShippingAddress());
         orderRepository.save(order);
@@ -93,9 +102,11 @@ public class OrderService {
     @Transactional
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new IllegalStateException("해당 주문을 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
         if (order.getStatus() != OrderStatus.ORDER) {
-            throw new IllegalStateException("주문 상태가 'ORDER'일 때만 취소할 수 있습니다.");
+            throw new OrderNotCancelableException(ErrorCode.ORDER_NOT_CANCELABLE,
+                "주문 상태가 'ORDER'일 때만 취소할 수 있습니다.");
         }
         order.updateOrderStatus(OrderStatus.CANCEL);
         orderRepository.save(order);

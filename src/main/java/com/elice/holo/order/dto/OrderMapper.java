@@ -20,11 +20,12 @@ public interface OrderMapper {
 
     // OrderDto를 Order 엔티티로 매핑
     @Mapping(target = "orderProducts", ignore = true)
-    // 주문 상품은 별도 처리
     Order toOrder(OrderDto orderDto, Member member);
 
     // OrderProductDto를 OrderProduct 엔티티로 매핑
     @Mapping(target = "order", ignore = true)
-    OrderProduct toOrderProduct(OrderProductDto orderProductDto, Order order, Product product);
+    default OrderProduct toOrderProduct(OrderProductDto orderProductDto, Order order,
+        Product product) {
+        return OrderProduct.createOrderProduct(order, product, orderProductDto.getCount());
+    }
 }
-
