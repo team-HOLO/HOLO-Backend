@@ -3,6 +3,7 @@ package com.elice.holo.product.controller;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -15,11 +16,9 @@ import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.repository.ProductRepository;
-import com.elice.holo.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,11 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @Transactional
@@ -69,17 +71,27 @@ class ProductControllerTest {
         final int price = 100000;
         String description = "시디즈 의자";
         int stockQuantity = 999;
+        List<Boolean> isThumbnails = List.of(Boolean.TRUE, Boolean.FALSE);
 
         AddProductRequest request = new AddProductRequest(name, price, description, stockQuantity,
-            getProductOptionDto());
+            getProductOptionDto(), isThumbnails);
 
-        String requestBody = objectMapper.writeValueAsString(request); //json mapping
+        //mock 이미지 파일
+        List<MultipartFile> multipartFiles = List.of(
+            new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg", "test image1 content".getBytes()),
+            new MockMultipartFile("Image2", "Image2.jpg", "image/jpeg", "test image2 content".getBytes()));
+
+        MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
+            "application/json",
+            objectMapper.writeValueAsBytes(request));
 
         //when
         ResultActions result = mockMvc.perform(
-            post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
+            multipart(url)
+                .file("productImages", multipartFiles.get(0).getBytes())
+                .file("productImages", multipartFiles.get(1).getBytes())
+                .file(requestPart)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
         );
 
         //then
@@ -138,8 +150,10 @@ class ProductControllerTest {
         //then
         resultActions
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].name").value("의자"))
-            .andExpect(jsonPath("$[1].price").value(100000));
+            .andExpect(jsonPath("$.content[0].name").value("의자")) // content 배열의 첫 번째 요소
+            .andExpect(jsonPath("$.content[1].price").value(100000)) // content 배열의 두 번째 요소
+            .andExpect(jsonPath("$.totalElements").value(2)) // 총 요소 수
+            .andExpect(jsonPath("$.totalPages").value(1)); // 총 페이지 수
 
     }
 
@@ -161,14 +175,26 @@ class ProductControllerTest {
 
         UpdateProductOptionDto optionDto1 = new UpdateProductOptionDto(null, "brown", "F", 100);
         UpdateProductOptionDto optionDto2 = new UpdateProductOptionDto(productOptionId, "RED", "F", 700);
+        boolean isThumbnail = false;
         UpdateProductRequest request = new UpdateProductRequest("의자(수정)", 200000, "시디즈(수정)",
-            300, List.of(optionDto1, optionDto2)
+            300, List.of(optionDto1, optionDto2), List.of(isThumbnail)
         );
 
+        MockMultipartFile requestPart = new MockMultipartFile("updateProductRequest", "request.json",
+            "application/json",
+            objectMapper.writeValueAsBytes(request));
+
         //when
-        ResultActions result = mockMvc.perform(put(url, savedProduct.getProductId())
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)));
+        ResultActions result = mockMvc.perform(
+            multipart(url, savedProduct.getProductId())
+                .file(requestPart)
+                .with( r -> {
+                    r.setMethod("PUT");
+                    return r;
+                    }
+                )
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+        );
 
         //then
         result.andExpect(status().isOk());
