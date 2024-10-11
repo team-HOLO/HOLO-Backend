@@ -33,15 +33,15 @@ public class CartProduct {
     @Column(nullable = false)
     private Long quantity; // 수량
 
-    public CartProduct(Long cartProductIdCart,Cart cart, Product product, Long quantity) {
-        this.cartProductId=cartProductIdCart;
+    public CartProduct(Long cartProductId, Cart cart, Product product, Long quantity) {
+        this.cartProductId = cartProductId;
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
     }
 
     public int getPrice() {
-        return (product != null && quantity != null) ? (int)(product.getPrice() * quantity) : 0;
+        return (product != null && quantity != null) ? (int) (product.getPrice() * quantity) : 0;
     }
 
 

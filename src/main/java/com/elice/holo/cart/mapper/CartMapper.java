@@ -14,7 +14,7 @@ import org.mapstruct.Mapping;
 public interface CartMapper {
 
     @Mapping(source = "cartProducts", target = "products")
-    @Mapping(source = "member.memberId",target = "memberId")
+    @Mapping(source = "member.memberId", target = "memberId")
     @Mapping(target = "totalPrice", ignore = true)
     CartDto toCartDto(Cart cart);
 
@@ -24,10 +24,12 @@ public interface CartMapper {
 
     @Mapping(source = "cartProductId", target = "cartProductId")
     @Mapping(source = "product", target = "productId")
+    @Mapping(target = "cartId", expression = "java(cartProduct.getCart().getCartId())")
     CartProductDto toCartProductDto(CartProduct cartProduct);
 
     default Long map(Product product) {
         return product != null ? product.getProductId() : null; // product가 null이 아닐 경우 ID 반환
     }
+
     List<CartDto> toCartDtoList(List<Cart> carts);
 }

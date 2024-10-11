@@ -3,10 +3,12 @@ package com.elice.holo.cart.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import com.elice.holo.cart.Service.CartService;
 import com.elice.holo.cart.domain.Cart;
 import com.elice.holo.cart.domain.CartProduct;
@@ -41,7 +43,6 @@ class CartServiceTest {
 
     @Mock
     private CartMapper cartMapper;
-
     private Member member;
     private Cart cart;
     private Product product;
@@ -49,9 +50,12 @@ class CartServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = new Member(null, "test@example.com", "password", "Test User", false, false, "010-1234-5678", 30, true);
+        member = new Member(null, "test@example.com", "password", "Test User", false, false,
+            "010-1234-5678", 30, true);
         cart = Cart.createCart(member);
         product = Product.createProduct("Test Product", 1000, "Description", 10);
+
+
     }
 
 
@@ -60,9 +64,10 @@ class CartServiceTest {
     void testGetCartByMember() {
         double totalPrice = 130;
 
-        when(cartRepository.findByMember_MemberId(member.getMemberId())).thenReturn(cart);
+        when(cartRepository.findByMember_MemberId(member.getMemberId())).thenReturn(
+            Optional.of(cart));
         when(cartMapper.toCartDto(cart)).thenReturn(
-            new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
+            new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(), totalPrice));
 
         CartDto result = cartService.getCartByMember(member);
 
@@ -73,13 +78,14 @@ class CartServiceTest {
     @DisplayName("장바구니 생성 테스트")
     @Test
     void testCreateCart() {
-        double totalPrice=130;
+        double totalPrice = 130;
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
         when(cartMapper.toCartDto(cart)).thenReturn(
-            new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
+            new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(), totalPrice));
 
         CartDto result = cartService.createCart(member);
 
+        assertNotNull(result);
         assertEquals(cart.getCartId(), result.getCartId());
         assertEquals(member.getMemberId(), result.getMemberId());
     }
@@ -92,11 +98,14 @@ class CartServiceTest {
         when(product.getProductId()).thenReturn(1L);
 
         when(cartRepository.findById(cart.getCartId())).thenReturn(java.util.Optional.of(cart));
-        when(productRepository.findById(product.getProductId())).thenReturn(java.util.Optional.of(product));
-        when(cartMapper.toCartDto(cart)).thenReturn(new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(),totalPrice));
+        when(productRepository.findById(product.getProductId())).thenReturn(
+            java.util.Optional.of(product));
+        when(cartMapper.toCartDto(cart)).thenReturn(
+            new CartDto(cart.getCartId(), member.getMemberId(), new ArrayList<>(), totalPrice));
 
         CartDto result = cartService.addProductToCart(cart.getCartId(), product.getProductId(), 2L);
 
+        assertNotNull(result);
         verify(cartRepository).save(cart);
         assertEquals(cart.getCartId(), result.getCartId());
     }
@@ -116,22 +125,25 @@ class CartServiceTest {
         cartService.removeProductFromCart(cart.getCartId(), cartProductId);
 
         // Then
-        assertFalse(cart.getCartProducts().contains(cartProduct), "Cart should not contain the removed product");
+        assertFalse(cart.getCartProducts().contains(cartProduct),
+            "Cart should not contain the removed product");
     }
 
     @Test
     @DisplayName("상품 수량 업데이트 테스트")
     void testUpdateProductQuantity() {
+        // Given
+        cartService.createCart(member); // 장바구니 생성
 
-        cart.addCartProduct(product, 1L); // 상품 추가
+        // 상품 추가
+        cartService.addProductToCart(cart.getCartId(), product.getProductId(), 2L);
+        Long cartProductId = cart.getCartProducts().get(0).getCartProductId();
 
+        // When
+        cartService.updateProductQuantity(cart.getCartId(), cartProductId, 3L);
 
-        when(cartRepository.findById(cart.getCartId())).thenReturn(java.util.Optional.of(cart));
-
-        cartService.updateProductQuantity(cart.getCartId(), cart.getCartProducts().get(0).getCartProductId(), 2L);
-
-
-        assertEquals(2L, cart.getCartProducts().get(0).getQuantity());
+        // Then
+        assertEquals(3L, cart.getCartProducts().get(0).getQuantity());
         verify(cartRepository).save(cart);
     }
 
@@ -145,6 +157,7 @@ class CartServiceTest {
         verify(cartRepository).save(cart);
         assertEquals(0, cart.getCartProducts().size());
     }
+
     @Test
     @DisplayName("장바구니 총 가격 계산 테스트")
     void testCalculateTotalPrice() {

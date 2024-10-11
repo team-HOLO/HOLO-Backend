@@ -47,17 +47,12 @@ public class Cart {
             .member(member)
             .build();
     }
-    //새로운 상품을 장바구니에 추가//
+
+    // 장바구니에 새로운 상품 추가
     public void addCartProduct(Product product, Long quantity) {
-        Long cartProductId = generateCartProductId(); // 임시 ID 생성
-        CartProduct cartProduct = new CartProduct(cartProductId, this, product, quantity);
+        CartProduct cartProduct = new CartProduct(null, this, product, quantity); // ID는 null로 설정
         this.cartProducts.add(cartProduct);
     }
-
-    private Long generateCartProductId() {
-        return System.currentTimeMillis(); // 단순한 임시 ID
-    }
-
 
 
     //장바구니 특정 상품 제거 //
