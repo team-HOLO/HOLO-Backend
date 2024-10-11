@@ -171,7 +171,7 @@ class CategoryControllerTest {
         categoryRepository.save(childCategory);
 
         // When & Then
-        mockMvc.perform(get("/api/categories/" + savedParent.getCategoryId()))
+        mockMvc.perform(get("/api/categories/sub/" + savedParent.getCategoryId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].name").value("ChildCategory"));
     }

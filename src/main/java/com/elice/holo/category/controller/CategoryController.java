@@ -43,7 +43,7 @@ public class CategoryController {
     }
 
     // 특정 카테고리의 하위 카테고리 목록 조회
-    @GetMapping("/{id}")
+    @GetMapping("/sub/{id}")
     public ResponseEntity<List<CategoryResponseDto>> getSubCategories(
         @PathVariable(name = "id") Long id) {
         List<CategoryResponseDto> subCategories = categoryService.getSubCategories(id);
