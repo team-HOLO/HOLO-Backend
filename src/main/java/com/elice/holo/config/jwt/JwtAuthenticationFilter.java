@@ -2,6 +2,7 @@ package com.elice.holo.config.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -21,18 +22,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final static String HEADER_AUTHORIZATION = "Authorization";
-    private final static String TOKEN_PREFIX = "Bearer ";
-
     @Override
-    protected void doFilterInternal(
-        HttpServletRequest request,
+    protected void doFilterInternal(HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
-        // Authorization 헤더에서 JWT 토큰 추출
-        String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
-        String token = getAccessToken(authorizationHeader);
+        // 쿠키에서 JWT 토큰 추출
+        String token = getJwtFromCookies(request);
 
         // 토큰이 유효한지 확인
         if (token != null && jwtTokenProvider.validToken(token)) {
@@ -44,10 +40,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Authorization 헤더에서 JWT 토큰 추출
-    private String getAccessToken(String authorizationHeader) {
-        if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) {
-            return authorizationHeader.substring(TOKEN_PREFIX.length());
+    // 쿠키에서 JWT 토큰 추출 메서드
+    private String getJwtFromCookies(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwtToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

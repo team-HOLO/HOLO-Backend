@@ -7,6 +7,8 @@ import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.service.MemberService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,15 +37,38 @@ public class MemberController {
         return ResponseEntity.status(201).body("회원가입 성공. JWT Token: " + token);
     }
 
-    // 로그인 API
+    // 로그인 API - 쿠키로 JWT 토큰 전달
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto) {
+    public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
         // 로그인 후 회원 정보를 엔티티로 받음
         Member member = memberService.loginAndReturnEntity(requestDto);
 
         // JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
-        return ResponseEntity.ok("로그인 성공. JWT Token: " + token);
+
+        // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
+        Cookie cookie = new Cookie("jwtToken", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // HTTPS에서만 사용 가능하게 설정
+        cookie.setPath("/"); // 애플리케이션 전체에 대해 쿠키가 유효하도록 설정
+        cookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
+
+        // 쿠키를 응답에 추가
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok("로그인 성공");
+    }
+    // 로그아웃 시 쿠키 삭제
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwtToken", null); // 쿠키 삭제
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // 유효 시간을 0으로 설정하여 삭제
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok("로그아웃 성공");
     }
 
     // 모든 회원 조회 API
