@@ -2,6 +2,7 @@ package com.elice.holo.common.exception;
 
 import com.elice.holo.category.exception.CategoryNotFoundException;
 import com.elice.holo.category.exception.DuplicateCategoryNameException;
+import com.elice.holo.member.exception.AccessDeniedException;
 import com.elice.holo.order.exception.OrderNotCancelableException;
 import com.elice.holo.order.exception.OrderNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
         log.error("Internal Server Error", ex);
         ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+    // AccessDeniedException 예외 처리
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("권한 오류: " + ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.ACCESS_DENIED);
 
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
