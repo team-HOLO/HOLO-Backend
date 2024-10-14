@@ -1,4 +1,4 @@
-package com.elice.holo.config;
+package com.elice.holo.token;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

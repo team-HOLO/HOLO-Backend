@@ -1,6 +1,6 @@
 package com.elice.holo.member.controller;
 
-import com.elice.holo.config.jwt.JwtTokenProvider;
+import com.elice.holo.token.JwtTokenProvider;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
 import com.elice.holo.member.dto.MemberResponseDto;
