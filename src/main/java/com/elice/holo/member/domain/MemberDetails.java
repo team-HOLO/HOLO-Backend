@@ -1,6 +1,6 @@
 package com.elice.holo.member.domain;
 
-import com.elice.holo.member.domain.Member;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
