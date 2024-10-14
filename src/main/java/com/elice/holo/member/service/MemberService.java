@@ -76,6 +76,14 @@ public class MemberService {
 
     // 모든 회원 조회
     public List<MemberResponseDto> getAllMembers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
+
+        // 관리자가 아니면 권한 에러
+        if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("관리자 권한이 필요합니다.");
+        }
+
         List<Member> members = memberRepository.findAllByIsDeletedFalse();
         return memberMapper.toDtoList(members);
     }
@@ -84,6 +92,15 @@ public class MemberService {
     public MemberResponseDto getMemberById(Long memberId) {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
+
+        // 로그인한 사용자가 해당 회원의 정보를 조회할 권한이 있는지 확인
+        if (!memberDetails.getMemberId().equals(memberId) &&
+            !memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("조회 권한이 없습니다.");
+        }
 
         return memberMapper.toDto(member);
     }
@@ -119,6 +136,15 @@ public class MemberService {
     public void deleteMember(Long memberId) {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
+
+        // 로그인한 사용자가 해당 회원을 삭제할 권한이 있는지 확인
+        if (!memberDetails.getMemberId().equals(memberId) &&
+            !memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
 
         member.deactivateMember();
         memberRepository.save(member);
