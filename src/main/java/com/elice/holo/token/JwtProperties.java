@@ -1,4 +1,4 @@
-package com.elice.holo.config.jwt;
+package com.elice.holo.token;
 
 import lombok.Getter;
 import lombok.Setter;

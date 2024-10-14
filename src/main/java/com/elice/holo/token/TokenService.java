@@ -1,6 +1,5 @@
-package com.elice.holo.config;
+package com.elice.holo.token;
 
-import com.elice.holo.config.jwt.JwtTokenProvider;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.service.MemberService;
 import java.time.Duration;

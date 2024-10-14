@@ -3,8 +3,8 @@ package com.elice.holo.config;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
-import com.elice.holo.config.jwt.JwtAuthenticationFilter;
-import com.elice.holo.config.jwt.JwtTokenProvider;
+import com.elice.holo.token.JwtAuthenticationFilter;
+import com.elice.holo.token.JwtTokenProvider;
 import com.elice.holo.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
