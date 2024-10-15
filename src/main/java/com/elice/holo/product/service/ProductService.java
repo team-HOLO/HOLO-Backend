@@ -9,6 +9,7 @@ import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
+import com.elice.holo.product.dto.ProductsAdminResponseDto;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
@@ -102,6 +103,15 @@ public class ProductService {
 
         product.updateIsDeleted(true);
     }
+
+    //상품 관리자용 조회 메서드
+    public Page<ProductsAdminResponseDto> getProductAdminPage(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAdminPage(pageable);
+
+        return productPage.map(ProductsAdminResponseDto::new);
+    }
+
+
 
     //상품 옵션 수정시 추가 메서드
     private void addProductOptions(UpdateProductRequest request, Product product) {

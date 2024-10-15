@@ -4,6 +4,7 @@ import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
+import com.elice.holo.product.dto.ProductsAdminResponseDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.dto.ProductsResponseDto;
@@ -39,19 +40,21 @@ public class ProductController {
         @RequestPart(name = "productImages") List<MultipartFile> multipartFiles
     ) throws IOException {
 
-        return new ResponseEntity<>(productService.saveProduct(addProductRequest, multipartFiles), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.saveProduct(addProductRequest, multipartFiles),
+            HttpStatus.CREATED);
     }
 
     //상품 상세 조회
     @GetMapping("/products/{id}")
-    public ResponseEntity<ProductResponseDto> getProductDetails(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<ProductResponseDto> getProductDetails(
+        @PathVariable(name = "id") Long id) {
         return new ResponseEntity<>(productService.findProductById(id), HttpStatus.OK);
     }
 
     //상품 목록 조회
     @GetMapping("/products")
     public ResponseEntity<Page<ProductsResponseDto>> getAllProducts(@ModelAttribute
-        ProductSearchCond cond, Pageable pageable) {
+    ProductSearchCond cond, Pageable pageable) {
 
         Page<ProductsResponseDto> products = productService.findProducts(pageable, cond);
         return new ResponseEntity<>(products, HttpStatus.OK);
@@ -62,7 +65,7 @@ public class ProductController {
     public ResponseEntity<Void> updateProduct(@PathVariable(name = "id") Long id,
         @RequestPart UpdateProductRequest updateProductRequest,
         @RequestPart(name = "productImages", required = false) List<MultipartFile> multipartFiles
-        ) {
+    ) {
         productService.updateProduct(id, updateProductRequest);
 
         return ResponseEntity.ok().build();
@@ -76,5 +79,12 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    //관리자용 페이지 조회
+    @GetMapping("/admin/products")
+    public ResponseEntity<Page<ProductsAdminResponseDto>> getProductAdminPage(Pageable pageable) {
+        Page<ProductsAdminResponseDto> productAdminPage = productService.getProductAdminPage(
+            pageable);
 
+        return ResponseEntity.ok(productAdminPage);
+    }
 }
