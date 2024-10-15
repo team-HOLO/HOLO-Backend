@@ -6,6 +6,10 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 import com.elice.holo.token.JwtAuthenticationFilter;
 import com.elice.holo.token.JwtTokenProvider;
 import com.elice.holo.member.service.MemberService;
+import com.elice.holo.token.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.elice.holo.token.oauth.OAuth2SuccessHandler;
+import com.elice.holo.token.oauth.OAuth2UserCustomService;
+import com.elice.holo.token.oauth.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +29,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwttokenProvider;
-    private final MemberService memberService;
+    private final MemberService userService;
+    private final OAuth2UserCustomService oAuth2UserCustomService;
+    private final RefreshTokenRepository refreshTokenRepository;
+
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -54,10 +61,39 @@ public class SecurityConfig {
                     new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                     new AntPathRequestMatcher("/api/members/**"))
             );
+        // OAuth2 로그인 설정
+        http.oauth2Login()
+            .loginPage("/login") // 로그인 페이지 경로 설정
+            .authorizationEndpoint()
+            .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()) // 쿠키 기반 OAuth2 요청 저장소 사용
+            .and()
+            .successHandler(oAuth2SuccessHandler()) // 성공 핸들러 설정
+            .userInfoEndpoint()
+            .userService(oAuth2UserCustomService); // 사용자 정보 서비스 설정
+
+        // 예외 처리 - 인증되지 않은 사용자가 /api/** 경로에 접근할 경우 401 Unauthorized 응답
+        http.exceptionHandling()
+            .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                new AntPathRequestMatcher("/api/**"));
+
+        // 로그아웃 설정
+        http.logout()
+            .logoutSuccessUrl("/login"); // 로그아웃 성공 시 이동할 경로 설정
 
         return http.build();
     }
-
+    @Bean
+    public OAuth2SuccessHandler oAuth2SuccessHandler() {
+        return new OAuth2SuccessHandler(jwttokenProvider,
+            refreshTokenRepository,
+            oAuth2AuthorizationRequestBasedOnCookieRepository(),
+            userService);
+    }
+    // 쿠키 기반 OAuth2 요청 저장소 설정
+    @Bean
+    public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
+        return new OAuth2AuthorizationRequestBasedOnCookieRepository();
+    }
     @Bean
     public JwtAuthenticationFilter tokenAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwttokenProvider);

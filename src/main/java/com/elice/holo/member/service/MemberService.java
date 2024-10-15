@@ -149,4 +149,9 @@ public class MemberService {
         member.deactivateMember();
         memberRepository.save(member);
     }
+
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmailAndIsDeletedFalse(email)
+            .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
+    }
 }
