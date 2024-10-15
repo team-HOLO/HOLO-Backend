@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-@Primary
+//@Primary
 @Service
 @RequiredArgsConstructor
 public class S3StorageService implements StorageService{
