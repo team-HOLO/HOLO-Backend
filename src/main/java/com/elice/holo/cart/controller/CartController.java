@@ -47,10 +47,11 @@ public class CartController {
         @PathVariable Long cartId,
         @PathVariable Long productId,
         @RequestParam Long quantity) {
+
         CartDto cartDto = cartService.addProductToCart(cartId, productId, quantity); // 상품 추가
         return ResponseEntity.status(HttpStatus.CREATED).body(cartDto);
-        // 생성 결과 반환
     }
+
 
     //장바구니 상품 수량 수정
     @PutMapping("/{cartId}/products/{cartProductId}")

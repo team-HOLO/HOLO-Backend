@@ -13,7 +13,8 @@ public enum ErrorCode {
     DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT, "Duplicate category name"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "Order not found"),
     ORDER_NOT_CANCELABLE(HttpStatus.BAD_REQUEST, "Order not cancelable"),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access is denied");
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access is denied"),
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found");
 
 
     private final HttpStatus status;
