@@ -3,6 +3,7 @@ package com.elice.holo.product.repository.query;
 import static com.elice.holo.product.domain.QProduct.*;
 import static com.elice.holo.product.domain.QProductImage.*;
 
+import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.QProductImage;
 import com.elice.holo.product.dto.ProductImageDto;
 import com.elice.holo.product.dto.ProductSearchCond;
@@ -40,7 +41,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
                 product.price
             ))
             .from(product)
-            .where(productNameIn(cond))
+            .where(productNameIn(cond), product.isDeleted.isFalse())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -97,5 +98,18 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
         }
     }
 
+    @Override
+    public Page<Product> findAdminPage(Pageable pageable) {
+        List<Product> result = queryFactory
+            .selectFrom(product)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
+        JPAQuery<Long> countQuery = queryFactory
+            .select(product.count())
+            .from(product);
+
+        return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+    }
 }
