@@ -4,6 +4,7 @@ import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.service.MemberService;
 import com.elice.holo.token.JwtTokenProvider;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,17 +21,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    // 상수 정의
-    public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token"; // 리프레시 토큰 쿠키 이름
-    public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14); // 리프레시 토큰 유효 기간
-    public static final Duration ACCESS_TOKEN_DURATION = Duration.ofDays(1); // 액세스 토큰 유효 기간
-    public static final String REDIRECT_PATH = "/login"; // 로그인 성공 후 리다이렉트 경로
-
-    // 의존성 주입
-    private final JwtTokenProvider tokenProvider; // JWT 토큰 제공자
-    private final RefreshTokenRepository refreshTokenRepository; // 리프레시 토큰 저장소
-    private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository; // OAuth2 인증 요청 쿠키 저장소
-    private final MemberService userService; // 사용자 서비스
+    // JWT 토큰 제공자
+    private final JwtTokenProvider tokenProvider;
+    private final MemberService userService;
 
     // OAuth2 로그인 성공 시 호출되는 메서드
     @Override
@@ -38,48 +31,21 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal(); // 인증된 사용자의 정보를 가져옴
         Member user = userService.findByEmail((String) oAuth2User.getAttributes().get("email")); // 사용자 정보 조회
 
-        // 리프레시 토큰 생성 및 저장
-        String refreshToken = tokenProvider.generateToken(user, REFRESH_TOKEN_DURATION); // 리프레시 토큰 생성
-        saveRefreshToken(user.getMemberId(), refreshToken); // 리프레시 토큰 저장
-        addRefreshTokenToCookie(request, response, refreshToken); // 리프레시 토큰을 쿠키에 추가
+        // JWT 토큰 생성
+        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(2)); // JWT 토큰을 2시간 동안 유효하도록 생성
 
-        // 액세스 토큰 생성
-        String accessToken = tokenProvider.generateToken(user, ACCESS_TOKEN_DURATION); // 액세스 토큰 생성
-        String targetUrl = getTargetUrl(accessToken); // 리다이렉트 URL 생성
+        // JWT 토큰을 쿠키에 설정 (HttpOnly, Secure 플래그 적용)
+        Cookie jwtCookie = new Cookie("jwtToken", accessToken);
+        jwtCookie.setHttpOnly(true); // XSS 공격 방지
+        jwtCookie.setSecure(true); // HTTPS에서만 전송
+        jwtCookie.setPath("/"); // 애플리케이션 전체에서 쿠키가 유효하도록 설정
+        jwtCookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
 
-        // 인증 관련 쿠키와 정보를 정리하고 리다이렉트 처리
-        clearAuthenticationAttributes(request, response); // 인증 속성 정리
-        getRedirectStrategy().sendRedirect(request, response, targetUrl); // 지정된 URL로 리다이렉트
-    }
+        // 쿠키를 응답에 추가
+        response.addCookie(jwtCookie);
 
-    // 리프레시 토큰을 DB에 저장하는 메서드
-    private void saveRefreshToken(Long userId, String newRefreshToken) {
-        RefreshToken refreshToken = refreshTokenRepository.findByUserId(userId)
-                .map(entity -> entity.update(newRefreshToken)) // 기존 토큰이 있으면 업데이트
-                .orElse(new RefreshToken(userId, newRefreshToken)); // 없으면 새로 생성
-
-        refreshTokenRepository.save(refreshToken); // 저장소에 리프레시 토큰 저장
-    }
-
-    // 리프레시 토큰을 쿠키에 추가하는 메서드
-    private void addRefreshTokenToCookie(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
-        int cookieMaxAge = (int) REFRESH_TOKEN_DURATION.toSeconds(); // 쿠키 유효 기간 설정
-
-        CookieUtil.deleteCookie(request, response, REFRESH_TOKEN_COOKIE_NAME); // 기존 쿠키 삭제
-        CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieMaxAge); // 새 쿠키 추가
-    }
-
-    // 인증 관련 속성을 정리하는 메서드
-    private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
-        super.clearAuthenticationAttributes(request); // 부모 클래스 메서드 호출하여 속성 정리
-        authorizationRequestRepository.removeAuthorizationRequestCookies(request, response); // 인증 요청 쿠키 삭제
-    }
-
-    // 리다이렉트할 URL을 생성하는 메서드
-    private String getTargetUrl(String token) {
-        return UriComponentsBuilder.fromUriString(REDIRECT_PATH) // 리다이렉트 경로 설정
-                .queryParam("token", token) // URL에 액세스 토큰을 쿼리 파라미터로 추가
-                .build()
-                .toUriString();
+        // 리다이렉트 처리 (로그인 성공 후 지정된 페이지로 이동)
+        String targetUrl = "/login"; // 원하는 리다이렉트 URL로 변경 가능
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

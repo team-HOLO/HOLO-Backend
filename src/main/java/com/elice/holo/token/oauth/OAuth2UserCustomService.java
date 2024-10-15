@@ -38,6 +38,8 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
                         .email(email)
                         .name(name)
                     .isDeleted(Boolean.FALSE)
+                    .isAdmin(Boolean.FALSE)
+                    .gender(Boolean.FALSE)
                         .build());
 
         return userRepository.save(user);

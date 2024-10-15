@@ -31,8 +31,6 @@ public class SecurityConfig {
     private final JwtTokenProvider jwttokenProvider;
     private final MemberService userService;
     private final OAuth2UserCustomService oAuth2UserCustomService;
-    private final RefreshTokenRepository refreshTokenRepository;
-
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -45,7 +43,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .csrf(AbstractHttpConfigurer::disable) // CSRF 설정 비활성화
+            .csrf(csrf -> csrf.disable()) // CSRF 설정 비활성화
             .sessionManagement(session -> session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS)) // 세션을 Stateless로 설정
             .authorizeHttpRequests(authorize -> authorize
@@ -61,6 +59,7 @@ public class SecurityConfig {
                     new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                     new AntPathRequestMatcher("/api/members/**"))
             );
+
         // OAuth2 로그인 설정
         http.oauth2Login()
             .loginPage("/login") // 로그인 페이지 경로 설정
@@ -82,18 +81,18 @@ public class SecurityConfig {
 
         return http.build();
     }
+
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(jwttokenProvider,
-            refreshTokenRepository,
-            oAuth2AuthorizationRequestBasedOnCookieRepository(),
-            userService);
+        return new OAuth2SuccessHandler(jwttokenProvider, userService); // RefreshTokenRepository 제거
     }
+
     // 쿠키 기반 OAuth2 요청 저장소 설정
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
+
     @Bean
     public JwtAuthenticationFilter tokenAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwttokenProvider);
