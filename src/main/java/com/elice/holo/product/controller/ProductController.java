@@ -8,6 +8,7 @@ import com.elice.holo.product.dto.ProductsAdminResponseDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.dto.ProductsResponseDto;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ProductController {
     //상품 등록
     @PostMapping("/products")
     public ResponseEntity<AddProductResponse> saveProduct(
-        @RequestPart AddProductRequest addProductRequest,
+        @Valid @RequestPart AddProductRequest addProductRequest,
         @RequestPart(name = "productImages") List<MultipartFile> multipartFiles
     ) throws IOException {
 
