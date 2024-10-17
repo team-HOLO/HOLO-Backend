@@ -42,15 +42,15 @@ public class Cart {
     }
 
     //생성 메서드//
-    public static Cart createCart(Member member) {
+    public static Cart createCart() {
         return Cart.builder()
-            .member(member)
             .build();
     }
 
     // 장바구니에 새로운 상품 추가
-    public void addCartProduct(Product product, Long quantity) {
-        CartProduct cartProduct = new CartProduct(null, this, product, quantity); // ID는 null로 설정
+    public void addCartProduct(Product product, Long quantity, String color, String size) {
+        CartProduct cartProduct = new CartProduct(null, this, product, quantity, color,
+            size); // ID는 null로 설정
         this.cartProducts.add(cartProduct);
     }
 

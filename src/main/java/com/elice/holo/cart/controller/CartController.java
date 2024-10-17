@@ -2,7 +2,9 @@ package com.elice.holo.cart.controller;
 
 import com.elice.holo.cart.Service.CartService;
 import com.elice.holo.cart.dto.CartDto;
+import com.elice.holo.cart.dto.CartRequestDto;
 import com.elice.holo.member.domain.Member;
+import com.elice.holo.member.service.MemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,34 +24,31 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
 
     private final CartService cartService;
+    private final MemberService memberService;
 
 
     //특정 회원의 장바구니 조회
     @GetMapping("/member/{memberId}")
     public ResponseEntity<CartDto> getCartByMemberId(@PathVariable Long memberId) {
-        Member member = new Member();
+        Member member = memberService.getMemberEntityById(memberId);
         CartDto cartDto = cartService.getCartByMember(member);
         return ResponseEntity.ok(cartDto);
-
     }
 
     //장바구니 생성
-    @PostMapping("/member/{memberId}")
-    public ResponseEntity<CartDto> createCart(@PathVariable Long memberId) {
-        Member member = new Member();
-        CartDto cartDto = cartService.createCart(member);
+    @PostMapping
+    public ResponseEntity<CartDto> createCart() {
+        CartDto cartDto = cartService.createCart();
         return ResponseEntity.status(HttpStatus.CREATED).body(cartDto);
-
     }
 
     //장바구니 상품 추가
     @PostMapping("/{cartId}/products/{productId}")
     public ResponseEntity<CartDto> addProductToCart(
         @PathVariable Long cartId,
-        @PathVariable Long productId,
-        @RequestParam Long quantity) {
+        @RequestBody CartRequestDto cartRequest) {
 
-        CartDto cartDto = cartService.addProductToCart(cartId, productId, quantity); // 상품 추가
+        CartDto cartDto = cartService.addProductToCart(cartId, cartRequest); // 상품 추가
         return ResponseEntity.status(HttpStatus.CREATED).body(cartDto);
     }
 

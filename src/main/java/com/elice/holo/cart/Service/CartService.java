@@ -3,14 +3,13 @@ package com.elice.holo.cart.Service;
 import com.elice.holo.cart.domain.Cart;
 import com.elice.holo.cart.domain.CartProduct;
 import com.elice.holo.cart.dto.CartDto;
+import com.elice.holo.cart.dto.CartRequestDto;
 import com.elice.holo.cart.exception.CartNotFoundException;
 import com.elice.holo.cart.mapper.CartMapper;
 import com.elice.holo.cart.repository.CartRepository;
 import com.elice.holo.common.exception.CustomException;
 import com.elice.holo.common.exception.ErrorCode;
 import com.elice.holo.member.domain.Member;
-import com.elice.holo.product.domain.Product;
-import com.elice.holo.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
     private final CartMapper cartMapper;
 
 
@@ -33,24 +31,22 @@ public class CartService {
 
     //장바구니 생성
     @Transactional
-    public CartDto createCart(Member member) {
-        Cart cart = Cart.createCart(member);
+    public CartDto createCart() {
+        Cart cart = Cart.createCart();
         cart = cartRepository.save(cart);
         return cartMapper.toCartDto(cart);
     }
 
     //장바구니에 상품 추가
     @Transactional
-    public CartDto addProductToCart(Long cartId, Long productID, Long quantity) {
+    public CartDto addProductToCart(Long cartId, CartRequestDto cartRequest) {
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(
                 () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
+        CartProduct cartProduct = cartMapper.toEntity(cartRequest);
+        cart.addCartProduct(cartProduct.getProduct(), cartProduct.getQuantity(),
+            cartRequest.getColor(), cartRequest.getSize());
 
-        Product product = productRepository.findById(productID)
-            .orElseThrow(
-                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
-
-        cart.addCartProduct(product, quantity);
         cartRepository.save(cart);
 
         return cartMapper.toCartDto(cart);
@@ -106,6 +102,7 @@ public class CartService {
         cart.getCartProducts().clear();
         cartRepository.save(cart);
     }
+
 
     //장바구니의 총 가격을 계산하는 메서드
     public double calculateTotalPrice(Long cartId) {
