@@ -5,6 +5,7 @@ import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
 import com.elice.holo.product.dto.ProductsAdminResponseDto;
+import com.elice.holo.product.dto.SortBy;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.service.ProductService;
 import com.elice.holo.product.dto.ProductsResponseDto;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,12 +54,26 @@ public class ProductController {
         return new ResponseEntity<>(productService.findProductById(id), HttpStatus.OK);
     }
 
-    //상품 목록 조회
+    //메인 상품 목록 조회
     @GetMapping("/products")
     public ResponseEntity<Page<ProductsResponseDto>> getAllProducts(@ModelAttribute
     ProductSearchCond cond, Pageable pageable) {
 
         Page<ProductsResponseDto> products = productService.findProducts(pageable, cond);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    //카테고리별 상품 조회
+    @GetMapping("/products/category/{categoryId}")
+    public ResponseEntity<Page<ProductsResponseDto>> getCategoryProducts(
+        @PathVariable(name = "categoryId") Long categoryId,
+        @ModelAttribute ProductSearchCond cond,
+        @RequestParam(name = "sortBy", required = false) SortBy sort,
+        Pageable pageable
+    ) {
+        Page<ProductsResponseDto> products = productService.findProductsByCategory(
+            categoryId, cond, sort, pageable);
+
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
@@ -67,6 +83,7 @@ public class ProductController {
         @RequestPart UpdateProductRequest updateProductRequest,
         @RequestPart(name = "productImages", required = false) List<MultipartFile> multipartFiles
     ) {
+
         productService.updateProduct(id, updateProductRequest);
 
         return ResponseEntity.ok().build();
