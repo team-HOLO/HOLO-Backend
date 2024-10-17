@@ -1,13 +1,16 @@
 package com.elice.holo.cart.controller;
 
 import com.elice.holo.cart.Service.CartService;
+import com.elice.holo.cart.dto.AddCartItemRequestDto;
 import com.elice.holo.cart.dto.CartDto;
-import com.elice.holo.cart.dto.CartRequestDto;
 import com.elice.holo.member.domain.Member;
+import com.elice.holo.member.domain.MemberDetails;
 import com.elice.holo.member.service.MemberService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,21 +38,27 @@ public class CartController {
         return ResponseEntity.ok(cartDto);
     }
 
-    //장바구니 생성
+    //장바구니 담기*//
     @PostMapping
-    public ResponseEntity<CartDto> createCart() {
-        CartDto cartDto = cartService.createCart();
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartDto);
-    }
+    public ResponseEntity<Void> addCartItem(@RequestBody AddCartItemRequestDto request) {
 
-    //장바구니 상품 추가
-    @PostMapping("/{cartId}/products/{productId}")
-    public ResponseEntity<CartDto> addProductToCart(
-        @PathVariable Long cartId,
-        @RequestBody CartRequestDto cartRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        CartDto cartDto = cartService.addProductToCart(cartId, cartRequest); // 상품 추가
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartDto);
+        // 로그인한 사용자가 해당 회원의 정보를 조회할 권한이 있는지 확인
+        if (authentication != null && authentication.isAuthenticated()) {
+            cartService.addProductToCartV2(
+                memberDetails.getMemberId(),
+                request.getProductId(),
+                request.getQuantity(),
+                request.getColor(),
+                request.getSize());
+            return ResponseEntity.ok().build();
+
+        } else { //인증되지 않은 비회원의 경우
+            throw new AccessDeniedException("로그인 후 이용해주세요.");
+        }
+
     }
 
 

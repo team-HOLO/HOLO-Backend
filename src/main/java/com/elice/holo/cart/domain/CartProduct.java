@@ -20,8 +20,7 @@ public class CartProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cartProductId; // PK
-
+    private Long cartProductId;
     @ManyToOne
     @JoinColumn(name = "cartId", nullable = false)
     private Cart cart; // 장바구니

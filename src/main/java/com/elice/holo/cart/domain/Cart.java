@@ -42,8 +42,9 @@ public class Cart {
     }
 
     //생성 메서드//
-    public static Cart createCart() {
+    public static Cart createCart(Member member) {
         return Cart.builder()
+            .member(member)
             .build();
     }
 
