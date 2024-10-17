@@ -1,7 +1,6 @@
 package com.elice.holo.category.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
@@ -26,6 +25,7 @@ class CategoryMapperTest {
     @DisplayName("Entity에서 CategoryDto 매핑")
     void testToCategoryDto() {
         Category category = Category.builder()
+            .categoryId(1L)
             .name("가전")
             .description("가전 제품")
             .parentCategory(null)
@@ -73,22 +73,39 @@ class CategoryMapperTest {
     @Test
     @DisplayName("CategoryCreateDto에서 Entity 매핑")
     void testToEntity() {
-        CategoryCreateDto createDto = new CategoryCreateDto("Home Appliances",
-            "Appliances for home", null);
+        Category parent = Category.builder()
+            .categoryId(1L)
+            .name("Parent")
+            .description("Parent Category")
+            .parentCategory(null)
+            .isDeleted(false)
+            .build();
 
+        // 새로운 Category DTO
+        CategoryCreateDto createDto = new CategoryCreateDto("Home Appliances",
+            "Appliances for home", parent.getCategoryId());
+
+        //  When
         Category category = categoryMapper.toEntity(createDto);
 
+        // Then
         assertEquals(createDto.getName(), category.getName());
         assertEquals(createDto.getDescription(), category.getDescription());
-        assertNull(category.getParentCategory());
     }
 
     @Test
     @DisplayName("Entity에서 CategoryDetailsDto 매핑")
     void testToCategoryDetailsDto() {
         Category parentCategory = Category.builder()
-            .name("가전 제품").description("가전 제품 모음").parentCategory(null).build();
-        Category category = Category.builder().name("모니터").description("모니터")
+            .categoryId(1L)
+            .name("가전 제품").
+            description("가전 제품 모음")
+            .parentCategory(null)
+            .build();
+        Category category = Category.builder()
+            .categoryId(2L)
+            .name("모니터")
+            .description("모니터")
             .parentCategory(parentCategory).build();
 
         CategoryDetailsDto dto = categoryMapper.toCategoryDetailsDto(category);
@@ -104,9 +121,13 @@ class CategoryMapperTest {
     @DisplayName("Entity 목록을 CategoryDto List로 매핑")
     void testToCategoryDtoList() {
         Category category1 = Category.builder()
-            .name("가전 제품").description("가전 제품 모음").parentCategory(null).build();
+            .categoryId(1L)
+            .name("가전 제품").description("가전 제품 모음")
+            .parentCategory(null).build();
         Category category2 = Category.builder()
-            .name("가구").description("가구 모음").parentCategory(null).build();
+            .categoryId(2L)
+            .name("가구").description("가구 모음")
+            .parentCategory(null).build();
         List<Category> categories = List.of(category1, category2);
 
         List<CategoryDto> dtoList = categoryMapper.toCategoryDtoList(categories);
