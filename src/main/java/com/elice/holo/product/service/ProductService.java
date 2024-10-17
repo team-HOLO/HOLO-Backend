@@ -1,5 +1,10 @@
 package com.elice.holo.product.service;
 
+import com.elice.holo.category.domain.Category;
+import com.elice.holo.category.exception.CategoryNotFoundException;
+import com.elice.holo.category.repository.CategoryRepository;
+import com.elice.holo.category.service.CategoryService;
+import com.elice.holo.common.exception.ErrorCode;
 import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -9,6 +14,8 @@ import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
+import com.elice.holo.product.dto.ProductsAdminResponseDto;
+import com.elice.holo.product.dto.SortBy;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
 import com.elice.holo.product.exception.ProductNotFoundException;
@@ -32,12 +39,19 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductImageService productImageService;
+    private final CategoryRepository categoryRepository;
 
     //상품 추가를 위한 메서드
     @Transactional
     public AddProductResponse saveProduct(AddProductRequest request, List<MultipartFile> multipartFiles) throws IOException {
 
         Product newProduct = request.toEntity();
+
+        //카테고리 추가
+        Category category = categoryRepository.findByCategoryIdAndIsDeletedFalse(request.getCategoryId())
+            .orElseThrow(() -> new CategoryNotFoundException(ErrorCode.CATEGORY_NOT_FOUND,
+                "해당 카테고리는 존재하지 않습니다"));
+        newProduct.addProductCategory(category);
 
         //상품 이미지 추가
         productImageService.saveItemImages(
@@ -69,13 +83,18 @@ public class ProductService {
         return response;
     }
 
-    //상품 다수 조회(목록 조회)를 위한 메서드
+    //상품 다수 조회(목록 조회)를 위한 메서드 -> 메인 페이지
     public Page<ProductsResponseDto> findProducts(Pageable pageable, ProductSearchCond cond) {
         return productRepository.findProductsPage(pageable, cond);
 
 //        return productRepository.findAll().stream()
 //            .map(productMapper::toProductsDto)
 //            .collect(Collectors.toList());
+    }
+
+    //카테고리별 상품 목록 조회를 위한 메서드
+    public Page<ProductsResponseDto> findProductsByCategory(Long categoryId, ProductSearchCond cond, SortBy sort, Pageable pageable) {
+        return productRepository.findCategoryProductsPage(pageable, cond, categoryId, sort);
     }
 
     //상품 수정 메서드
@@ -102,6 +121,15 @@ public class ProductService {
 
         product.updateIsDeleted(true);
     }
+
+    //상품 관리자용 조회 메서드
+    public Page<ProductsAdminResponseDto> getProductAdminPage(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAdminPage(pageable);
+
+        return productPage.map(ProductsAdminResponseDto::new);
+    }
+
+
 
     //상품 옵션 수정시 추가 메서드
     private void addProductOptions(UpdateProductRequest request, Product product) {

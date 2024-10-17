@@ -18,7 +18,7 @@ public class ProductsResponseDto {
     private Long productId;
     private String name;
     private int price;
-    private List<ProductImageDto> thumbNailImage;  //TODO 썸네일 이미지 개수 결정
+    private List<ProductImageDto> thumbNailImage;
 
     public ProductsResponseDto(Product product) {
         productId = product.getProductId();
