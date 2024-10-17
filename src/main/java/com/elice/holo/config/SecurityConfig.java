@@ -3,9 +3,9 @@ package com.elice.holo.config;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
+import com.elice.holo.member.service.MemberService;
 import com.elice.holo.token.JwtAuthenticationFilter;
 import com.elice.holo.token.JwtTokenProvider;
-import com.elice.holo.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/members/signup", "/api/members/login")
                 .permitAll() // 회원 가입, 로그인 API는 인증 없이 접근 가능
                 .requestMatchers("/api/members/**").authenticated() // 그 외 /api/members 경로는 인증 필요
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll() // 나머지 요청은 모두 허용
             )
             .addFilterBefore(tokenAuthenticationFilter(),
