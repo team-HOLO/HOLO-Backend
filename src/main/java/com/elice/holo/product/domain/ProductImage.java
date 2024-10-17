@@ -48,8 +48,10 @@ public class ProductImage {
         return new ProductImage(originName, storeName);
     }
 
+    //==연관 관계 편의 메서드==//
     public void assignProduct(Product product) {
         this.product = product;
+        product.getProductImages().add(this);
     }
 
     public void changeIsThumbnail(boolean tf) {
