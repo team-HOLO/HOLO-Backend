@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.elice.holo.category.domain.Category;
+import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.product.ProductMapper;
+import com.elice.holo.product.domain.ProductImage;
 import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
@@ -52,6 +55,8 @@ class ProductControllerTest {
 
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -229,6 +234,70 @@ class ProductControllerTest {
         Product deletedProduct = productRepository.findById(savedProduct.getProductId()).get();
         assertThat(deletedProduct.getIsDeleted()).isTrue();
 
+    }
+
+    @Test
+    @DisplayName("카테고리별 상품 조회 테스트")
+    public void getCategoryProductsTest() throws Exception {
+
+        //given
+        final String url = "/api/products/category/{categoryId}?sortBy=PRICE_ASC";   //가격 높은순으로 정렬
+
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        Category savedCategory1 = categoryRepository.save(category1);
+
+        Category category2 = Category.builder()
+            .name("의자")
+            .description("하위 카테고리")
+            .parentCategory(savedCategory1)
+            .build();
+        Category savedCategory2 = categoryRepository.save(category2);
+
+        Category category3 = Category.builder()
+            .name("책상")
+            .description("하위 카테고리")
+            .parentCategory(savedCategory1)
+            .build();
+        Category savedCategory3 = categoryRepository.save(category3);
+
+        //첫번째 상품
+        Product product1 = Product.createProduct("책상", 120000, "데스커 책상", 100);
+        product1.addProductOption(ProductOption.createOption("RED", "F", 30));
+        product1.addProductCategory(savedCategory3);
+
+        ProductImage productImage = ProductImage.createProductImage("IMAGE1.jpg",
+            "storeImage.jpg");
+        productImage.changeIsThumbnail(true);
+        productImage.assignProduct(product1);
+
+        productRepository.save(product1);
+
+        //두번째 상품
+        Product product2 = Product.createProduct("의자", 1000000, "시디즈 의자", 100);
+        product2.addProductOption(ProductOption.createOption("RED", "F", 30));
+        product2.addProductCategory(savedCategory2);
+
+        ProductImage productImage2 = ProductImage.createProductImage("IMAGE2.jpg",
+            "storeImage.jpg");
+        productImage2.changeIsThumbnail(true);
+        productImage2.assignProduct(product2);
+
+        productRepository.save(product2);
+
+        //when
+        ResultActions result = mockMvc.perform(get(url, savedCategory1.getCategoryId()));
+        //가구는 책상과 의자 카테고리의 부모 카테고리이기 때문에 하위 카테고리를 모두 포함해야 함
+
+        //then  가격 높은순으로 정렬
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.content[0].name").value("의자"))
+            .andExpect(jsonPath("$.content[0].price").value(1000000))
+            .andExpect(jsonPath("$.content[1].name").value("책상"));
     }
 
 

@@ -68,11 +68,6 @@ public class Product extends BaseEntity {
     }
 
     //== 연관 관계 편의 메서드 ==//
-    public void addProductImages(ProductImage productImage) {
-        productImages.add(productImage);
-        productImage.assignProduct(this);
-    }
-
     public void addProductOption(ProductOption productOption) {
         productOptions.add(productOption);
         productOption.assignProduct(this);
