@@ -10,6 +10,9 @@ import com.elice.holo.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -99,5 +102,15 @@ public class MemberController {
     public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId) {
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/check-admin")
+    public ResponseEntity<Boolean> checkAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+
+            boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            return ResponseEntity.ok(isAdmin);
+        }
+        return ResponseEntity.ok(false);
     }
 }
