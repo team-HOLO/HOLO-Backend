@@ -118,16 +118,38 @@ class CategoryControllerTest {
             .description("Description2")
             .parentCategory(null)
             .build();
-        categoryRepository.saveAll(List.of(category1, category2));
+        Category category3 = Category.builder()
+            .name("Another")
+            .description("Description2")
+            .parentCategory(null)
+            .build();
+        categoryRepository.saveAll(List.of(category1, category2, category3));
 
-        // When & Then
+        // When & Then - 검색어가 없는 경우
         mockMvc.perform(get("/api/categories/admin")
                 .param("page", "0")
                 .param("size", "15")
                 .param("sortBy", "name")
                 .param("direction", "asc"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].name").value("Category1"));
+            // 이름 순 정렬 확인
+            .andExpect(jsonPath("$.content[0].name").value("Another"))
+            .andExpect(jsonPath("$.content[1].name").value("Category1"))
+            .andExpect(jsonPath("$.content[2].name").value("Category2"))
+            .andExpect(jsonPath("$.content.length()").value(3));
+
+        // When & Then - 검색어 "category" : 대,소문자 무시 테스트 포함
+        mockMvc.perform(get("/api/categories/admin")
+                .param("page", "0")
+                .param("size", "15")
+                .param("sortBy", "name")
+                .param("direction", "asc")
+                .param("name", "category"))
+            .andExpect(status().isOk())
+            // 이름에 category가 포함된 경우만 존재하는지 확인
+            .andExpect(jsonPath("$.content[0].name").value("Category1"))
+            .andExpect(jsonPath("$.content[1].name").value("Category2"))
+            .andExpect(jsonPath("$.content.length()").value(2));
     }
 
     @Test
