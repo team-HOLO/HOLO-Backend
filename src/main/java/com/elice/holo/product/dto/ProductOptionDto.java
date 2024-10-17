@@ -3,10 +3,12 @@ package com.elice.holo.product.dto;
 import com.elice.holo.product.domain.ProductOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 //상품 옵션 리스트 DTO
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductOptionDto {
 
     private String color;
