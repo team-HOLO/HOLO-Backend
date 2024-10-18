@@ -13,7 +13,6 @@ import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.repository.ProductRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,37 +102,37 @@ public class CartService {
             totalPrice); // DTO에 totalPrice 포함하여 반환
     }
 
-    //상품 수량 수정//
-    @Transactional
-    public CartDto updateProductQuantityInCart(Long memberId, Long cartProductId, Long quantity) {
-        // 장바구니에서 특정 상품 조회
-        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
-            .orElseThrow(() -> new CustomException("장바구니에 해당 상품이 존재하지 않습니다."));
-
-        // 수량 직접 수정
-        cartProduct.updateQuantity(quantity); // 수량을 직접 변경
-
-        // 변경된 카트 저장
-        cartProductRepository.save(cartProduct);
-
-        // 전체 장바구니 DTO 반환
-        Cart cart = cartProduct.getCart(); // 장바구니 객체 가져오기
-        return cartMapper.toCartDto(cart);
-    }
-
-    //선택삭제//
-    @Transactional
-    public void removeProductFromCart(Long memberId, Long cartProductId) {
-        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
-            .orElseThrow(() -> new CustomException("장바구니에 해당 상품이 존재하지 않습니다."));
-
-        // 해당 상품이 사용자 장바구니에 속하는지 확인
-        if (!cartProduct.getCart().getMember().getMemberId().equals(memberId)) {
-            throw new AccessDeniedException("이 상품을 삭제할 권한이 없습니다.");
-        }
-
-        cartProductRepository.delete(cartProduct); // 상품 삭제
-    }
+//    //상품 수량 수정//
+//    @Transactional
+//    public CartDto updateProductQuantityInCart(Long memberId, Long cartProductId, Long quantity) {
+//        // 장바구니에서 특정 상품 조회
+//        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
+//            .orElseThrow(() -> new CustomException("장바구니에 해당 상품이 존재하지 않습니다."));
+//
+//        // 수량 직접 수정
+//        cartProduct.updateQuantity(quantity); // 수량을 직접 변경
+//
+//        // 변경된 카트 저장
+//        cartProductRepository.save(cartProduct);
+//
+//        // 전체 장바구니 DTO 반환
+//        Cart cart = cartProduct.getCart(); // 장바구니 객체 가져오기
+//        return cartMapper.toCartDto(cart);
+//    }
+//
+//    //선택삭제//
+//    @Transactional
+//    public void removeProductFromCart(Long memberId, Long cartProductId) {
+//        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
+//            .orElseThrow(() -> new CustomException("장바구니에 해당 상품이 존재하지 않습니다."));
+//
+//        // 해당 상품이 사용자 장바구니에 속하는지 확인
+//        if (!cartProduct.getCart().getMember().getMemberId().equals(memberId)) {
+//            throw new AccessDeniedException("이 상품을 삭제할 권한이 없습니다.");
+//        }
+//
+//        cartProductRepository.delete(cartProduct); // 상품 삭제
+//    }
 
 
 }
