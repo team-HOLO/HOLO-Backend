@@ -32,11 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -137,6 +135,26 @@ class ProductServiceTest {
         //then
         assertThat(exception.getMessage()).contains("상품이 존재하지 않습니다.");
         verify(productRepository, times(1)).findProductDetailByProductId(id);
+    }
+
+    @Test
+    @DisplayName("상품 이름이 중복되면 DuplicateProductNameException 발생")
+    void ValidateDuplicateProductNameTest() {
+
+        //given
+        Product product = Product.createProduct("트롤리", 100000, "모던하우스 트롤리", 100);
+        when(productRepository.existsByNameAndIsDeletedFalse("트롤리")).thenReturn(true);
+
+        AddProductRequest request = new AddProductRequest("트롤리", 100000, "중복 트롤리", 100,
+            getProductOptionDto(), List.of(false));
+
+        //when & then
+        assertThrows(DuplicateProductNameException.class, () ->
+            productService.saveProduct(request, List.of())
+        );
+
+        verify(productRepository, never()).save(any(Product.class));
+
     }
 
     @Test
