@@ -27,7 +27,7 @@ public class Member {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     @Column(name = "name")
@@ -64,6 +64,12 @@ public class Member {
         this.tel = tel;
         this.age = age;
         this.gender = gender;
+    }
+
+    public Member update(String nickname) {
+        this.name = nickname;
+
+        return this;
     }
 
 

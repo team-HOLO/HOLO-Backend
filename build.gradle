@@ -53,6 +53,12 @@ dependencies {
 
     //AWS 추가
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // Thymeleaf와 Spring Security를 통합해 사용자 권한 등의 보안 정보를 뷰에서 사용할 수 있게 해줌
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // OAuth2 클라이언트 기능을 추가해 소셜 로그인이나 OAuth2 인증을 통해 보안 자원에 접근 가능하게 함
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {
