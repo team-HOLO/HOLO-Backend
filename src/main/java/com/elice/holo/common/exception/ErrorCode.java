@@ -13,7 +13,10 @@ public enum ErrorCode {
     DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT, "Duplicate category name"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "Order not found"),
     ORDER_NOT_CANCELABLE(HttpStatus.BAD_REQUEST, "Order not cancelable"),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access is denied");
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access is denied"),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product not found"),
+    DUPLICATE_PRODUCT_NAME(HttpStatus.CONFLICT, "Duplicate product name"),
+    INVALID_FILE_EXTENSION(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid File Extension");
 
 
     private final HttpStatus status;

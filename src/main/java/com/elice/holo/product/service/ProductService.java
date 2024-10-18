@@ -18,11 +18,14 @@ import com.elice.holo.product.dto.ProductsAdminResponseDto;
 import com.elice.holo.product.dto.SortBy;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
+import com.elice.holo.product.exception.DuplicateProductNameException;
+import com.elice.holo.product.exception.InvalidFileExtensionException;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.ProductsResponseDto;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -41,11 +44,26 @@ public class ProductService {
     private final ProductImageService productImageService;
     private final CategoryRepository categoryRepository;
 
+    private static final List<String> allowExt = Arrays.asList("jpg", "jpeg", "png", "gif", "jfif",
+        "bmp", "tiff", "jfif", "svg");
+
+
     //상품 추가를 위한 메서드
     @Transactional
     public AddProductResponse saveProduct(AddProductRequest request, List<MultipartFile> multipartFiles) throws IOException {
 
         Product newProduct = request.toEntity();
+
+        //상품 이름 중복 예외
+        if (productRepository.existsByNameAndIsDeletedFalse(request.getName())) {
+            throw new DuplicateProductNameException(ErrorCode.DUPLICATE_PRODUCT_NAME);
+        }
+
+        //파일 확장자 검사
+        if (!validateFileExtension(multipartFiles) || !validateFileContentType(multipartFiles)) {
+            throw new InvalidFileExtensionException(ErrorCode.INVALID_FILE_EXTENSION);
+        }
+
 
         //카테고리 추가
         Category category = categoryRepository.findByCategoryIdAndIsDeletedFalse(request.getCategoryId())
@@ -161,5 +179,23 @@ public class ProductService {
                     });
             }
         });
+    }
+
+    private boolean validateFileExtension(List<MultipartFile> multipartFiles) {
+        List<String> extList = multipartFiles.stream()
+            .map(m -> extractExt(m.getOriginalFilename()))
+            .collect(Collectors.toList());
+
+        return extList.stream().allMatch(ext -> allowExt.contains(ext.toLowerCase()));
+    }
+
+    private String extractExt(String originName) {
+        int pos = originName.lastIndexOf(".");
+        return originName.substring(pos + 1);
+    }
+
+    private boolean validateFileContentType(List<MultipartFile> multipartFiles) {
+        return multipartFiles.stream()
+            .allMatch(file -> file.getContentType().startsWith("image/"));
     }
 }
