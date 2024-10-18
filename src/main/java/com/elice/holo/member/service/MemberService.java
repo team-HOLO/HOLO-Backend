@@ -28,7 +28,7 @@ public class MemberService {
     @Transactional
     public MemberResponseDto signup(MemberSignupRequestDto requestDto) {
         if (memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            return null;
         }
 
         Member member = memberMapper.toEntity(requestDto);

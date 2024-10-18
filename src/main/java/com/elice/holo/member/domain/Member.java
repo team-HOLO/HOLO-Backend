@@ -30,22 +30,22 @@ public class Member {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "is_admin", nullable = false)
+    @Column(name = "is_admin")
     private Boolean isAdmin; // 관리자 여부
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     private Boolean isDeleted; // 회원탈퇴 여부 true : 탈퇴
 
-    @Column(name = "tel", nullable = false)
+    @Column(name = "tel")
     private String tel;
 
-    @Column(name = "age", nullable = false)
+    @Column(name = "age")
     private Integer age;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private Boolean gender; // (true = 남성, false = 여성 등)
 
 
