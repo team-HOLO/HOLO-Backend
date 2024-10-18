@@ -38,6 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            .cors().and()
             .csrf(AbstractHttpConfigurer::disable) // CSRF 설정 비활성화
             .sessionManagement(session -> session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS)) // 세션을 Stateless로 설정
