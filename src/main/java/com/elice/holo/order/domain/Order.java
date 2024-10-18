@@ -42,6 +42,7 @@ public class Order extends BaseEntity {
     private Member member;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -52,14 +53,18 @@ public class Order extends BaseEntity {
     private LocalDateTime orderDate;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal totalPrice;
+    private int totalPrice;
 
     @Column(nullable = false)
     private String shippingAddress;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+
     // private 생성자
-    private Order(Member member, BigDecimal totalPrice, String shippingAddress,
-        List<OrderProduct> orderProducts) {
+    private Order(Member member, int totalPrice, String shippingAddress,
+                  List<OrderProduct> orderProducts) {
         this.member = member;
         this.totalPrice = totalPrice;
         this.shippingAddress = shippingAddress;
@@ -73,8 +78,8 @@ public class Order extends BaseEntity {
     }
 
     // 팩토리 메서드
-    public static Order createOrder(Member member, BigDecimal totalPrice, String shippingAddress,
-        List<OrderProduct> orderProducts) {
+    public static Order createOrder(Member member, int totalPrice, String shippingAddress,
+                                    List<OrderProduct> orderProducts) {
         return new Order(member, totalPrice, shippingAddress, orderProducts);
     }
 
@@ -86,11 +91,6 @@ public class Order extends BaseEntity {
     // 상태 변경 메서드
     public void updateOrderStatus(OrderStatus newStatus) {
         this.status = newStatus;
-    }
-
-    // 총 가격 업데이트
-    public void updateTotalPrice(BigDecimal newTotalPrice) {
-        this.totalPrice = newTotalPrice;
     }
 
     // 배송 주소 업데이트
@@ -105,5 +105,9 @@ public class Order extends BaseEntity {
         for (OrderProduct orderProduct : newOrderProducts) {
             orderProduct.setOrder(this);
         }
+    }
+    // 삭제(소프트 딜리트)메서드
+    public void softDelete() {
+        this.isDeleted = true;
     }
 }
