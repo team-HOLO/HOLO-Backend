@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.elice.holo.category.domain.Category;
+import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductOptionDto;
@@ -13,6 +15,7 @@ import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
+import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -41,6 +44,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -62,15 +67,24 @@ class ProductServiceTest {
 
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        Category category = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        Category savedCategory = categoryRepository.save(category);
+
         boolean isThumbnail = false;
         AddProductRequest request = new AddProductRequest("의자", 300000, "시디즈", 100,
             getProductOptionDto(), List.of(isThumbnail));
+        request.setCategoryId(1L);
 
         //mockMultipartFile
         MockMultipartFile mockFile = new MockMultipartFile("file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
         List<MultipartFile> multipartFiles = List.of(mockFile);
 
         when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(category));
 
         //when
         AddProductResponse response = productService.saveProduct(request, multipartFiles);
@@ -145,7 +159,8 @@ class ProductServiceTest {
             .map(ProductsResponseDto::new)
             .collect(Collectors.toList());
 
-        when(productRepository.findProductsPage(pageRequest, cond)).thenReturn(new PageImpl<>(result, pageRequest, result.size()));
+        when(productRepository.findProductsPage(pageRequest, cond)).thenReturn(
+            new PageImpl<>(result, pageRequest, result.size()));
 
         //when
         Page<ProductsResponseDto> productsPage = productService.findProducts(pageRequest, cond);

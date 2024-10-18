@@ -78,8 +78,16 @@ class ProductControllerTest {
         int stockQuantity = 999;
         List<Boolean> isThumbnails = List.of(Boolean.TRUE, Boolean.FALSE);
 
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        Category savedCategory1 = categoryRepository.save(category1);
+
         AddProductRequest request = new AddProductRequest(name, price, description, stockQuantity,
             getProductOptionDto(), isThumbnails);
+        request.setCategoryId(category1.getCategoryId());
 
         //mock 이미지 파일
         List<MultipartFile> multipartFiles = List.of(
