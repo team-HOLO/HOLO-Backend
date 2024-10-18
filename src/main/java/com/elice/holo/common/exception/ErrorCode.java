@@ -16,7 +16,9 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access is denied"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product not found"),
     DUPLICATE_PRODUCT_NAME(HttpStatus.CONFLICT, "Duplicate product name"),
-    INVALID_FILE_EXTENSION(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid File Extension");
+    INVALID_FILE_EXTENSION(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid File Extension"),
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found"),
+    CART_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart product not found");
 
 
     private final HttpStatus status;
