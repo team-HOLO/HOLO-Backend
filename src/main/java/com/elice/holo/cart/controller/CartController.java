@@ -61,16 +61,29 @@ public class CartController {
 
     }
 
-
-    //장바구니 상품 수량 수정
+    //수량 수정//
     @PutMapping("/{cartId}/products/{cartProductId}")
     public ResponseEntity<CartDto> updateProductQuantity(
         @PathVariable Long cartId,
         @PathVariable Long cartProductId,
         @RequestParam Long quantity) {
-        CartDto cartDto = cartService.updateProductQuantity(cartId, cartProductId,
-            quantity); // 수량 수정
-        return ResponseEntity.ok(cartDto); // 수정 결과 반환
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
+
+        // 로그인 여부 확인
+        if (authentication != null && authentication.isAuthenticated()) {
+            // 장바구니에서 상품 수량 수정
+            CartDto cartDto = cartService.updateProductQuantityInCart(
+                memberDetails.getMemberId(),
+                cartId,
+                cartProductId,
+                quantity);
+
+            return ResponseEntity.ok(cartDto); // 수정된 장바구니 반환
+        } else {
+            throw new AccessDeniedException("로그인 후 이용해주세요.");
+        }
     }
 
     //장바구니 상품 제거

@@ -10,4 +10,5 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findByMember_MemberId(Long memberId); //특정 회원의 장바구니 조회
 
+
 }

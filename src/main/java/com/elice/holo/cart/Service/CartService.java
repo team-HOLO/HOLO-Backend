@@ -5,6 +5,7 @@ import com.elice.holo.cart.domain.CartProduct;
 import com.elice.holo.cart.dto.CartDto;
 import com.elice.holo.cart.exception.CartNotFoundException;
 import com.elice.holo.cart.mapper.CartMapper;
+import com.elice.holo.cart.repository.CartProductRepository;
 import com.elice.holo.cart.repository.CartRepository;
 import com.elice.holo.common.exception.CustomException;
 import com.elice.holo.common.exception.ErrorCode;
@@ -24,6 +25,7 @@ public class CartService {
     private final CartMapper cartMapper;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
+    private final CartProductRepository cartProductRepository;
 
 
     // 특정 회원의 장바구니 조회
@@ -58,20 +60,6 @@ public class CartService {
         return cartMapper.toCartDto(cart);
     }
 
-//    //장바구니에 상품 추가
-//    @Transactional
-//    public CartDto addProductToCart(Long cartId, CartRequestDto cartRequest) {
-//        Cart cart = cartRepository.findById(cartId)
-//            .orElseThrow(
-//                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
-//        CartProduct cartProduct = cartMapper.toEntity(cartRequest);
-//        cart.addCartProduct(cartProduct.getProduct(), cartProduct.getQuantity(),
-//            cartRequest.getColor(), cartRequest.getSize());
-//
-//        cartRepository.save(cart);
-//
-//        return cartMapper.toCartDto(cart);
-//    }
 
     //장바구니에서 상품 제거
     @Transactional
@@ -90,28 +78,74 @@ public class CartService {
         return cartMapper.toCartDto(cart);
     }
 
-    //상품 수량 업데이트
     @Transactional
-    public CartDto updateProductQuantity(Long cartId, Long cartProductId, Long quantity) {
-        Cart cart = cartRepository.findById(cartId)
+    public CartDto updateProductQuantityInCart(Long memberId, Long cartId, Long cartProductId,
+        Long quantity) {
+        // 장바구니 찾기
+        Cart cart = cartRepository.findByMember_MemberId(memberId)
             .orElseThrow(
-                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
+                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, "장바구니를 찾을 수 없습니다."));
 
-        CartProduct cartProduct = cart.getCartProducts().stream()
-            .filter(cp -> cp.getCartProductId().equals(cartProductId))
-            .findFirst()
-            .orElseThrow(
-                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
+        // 장바구니 상품 확인
+        CartProduct cartProduct = cartProductRepository.findByCartProductIdAndCart_CartId(
+                cartProductId,
+                cartId)
+            .orElseThrow(() -> new CartNotFoundException(ErrorCode.CART_PRODUCT_NOT_FOUND,
+                "해당 상품을 장바구니에서 찾을 수 없습니다."));
 
-        if (quantity == null || quantity <= 0) {
-            throw new CustomException("수량은 1 이상이어야 합니다.");
+        // 수량 검증
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
         }
 
-        cart.updateCartProductQuantity(cartProduct, quantity);
-        cartRepository.save(cart);
+        // 수량 수정
+        cartProduct.updateQuantity(quantity); // 기존 객체의 메서드 사용
+        cartProductRepository.save(cartProduct); // 수정된 상품 저장
 
-        return cartMapper.toCartDto(cart); // 수정된 장바구니 반환
+        return cartMapper.toCartDto(cart); // 수정된 장바구니 DTO 반환
     }
+//    //장바구니 수량
+//    @Transactional
+//    public CartDto updateProductQuantityInCart(Long memberid, Long cartId, Long cartProductId,
+//        Long quantity) {
+//        Cart cart = cartRepository.findByMember_MemberId(memberid)
+//            .orElseThrow(() -> new ResourceNotFoundException("장바구니를 찾을 수 없습니다."));
+//        // 장바구니 상품 확인
+//        CartProduct cartProduct = cartProductRepository.findByIdAndCartId(cartProductId, cartId)
+//            .orElseThrow(() -> new ResourceNotFoundException("해당 상품을 장바구니에서 찾을 수 없습니다."));
+//
+//        // 수량 수정
+//        CartProduct updatedCartProduct = new CartProduct(cartProduct.getCartProductId(),
+//            cartProduct.getCart(), cartProduct.getProduct(),
+//            quantity, cartProduct.getColor(), cartProduct.getSize());
+//        cartProductRepository.save(updatedCartProduct); // 수정된 상품 저장
+//
+//        return cartMapper.toCartDto(cart); // 수정된 장바구니 DTO 반환
+//    }
+
+//
+//    //상품 수량 업데이트
+//    @Transactional
+//    public CartDto updateProductQuantity(Long cartId, Long cartProductId, Long quantity) {
+//        Cart cart = cartRepository.findById(cartId)
+//            .orElseThrow(
+//                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
+//
+//        CartProduct cartProduct = cart.getCartProducts().stream()
+//            .filter(cp -> cp.getCartProductId().equals(cartProductId))
+//            .findFirst()
+//            .orElseThrow(
+//                () -> new CartNotFoundException(ErrorCode.CART_NOT_FOUND, ("존재하지 않는 장바구니입니다")));
+//
+//        if (quantity == null || quantity <= 0) {
+//            throw new CustomException("수량은 1 이상이어야 합니다.");
+//        }
+//
+//        cart.updateCartProductQuantity(cartProduct, quantity);
+//        cartRepository.save(cart);
+//
+//        return cartMapper.toCartDto(cart); // 수정된 장바구니 반환
+//    }
 
     //장바구니 전체 비우기
     @Transactional
