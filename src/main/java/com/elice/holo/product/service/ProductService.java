@@ -18,6 +18,7 @@ import com.elice.holo.product.dto.ProductsAdminResponseDto;
 import com.elice.holo.product.dto.SortBy;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
+import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.ProductsResponseDto;
@@ -46,6 +47,10 @@ public class ProductService {
     public AddProductResponse saveProduct(AddProductRequest request, List<MultipartFile> multipartFiles) throws IOException {
 
         Product newProduct = request.toEntity();
+
+        if (productRepository.existsByNameAndIsDeletedFalse(request.getName())) {
+            throw new DuplicateProductNameException(ErrorCode.DUPLICATE_PRODUCT_NAME);
+        }
 
         //카테고리 추가
         Category category = categoryRepository.findByCategoryIdAndIsDeletedFalse(request.getCategoryId())
