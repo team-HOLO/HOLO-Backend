@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -168,6 +169,45 @@ class ProductControllerTest {
         result.andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value("Duplicate product name"));
     }
+
+    @Test
+    @DisplayName("상품 이미지 등록시 이미지 파일이 아닐 경우 415 unsupported media type 상태 코드 반환")
+    public void InvalidFileExtensionTest() throws Exception {
+
+        //given
+        final String url = "/api/products";
+
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        categoryRepository.save(category1);
+
+        //첫번째 상품 등록
+        AddProductRequest request = new AddProductRequest("침대", 100000, "에이스 침대", 100,
+            getProductOptionDto(), List.of(Boolean.FALSE));
+        request.setCategoryId(category1.getCategoryId());
+
+        MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
+            "application/json", objectMapper.writeValueAsBytes(request));
+
+        MockMultipartFile InvalidFile = new MockMultipartFile("Image1", "file.txt", "image/jpeg",
+            "test image1 content".getBytes());
+
+        //when
+        ResultActions result = mockMvc.perform(multipart(url)
+            .file("productImages", InvalidFile.getBytes())
+            .file(requestPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isUnsupportedMediaType())
+            .andExpect(jsonPath("$.message").value("Invalid File Extension"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()));
+    }
+
+
 
     @Test
     @DisplayName("상품 상세 조회 테스트")
