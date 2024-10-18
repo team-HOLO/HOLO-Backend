@@ -45,7 +45,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(jwtCookie);
 
         // 리다이렉트 처리 (로그인 성공 후 지정된 페이지로 이동)
-        String targetUrl = "/login"; // 원하는 리다이렉트 URL로 변경 가능
+        String targetUrl = "http://localhost:3000";
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
