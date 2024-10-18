@@ -34,6 +34,9 @@ public class MemberController {
     public ResponseEntity<String> signup(@RequestBody MemberSignupRequestDto requestDto) {
         // 회원가입 후 회원 정보를 엔티티로 받음
         Member member = memberService.signupAndReturnEntity(requestDto);
+        if (member == null) {
+            return ResponseEntity.status(400).body("이미 존재하는 이메일입니다."); // 이메일 중복 시 에러 반환
+        }
 
         // JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
@@ -43,23 +46,27 @@ public class MemberController {
     // 로그인 API - 쿠키로 JWT 토큰 전달
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
-        // 로그인 후 회원 정보를 엔티티로 받음
-        Member member = memberService.loginAndReturnEntity(requestDto);
+        try {
+            // 로그인 후 회원 정보를 엔티티로 받음
+            Member member = memberService.loginAndReturnEntity(requestDto);
 
-        // JWT 토큰 생성
-        String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
+            // JWT 토큰 생성
+            String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
 
-        // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
-        Cookie cookie = new Cookie("jwtToken", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS에서만 사용 가능하게 설정
-        cookie.setPath("/"); // 애플리케이션 전체에 대해 쿠키가 유효하도록 설정
-        cookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
+            // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
+            Cookie cookie = new Cookie("jwtToken", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true); // HTTPS에서만 사용 가능하게 설정
+            cookie.setPath("/"); // 애플리케이션 전체에 대해 쿠키가 유효하도록 설정
+            cookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
 
-        // 쿠키를 응답에 추가
-        response.addCookie(cookie);
+            // 쿠키를 응답에 추가
+            response.addCookie(cookie);
 
-        return ResponseEntity.ok("로그인 성공");
+            return ResponseEntity.ok("로그인 성공");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(e.getMessage()); // 로그인 실패 시 400 상태 코드와 메시지 반환
+        }
     }
     // 로그아웃 시 쿠키 삭제
     @PostMapping("/logout")
