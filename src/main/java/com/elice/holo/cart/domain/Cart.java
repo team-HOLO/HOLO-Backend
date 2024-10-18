@@ -50,7 +50,7 @@ public class Cart {
 
     // 장바구니에 새로운 상품 추가
     public void addCartProduct(Product product, Long quantity, String color, String size) {
-        CartProduct cartProduct = new CartProduct(null, this, product, quantity, color,
+        CartProduct cartProduct = new CartProduct(this, product, quantity, color,
             size); // ID는 null로 설정
         this.cartProducts.add(cartProduct);
     }

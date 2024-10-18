@@ -35,9 +35,8 @@ public class CartProduct {
     private String color;
     private String size;
 
-    public CartProduct(Long cartProductId, Cart cart, Product product, Long quantity, String color,
+    public CartProduct(Cart cart, Product product, Long quantity, String color,
         String size) {
-        this.cartProductId = cartProductId;
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;

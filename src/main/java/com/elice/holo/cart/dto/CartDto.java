@@ -16,7 +16,14 @@ public class CartDto {
     private List<CartProductDto> products;
     private double totalPrice;
 
+    public CartDto() {
+    }
 
+    public CartDto(Long cartId, List<CartProductDto> products, double totalPrice) {
+        this.cartId = cartId;
+        this.products = products;
+        this.totalPrice = totalPrice;
+    }
 
 
 }

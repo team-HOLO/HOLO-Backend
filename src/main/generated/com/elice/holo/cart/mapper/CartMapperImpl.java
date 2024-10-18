@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-18T03:09:58+0900",
+    date = "2024-10-19T04:57:11+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 21.0.4 (Amazon.com Inc.)"
 )
 @Component
@@ -27,7 +27,7 @@ public class CartMapperImpl implements CartMapper {
 
         CartDto.CartDtoBuilder cartDto = CartDto.builder();
 
-        cartDto.products( cartProductListToCartProductDtoList( cart.getCartProducts() ) );
+        cartDto.products( toCartProductDtoList( cart.getCartProducts() ) );
         cartDto.cartId( cart.getCartId() );
 
         return cartDto.build();
@@ -49,9 +49,8 @@ public class CartMapperImpl implements CartMapper {
 
         Cart cart = null;
         Product product = null;
-        Long cartProductId = null;
 
-        CartProduct cartProduct = new CartProduct( cartProductId, cart, product, quantity, color, size );
+        CartProduct cartProduct = new CartProduct( cart, product, quantity, color, size );
 
         return cartProduct;
     }
@@ -85,18 +84,5 @@ public class CartMapperImpl implements CartMapper {
         }
 
         return list;
-    }
-
-    protected List<CartProductDto> cartProductListToCartProductDtoList(List<CartProduct> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<CartProductDto> list1 = new ArrayList<CartProductDto>( list.size() );
-        for ( CartProduct cartProduct : list ) {
-            list1.add( toCartProductDto( cartProduct ) );
-        }
-
-        return list1;
     }
 }

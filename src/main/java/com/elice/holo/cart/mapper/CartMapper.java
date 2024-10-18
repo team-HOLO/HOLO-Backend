@@ -8,6 +8,7 @@ import com.elice.holo.cart.dto.CartProductDto;
 import com.elice.holo.cart.dto.CartRequestDto;
 import com.elice.holo.product.domain.Product;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -35,4 +36,10 @@ public interface CartMapper {
     }
 
     List<CartDto> toCartDtoList(List<Cart> carts);
+
+    default List<CartProductDto> toCartProductDtoList(List<CartProduct> cartProducts) {
+        return cartProducts.stream()
+            .map(this::toCartProductDto)
+            .collect(Collectors.toList());
+    }
 }
