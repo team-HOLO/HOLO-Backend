@@ -38,24 +38,29 @@ public class OrderProduct {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private int count;
+    @Column(nullable = false)
+    private int quantity;
 
-    // private 생성자
-    private OrderProduct(Order order, Product product, int count) {
-        this.order = order;
-        this.product = product;
-        this.count = count;
-    }
+    @Column(nullable = false)
+    private String color;
+
+    @Column(nullable = false)
+    private String size;
 
     // 팩토리 메서드
-    public static OrderProduct createOrderProduct(Order order, Product product, int count) {
-        if (order == null || product == null) {
-            throw new IllegalArgumentException("주문과 상품 정보는 필수입니다.");
+    public static OrderProduct createOrderProduct(Product product, int quantity, String color, String size) {
+        if (!product.canReduceStock(quantity)) {
+            throw new IllegalStateException("재고가 부족합니다.");
         }
-        if (count <= 0) {
-            throw new IllegalArgumentException("상품 수량은 1개 이상이어야 합니다.");
-        }
-        return new OrderProduct(order, product, count);
+        product.reduceStock(quantity);  // 재고 감소
+        return new OrderProduct(product, quantity, color, size);
     }
-}
+    // private 생성자
+    private OrderProduct(Product product, int quantity, String color, String size) {
+        this.product = product;
+        this.quantity = quantity;
+        this.color = color;
+        this.size = size;
+    }
 
+}

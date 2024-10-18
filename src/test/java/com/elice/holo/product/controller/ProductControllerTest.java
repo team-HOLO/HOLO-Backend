@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.repository.CategoryRepository;
+import com.elice.holo.common.exception.ErrorCode;
 import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.domain.ProductImage;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -18,7 +19,9 @@ import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
+import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.repository.ProductRepository;
+import com.elice.holo.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +32,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -57,6 +60,8 @@ class ProductControllerTest {
     ProductRepository productRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    private ProductService productService;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -78,8 +83,16 @@ class ProductControllerTest {
         int stockQuantity = 999;
         List<Boolean> isThumbnails = List.of(Boolean.TRUE, Boolean.FALSE);
 
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        categoryRepository.save(category1);
+
         AddProductRequest request = new AddProductRequest(name, price, description, stockQuantity,
             getProductOptionDto(), isThumbnails);
+        request.setCategoryId(category1.getCategoryId());
 
         //mock 이미지 파일
         List<MultipartFile> multipartFiles = List.of(
@@ -103,12 +116,102 @@ class ProductControllerTest {
         result
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.description").value(description));
-
     }
 
     @Test
+    @DisplayName("상품 이름이 중복되면 409 conflict 상태 코드 반환 ")
+    void validateDuplicateProductNameTest() throws Exception {
+
+        //given
+        final String url = "/api/products";
+
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        categoryRepository.save(category1);
+
+        //첫번째 상품 등록
+        AddProductRequest request = new AddProductRequest("트롤리", 100000, "트롤리", 100,
+            getProductOptionDto(), List.of(Boolean.FALSE));
+        request.setCategoryId(category1.getCategoryId());
+
+        MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
+            "application/json", objectMapper.writeValueAsBytes(request));
+
+        MockMultipartFile image = new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg",
+            "test image1 content".getBytes());
+
+        mockMvc.perform(multipart(url)
+            .file("productImages", image.getBytes())
+            .file(requestPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //두번째 상품 등록
+        AddProductRequest request2 = new AddProductRequest("트롤리", 100000, "중복 트롤리", 100,
+            getProductOptionDto(), List.of(Boolean.FALSE));
+        request2.setCategoryId(category1.getCategoryId());
+
+        MockMultipartFile requestPart2 = new MockMultipartFile("addProductRequest", "request.json",
+            "application/json", objectMapper.writeValueAsBytes(request2));
+
+        MockMultipartFile image2 = new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg",
+            "test image1 content".getBytes());
+
+        //when
+        ResultActions result = mockMvc.perform(multipart(url)
+                .file("productImages", image2.getBytes())
+                .file(requestPart2)
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message").value("Duplicate product name"));
+    }
+
+    @Test
+    @DisplayName("상품 이미지 등록시 이미지 파일이 아닐 경우 415 unsupported media type 상태 코드 반환")
+    public void InvalidFileExtensionTest() throws Exception {
+
+        //given
+        final String url = "/api/products";
+
+        Category category1 = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        categoryRepository.save(category1);
+
+        //첫번째 상품 등록
+        AddProductRequest request = new AddProductRequest("침대", 100000, "에이스 침대", 100,
+            getProductOptionDto(), List.of(Boolean.FALSE));
+        request.setCategoryId(category1.getCategoryId());
+
+        MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
+            "application/json", objectMapper.writeValueAsBytes(request));
+
+        MockMultipartFile InvalidFile = new MockMultipartFile("Image1", "file.txt", "image/jpeg",
+            "test image1 content".getBytes());
+
+        //when
+        ResultActions result = mockMvc.perform(multipart(url)
+            .file("productImages", InvalidFile.getBytes())
+            .file(requestPart)
+            .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isUnsupportedMediaType())
+            .andExpect(jsonPath("$.message").value("Invalid File Extension"))
+            .andExpect(jsonPath("$.status").value(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()));
+    }
+
+
+
+    @Test
     @DisplayName("상품 상세 조회 테스트")
-    void getProductDetails() throws Exception{
+    void getProductDetails() throws Exception {
 
         //given
         final String url = "/api/products/{id}";

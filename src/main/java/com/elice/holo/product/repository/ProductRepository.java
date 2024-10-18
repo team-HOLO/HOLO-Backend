@@ -19,5 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     @Query("select p from Product p join fetch p.productImages where p.isDeleted = false")
     List<Product> findAllWithProductImage();
 
+    boolean existsByNameAndIsDeletedFalse(String name);
+
 
 }
