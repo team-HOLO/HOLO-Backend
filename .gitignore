@@ -36,3 +36,6 @@ intellij-java-google-style.xml
 
 ### VS Code ###
 .vscode/
+
+### Generated ###
+/src/main/generated

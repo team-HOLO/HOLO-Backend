@@ -20,8 +20,7 @@ public class CartProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cartProductId; // PK
-
+    private Long cartProductId;
     @ManyToOne
     @JoinColumn(name = "cartId", nullable = false)
     private Cart cart; // 장바구니
@@ -33,11 +32,16 @@ public class CartProduct {
     @Column(nullable = false)
     private Long quantity; // 수량
 
-    public CartProduct(Long cartProductId, Cart cart, Product product, Long quantity) {
-        this.cartProductId = cartProductId;
+    private String color;
+    private String size;
+
+    public CartProduct(Cart cart, Product product, Long quantity, String color,
+        String size) {
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
+        this.color = color;
+        this.size = size;
     }
 
     public int getPrice() {

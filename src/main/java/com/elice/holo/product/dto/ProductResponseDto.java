@@ -14,7 +14,7 @@ public class ProductResponseDto {
     private String name;
     private int price;
     private String description;
-    private List<ProductOptionDto> productOptions;  //TODO Fetch JOIN 적용
+    private List<ProductOptionDto> productOptions;
     private List<ProductImageDto>  productImageDtos;
 
     public ProductResponseDto(Product product) {

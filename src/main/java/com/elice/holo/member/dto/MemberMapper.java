@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 public interface MemberMapper {
 
     // 회원가입용 DTO -> 엔티티 변환
-    @Mapping(target = "isAdmin", constant = "false")
+
     @Mapping(target = "isDeleted", constant = "false")
     Member toEntity(MemberSignupRequestDto requestDto);
 

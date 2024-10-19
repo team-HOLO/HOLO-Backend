@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.elice.holo.category.domain.Category;
+import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.dto.AddProductResponse;
 import com.elice.holo.product.dto.ProductOptionDto;
@@ -13,6 +15,7 @@ import com.elice.holo.product.dto.ProductResponseDto;
 import com.elice.holo.product.dto.ProductSearchCond;
 import com.elice.holo.product.dto.UpdateProductOptionDto;
 import com.elice.holo.product.dto.UpdateProductRequest;
+import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.exception.ProductNotFoundException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -29,11 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -62,15 +65,24 @@ class ProductServiceTest {
 
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        Category category = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        Category savedCategory = categoryRepository.save(category);
+
         boolean isThumbnail = false;
         AddProductRequest request = new AddProductRequest("의자", 300000, "시디즈", 100,
             getProductOptionDto(), List.of(isThumbnail));
+        request.setCategoryId(1L);
 
         //mockMultipartFile
         MockMultipartFile mockFile = new MockMultipartFile("file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
         List<MultipartFile> multipartFiles = List.of(mockFile);
 
         when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(category));
 
         //when
         AddProductResponse response = productService.saveProduct(request, multipartFiles);
@@ -126,6 +138,26 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("상품 이름이 중복되면 DuplicateProductNameException 발생")
+    void ValidateDuplicateProductNameTest() {
+
+        //given
+        Product product = Product.createProduct("트롤리", 100000, "모던하우스 트롤리", 100);
+        when(productRepository.existsByNameAndIsDeletedFalse("트롤리")).thenReturn(true);
+
+        AddProductRequest request = new AddProductRequest("트롤리", 100000, "중복 트롤리", 100,
+            getProductOptionDto(), List.of(false));
+
+        //when & then
+        assertThrows(DuplicateProductNameException.class, () ->
+            productService.saveProduct(request, List.of())
+        );
+
+        verify(productRepository, never()).save(any(Product.class));
+
+    }
+
+    @Test
     @DisplayName("상품 다수 조회 테스트")
     void getAllProductTest() {
 
@@ -145,7 +177,8 @@ class ProductServiceTest {
             .map(ProductsResponseDto::new)
             .collect(Collectors.toList());
 
-        when(productRepository.findProductsPage(pageRequest, cond)).thenReturn(new PageImpl<>(result, pageRequest, result.size()));
+        when(productRepository.findProductsPage(pageRequest, cond)).thenReturn(
+            new PageImpl<>(result, pageRequest, result.size()));
 
         //when
         Page<ProductsResponseDto> productsPage = productService.findProducts(pageRequest, cond);

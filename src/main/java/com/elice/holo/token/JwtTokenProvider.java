@@ -1,18 +1,17 @@
-package com.elice.holo.config.jwt;
+package com.elice.holo.token;
 
 
 import com.elice.holo.member.domain.Member;
+import com.elice.holo.member.domain.MemberDetails;
+import com.elice.holo.member.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 
@@ -20,10 +19,13 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+    private final MemberRepository memberRepository; // MemberRepository 주입
+
 
     // 생성자에서 jwtProperties만 주입, secretKey 인코딩 없음
-    public JwtTokenProvider(JwtProperties jwtProperties) {
+    public JwtTokenProvider(JwtProperties jwtProperties, MemberRepository memberRepository) {
         this.jwtProperties = jwtProperties;
+        this.memberRepository = memberRepository;
     }
 
     // 사용자 정보를 기반으로 JWT 토큰을 생성하는 메서드
@@ -41,8 +43,7 @@ public class JwtTokenProvider {
             .setIssuer(jwtProperties.getIssuer()) // 발급자
             .setIssuedAt(now) // 발급 시간
             .setExpiration(expiry) // 만료 시간
-            .setSubject(member.getEmail()) // 주체
-            .claim("memberId", member.getMemberId()) // 클레임
+            .setSubject(member.getMemberId().toString()) // memberId를 subject로 설정
             .signWith(SignatureAlgorithm.HS256,
                 jwtProperties.getSecretKey()) // Secret Key 그대로 사용
             .compact(); // 토큰 생성 및 반환
@@ -77,13 +78,16 @@ public class JwtTokenProvider {
     // 토큰에서 인증 정보를 추출
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(
-            new SimpleGrantedAuthority("ROLE_USER"));
+        Long memberId = Long.parseLong(claims.getSubject()); // subject를 memberId로 사용
 
-        // 인증 객체 생성 및 반환
+        // memberId로 Member 엔티티 조회
+        Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자"));
+
+        MemberDetails memberDetails = new MemberDetails(member); // MemberDetails 생성
+
         return new UsernamePasswordAuthenticationToken(
-            new org.springframework.security.core.userdetails.User(claims.getSubject(), "",
-                authorities), token, authorities);
+            memberDetails, token, memberDetails.getAuthorities());
     }
 
     // 토큰에서 사용자 ID를 추출
