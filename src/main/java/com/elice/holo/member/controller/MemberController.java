@@ -1,5 +1,6 @@
 package com.elice.holo.member.controller;
 
+import com.elice.holo.member.domain.MemberDetails;
 import com.elice.holo.token.JwtTokenProvider;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
@@ -128,5 +129,15 @@ public class MemberController {
             return ResponseEntity.ok(true);  // 로그인된 상태라면 true 반환
         }
         return ResponseEntity.ok(false);  // 로그인되지 않은 상태라면 false 반환
+    }
+    @GetMapping("/me")
+    public ResponseEntity<MemberResponseDto> getMyInfo() {
+        // SecurityContextHolder에서 현재 인증된 사용자 정보
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
+
+        // 현재 로그인한 사용자의 memberId로 회원 정보 조회
+        MemberResponseDto memberResponseDto = memberService.getMemberById(memberDetails.getMemberId());
+        return ResponseEntity.ok(memberResponseDto);
     }
 }
