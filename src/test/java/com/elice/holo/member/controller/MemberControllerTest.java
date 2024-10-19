@@ -1,237 +1,249 @@
-//package com.elice.holo.member.controller;
-//
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//
-//import com.elice.holo.member.domain.Member;
-//import com.elice.holo.member.dto.MemberSignupRequestDto;
-//import com.elice.holo.member.dto.MemberUpdateRequestDto;
-//import com.elice.holo.member.repository.MemberRepository;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import java.util.Optional;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.http.MediaType;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.ResultActions;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.web.context.WebApplicationContext;
-//
-//@SpringBootTest
-//@AutoConfigureMockMvc
-//@Transactional
-//class MemberControllerTest {
-//
-//    @Autowired
-//    protected MockMvc mockMvc;
-//
-//    @Autowired
-//    protected ObjectMapper objectMapper;
-//
-//    @Autowired
-//    private MemberRepository memberRepository;
-//
-//    @Autowired
-//    private WebApplicationContext context;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-//    }
-//
-//    @DisplayName("회원가입 API 테스트")
-//    @Test
-//    void signupTest() throws Exception {
-//        // Given
-//        final String url = "/api/members/signup";
-//        MemberSignupRequestDto signupRequest = new MemberSignupRequestDto();
-//        signupRequest.setEmail("test@test.com");
-//        signupRequest.setPassword("password123");
-//        signupRequest.setName("유재석");
-//        signupRequest.setTel("010-1234-5678");
-//        signupRequest.setGender(true);
-//        signupRequest.setAge(45);
-//
-//        String requestBody = objectMapper.writeValueAsString(signupRequest);
-//
-//        // When
-//        ResultActions result = mockMvc.perform(
-//            post(url)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(requestBody)
-//        );
-//
-//        // Then
-//        result.andExpect(status().isCreated())
-//            .andExpect(jsonPath("$.email").value("test@test.com"))
-//            .andExpect(jsonPath("$.name").value("유재석"))
-//            .andExpect(jsonPath("$.tel").value("010-1234-5678"))
-//            .andExpect(jsonPath("$.gender").value(true))
-//            .andExpect(jsonPath("$.age").value(45))
-//            .andExpect(jsonPath("$.isAdmin").value(false));
-//    }
-//
-//    @DisplayName("모든 회원 조회 API 테스트")
-//    @Test
-//    void getAllMembersTest() throws Exception {
-//        // Given
-//        final String url = "/api/members";
-//
-//        Member member1 = Member.builder()
-//            .email("test1@test.com")
-//            .password("password123")
-//            .name("Tester1")
-//            .tel("010-1234-5678")
-//            .gender(true)
-//            .age(30)
-//            .isDeleted(false)
-//            .isAdmin(false)
-//            .build();
-//
-//        Member member2 = Member.builder()
-//            .email("test2@test.com")
-//            .password("password123")
-//            .name("Tester2")
-//            .tel("010-8765-4321")
-//            .gender(false)
-//            .age(25)
-//            .isDeleted(false)
-//            .isAdmin(false)
-//            .build();
-//
-//        memberRepository.save(member1);
-//        memberRepository.save(member2);
-//
-//        // When
-//        ResultActions result = mockMvc.perform(get(url));
-//
-//        // Then
-//        result.andExpect(status().isOk())
-//            .andExpect(jsonPath("$[0].email").value("test1@test.com"))
-//            .andExpect(jsonPath("$[0].name").value("Tester1"))
-//            .andExpect(jsonPath("$[0].tel").value("010-1234-5678"))
-//            .andExpect(jsonPath("$[0].gender").value(true))
-//            .andExpect(jsonPath("$[0].age").value(30))
-//            .andExpect(jsonPath("$[0].isAdmin").value(false))
-//            .andExpect(jsonPath("$[1].email").value("test2@test.com"))
-//            .andExpect(jsonPath("$[1].name").value("Tester2"))
-//            .andExpect(jsonPath("$[1].tel").value("010-8765-4321"))
-//            .andExpect(jsonPath("$[1].gender").value(false))
-//            .andExpect(jsonPath("$[1].age").value(25))
-//            .andExpect(jsonPath("$[1].isAdmin").value(false));
-//    }
-//
-//    @DisplayName("특정 회원 조회 API 테스트")
-//    @Test
-//    void getMemberByIdTest() throws Exception {
-//        // Given
-//        final String url = "/api/members/{memberId}";
-//
-//        Member member = Member.builder()
-//            .email("test1@test.com")
-//            .password("password123")
-//            .name("Tester1")
-//            .tel("010-1234-5678")
-//            .gender(true)
-//            .age(30)
-//            .isDeleted(false)
-//            .isAdmin(false)
-//            .build();
-//
-//        Member savedMember = memberRepository.save(member);
-//
-//        // When
-//        ResultActions result = mockMvc.perform(get(url, savedMember.getMemberId()));
-//
-//        // Then
-//        result.andExpect(status().isOk())
-//            .andExpect(jsonPath("$.email").value("test1@test.com"))
-//            .andExpect(jsonPath("$.name").value("Tester1"))
-//            .andExpect(jsonPath("$.tel").value("010-1234-5678"))
-//            .andExpect(jsonPath("$.gender").value(true))
-//            .andExpect(jsonPath("$.age").value(30))
-//            .andExpect(jsonPath("$.isAdmin").value(false));
-//    }
-//    @DisplayName("회원 정보 수정 API 테스트")
-//    @Test
-//    void updateMemberTest() throws Exception {
-//        // Given
-//        final String url = "/api/members/{memberId}";
-//
-//        Member member = Member.builder()
-//            .email("test@test.com")
-//            .password("password123")
-//            .name("유재석")
-//            .tel("010-1234-5678")
-//            .gender(true)
-//            .age(45)
-//            .isDeleted(false)
-//            .isAdmin(false)
-//            .build();
-//
-//        Member savedMember = memberRepository.save(member);
-//
-//        MemberUpdateRequestDto updateRequest = new MemberUpdateRequestDto();
-//        updateRequest.setName("강호동");
-//        updateRequest.setTel("010-8765-4321");
-//        updateRequest.setGender(false);
-//        updateRequest.setAge(50);
-//
-//        String requestBody = objectMapper.writeValueAsString(updateRequest);
-//
-//        // When
-//        ResultActions result = mockMvc.perform(
-//            put(url, savedMember.getMemberId())
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(requestBody)
-//        );
-//
-//        // Then
-//        result.andExpect(status().isOk())
-//            .andExpect(jsonPath("$.email").value("test@test.com"))
-//            .andExpect(jsonPath("$.name").value("강호동"))
-//            .andExpect(jsonPath("$.tel").value("010-8765-4321"))
-//            .andExpect(jsonPath("$.gender").value(false))
-//            .andExpect(jsonPath("$.age").value(50))
-//            .andExpect(jsonPath("$.isAdmin").value(false));
-//    }
-//
-//    @DisplayName("회원 삭제 API 테스트")
-//    @Test
-//    void deleteMemberTest() throws Exception {
-//        // Given
-//        final String url = "/api/members/{memberId}";
-//
-//        Member member = Member.builder()
-//            .email("test@test.com")
-//            .password("password123")
-//            .name("유재석")
-//            .tel("010-1234-5678")
-//            .gender(true)
-//            .age(45)
-//            .isDeleted(false)
-//            .isAdmin(false)
-//            .build();
-//
-//        Member savedMember = memberRepository.save(member);
-//
-//        // When
-//        ResultActions result = mockMvc.perform(delete(url, savedMember.getMemberId()));
-//
-//        // Then
-//        result.andExpect(status().isNoContent());
-//
-//        Optional<Member> deletedMember = memberRepository.findByMemberIdAndIsDeletedFalse(
-//            savedMember.getMemberId());
-//        assert (deletedMember.isEmpty());
-//    }
-//}
+package com.elice.holo.member.controller;
+
+import com.elice.holo.member.domain.Member;
+import com.elice.holo.member.dto.MemberLoginRequestDto;
+import com.elice.holo.member.dto.MemberResponseDto;
+import com.elice.holo.member.dto.MemberSignupRequestDto;
+import com.elice.holo.member.dto.MemberMapper;
+import com.elice.holo.member.dto.MemberUpdateRequestDto;
+import com.elice.holo.member.service.MemberService;
+import com.elice.holo.token.JwtTokenProvider;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+@DisplayName("MemberController Test")
+public class MemberControllerTest {
+
+    @Mock
+    private MemberService memberService;  // MemberService를 Mock으로 설정
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;  // JwtTokenProvider를 Mock으로 설정
+
+    @Mock
+    private HttpServletResponse response;  // HttpServletResponse를 Mock으로 설정
+
+    @Mock
+    private MemberMapper memberMapper;  // MemberMapper를 Mock으로 설정
+
+    @InjectMocks
+    private MemberController memberController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);  // Mock 객체 초기화
+    }
+
+    @Test
+    @DisplayName("회원가입 성공 테스트")
+    public void testSignupSuccess() {
+        // Given
+        MemberSignupRequestDto signupRequest = new MemberSignupRequestDto(
+            "test@example.com", "password", "Test User", false, "010-1234-5678", true, 25);
+
+
+        Member mockMember = Member.builder()
+            .email("test@example.com")
+            .password("password")
+            .name("Test User")
+            .isAdmin(false)
+            .tel("010-1234-5678")
+            .gender(true)
+            .age(25)
+            .isDeleted(false)
+            .build();
+
+
+        when(memberMapper.toEntity(signupRequest)).thenReturn(mockMember);  // toEntity 메서드 Mock 설정
+        when(memberService.signupAndReturnEntity(signupRequest)).thenReturn(mockMember);
+        when(jwtTokenProvider.generateToken(mockMember, java.time.Duration.ofHours(2)))
+            .thenReturn("mockJwtToken");
+
+        // When
+        ResponseEntity<String> responseEntity = memberController.signup(signupRequest);
+
+        // Then
+        assertEquals(201, responseEntity.getStatusCodeValue());
+        assertEquals("회원가입 성공. JWT Token: mockJwtToken", responseEntity.getBody());
+        verify(memberService, times(1)).signupAndReturnEntity(signupRequest);
+    }
+
+    @Test
+    @DisplayName("로그인 성공 테스트")
+    public void testLoginSuccess() {
+        // Given
+        MemberLoginRequestDto loginRequest = new MemberLoginRequestDto("test@example.com", "password");
+
+        Member mockMember = Member.builder()
+            .email("test@example.com")
+            .password("password")
+            .name("Test User")
+            .isAdmin(false)
+            .tel("010-1234-5678")
+            .gender(true)
+            .age(25)
+            .isDeleted(false)
+            .build();
+
+
+        when(memberService.loginAndReturnEntity(loginRequest)).thenReturn(mockMember);
+        when(jwtTokenProvider.generateToken(mockMember, java.time.Duration.ofHours(2)))
+            .thenReturn("mockJwtToken");
+
+        // When
+        ResponseEntity<String> responseEntity = memberController.login(loginRequest, response);
+
+        // Then
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        verify(response, times(1)).addCookie(any(Cookie.class));  // 쿠키가 추가되었는지 검증
+    }
+
+    @Test
+    @DisplayName("로그인 실패 테스트")
+    public void testLoginFail() {
+        // Given
+        MemberLoginRequestDto loginRequest = new MemberLoginRequestDto("test@example.com", "wrongPassword");
+
+
+        when(memberService.loginAndReturnEntity(loginRequest))
+            .thenThrow(new IllegalArgumentException("비밀번호가 일치하지 않습니다."));
+
+        // When
+        ResponseEntity<String> responseEntity = memberController.login(loginRequest, response);
+
+
+        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals("비밀번호가 일치하지 않습니다.", responseEntity.getBody());
+    }
+
+    @Test
+    @DisplayName("로그아웃 테스트")
+    public void testLogout() {
+        // When
+        ResponseEntity<String> responseEntity = memberController.logout(response);
+
+        // Then
+        verify(response, times(1)).addCookie(any(Cookie.class));
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals("로그아웃 성공", responseEntity.getBody());
+    }
+
+    @Test
+    @DisplayName("모든 회원 조회 테스트")
+    public void testGetAllMembers() {
+        List<MemberResponseDto> mockMemberList = List.of(
+            new MemberResponseDto(1L, "test1@example.com", "Test User 1", "010-1111-2222", true, 25, false),
+            new MemberResponseDto(2L, "test2@example.com", "Test User 2", "010-3333-4444", true, 30, false)
+        );
+
+
+        when(memberService.getAllMembers()).thenReturn(mockMemberList);
+
+        // When
+        ResponseEntity<List<MemberResponseDto>> responseEntity = memberController.getAllMembers();
+
+        // Then
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(mockMemberList.size(), responseEntity.getBody().size());
+        verify(memberService, times(1)).getAllMembers();
+    }
+
+    @Test
+    @DisplayName("특정 회원 조회 테스트")
+    public void testGetMemberById() {
+        // Given
+        Long memberId = 1L;
+        MemberResponseDto mockMember = new MemberResponseDto(memberId, "test@example.com", "Test User", "010-1111-2222", true, 25, false);
+
+
+        when(memberService.getMemberById(memberId)).thenReturn(mockMember);
+
+        // When
+        ResponseEntity<MemberResponseDto> responseEntity = memberController.getMemberById(memberId);
+
+        // Then
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(mockMember.getEmail(), responseEntity.getBody().getEmail());
+        verify(memberService, times(1)).getMemberById(memberId);
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정 테스트")
+    public void testUpdateMember() {
+        // Given
+        Long memberId = 1L;
+        MemberUpdateRequestDto updateRequest = new MemberUpdateRequestDto(
+            "test@example.com", // 이메일 추가
+            "newPassword",      // 패스워드 추가
+            "Updated User",
+            "010-9999-8888",
+            true,
+            26
+        );
+        MemberResponseDto updatedMember = new MemberResponseDto(memberId, "test@example.com", "Updated User", "010-9999-8888", true, 26, false);
+
+
+        when(memberService.updateMember(memberId, updateRequest)).thenReturn(updatedMember);
+
+        // When
+        ResponseEntity<MemberResponseDto> responseEntity = memberController.updateMember(memberId, updateRequest);
+
+        // Then
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(updatedMember.getName(), responseEntity.getBody().getName());
+        verify(memberService, times(1)).updateMember(memberId, updateRequest);
+    }
+
+    @Test
+    @DisplayName("회원 삭제 테스트")
+    public void testDeleteMember() {
+        // Given
+        Long memberId = 1L;
+
+        // When
+        ResponseEntity<Void> responseEntity = memberController.deleteMember(memberId);
+
+        // Then
+        assertEquals(204, responseEntity.getStatusCodeValue());
+        verify(memberService, times(1)).deleteMember(memberId);
+    }
+
+    @Test
+    @DisplayName("관리자 권한 확인 테스트")
+    public void testCheckAdmin() {
+        // Given
+        Authentication mockAuthentication = mock(Authentication.class);
+        when(mockAuthentication.isAuthenticated()).thenReturn(true);
+
+
+        Collection<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        when(mockAuthentication.getAuthorities()).thenAnswer(invocation -> authorities);
+
+
+        SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
+
+
+        ResponseEntity<Boolean> responseEntity = memberController.checkAdmin();
+
+        // Then
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(true, responseEntity.getBody());
+    }
+}

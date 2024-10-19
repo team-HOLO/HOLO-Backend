@@ -3,11 +3,14 @@ package com.elice.holo.member.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.elice.holo.member.domain.Member;
+import com.elice.holo.member.domain.MemberDetails;
 import com.elice.holo.member.dto.MemberLoginRequestDto;
 import com.elice.holo.member.dto.MemberMapper;
 import com.elice.holo.member.dto.MemberResponseDto;
@@ -24,6 +27,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 class MemberServiceTest {
 
@@ -53,6 +58,7 @@ class MemberServiceTest {
         requestDto.setGender(true);
         requestDto.setAge(45);
 
+        // 회원가입 후 반환할 Member 객체
         Member member = Member.builder()
             .email(requestDto.getEmail())
             .password(requestDto.getPassword())
@@ -63,15 +69,15 @@ class MemberServiceTest {
             .isDeleted(false)
             .build();
 
-        MemberResponseDto responseDto = new MemberResponseDto(
-            member); // MemberResponseDto는 Mapper를 통해 생성되도록 처리
-
         // When
-        when(memberMapper.toEntity(any(MemberSignupRequestDto.class))).thenReturn(member);
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
-        when(memberMapper.toDto(any(Member.class))).thenReturn(responseDto);
 
-        MemberResponseDto result = memberService.signup(requestDto);
+        when(memberMapper.toEntity(any(MemberSignupRequestDto.class))).thenReturn(member);
+
+
+        when(memberRepository.save(any(Member.class))).thenReturn(member);
+
+
+        Member result = memberService.signupAndReturnEntity(requestDto);
 
         // Then
         assertEquals(result.getEmail(), requestDto.getEmail());
@@ -253,42 +259,53 @@ class MemberServiceTest {
     void getAllMembersTest() {
         // Given
         Member member1 = Member.builder()
-            .email("test1@test.com")
-            .name("Tester1")
+            .email("admin@test.com")
+            .name("AdminUser")
             .tel("010-1234-5678")
             .gender(true)
             .age(30)
             .isDeleted(false)
+            .isAdmin(true)
             .build();
 
         Member member2 = Member.builder()
-            .email("test2@test.com")
-            .name("Tester2")
+            .email("user@test.com")
+            .name("NormalUser")
             .tel("010-8765-4321")
             .gender(false)
             .age(25)
             .isDeleted(false)
+            .isAdmin(false)
             .build();
 
-        List<Member> members = new ArrayList<>();
-        members.add(member1);
-        members.add(member2);
+        List<Member> members = List.of(member1, member2);
 
-        List<MemberResponseDto> responseDtos = new ArrayList<>();
-        responseDtos.add(new MemberResponseDto(member1));
-        responseDtos.add(new MemberResponseDto(member2));
+        List<MemberResponseDto> responseDtos = List.of(
+            new MemberResponseDto(member1),
+            new MemberResponseDto(member2)
+        );
 
-        // When
+
+        Authentication mockAuthentication = mock(Authentication.class);
+        MemberDetails mockMemberDetails = new MemberDetails(member1);
+        when(mockAuthentication.getPrincipal()).thenReturn(mockMemberDetails);
+        when(mockAuthentication.isAuthenticated()).thenReturn(true);
+
+
+        SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
+
+
         when(memberRepository.findAllByIsDeletedFalse()).thenReturn(members);
-        when(memberMapper.toDtoList(ArgumentMatchers.<List<Member>>any())).thenReturn(responseDtos);
+        when(memberMapper.toDtoList(any())).thenReturn(responseDtos);
 
         List<MemberResponseDto> result = memberService.getAllMembers();
 
         // Then
         assertEquals(2, result.size());
-        assertEquals(result.get(0).getEmail(), "test1@test.com");
-        assertEquals(result.get(1).getEmail(), "test2@test.com");
+        assertEquals(result.get(0).getEmail(), "admin@test.com");
+        assertEquals(result.get(1).getEmail(), "user@test.com");
     }
+
 
     @DisplayName("특정 회원 조회 테스트")
     @Test
@@ -297,6 +314,7 @@ class MemberServiceTest {
         Long memberId = 1L;
 
         Member member = Member.builder()
+            .memberId(memberId) // memberId를 설정
             .email("test@test.com")
             .password("password123")
             .name("유재석")
@@ -304,14 +322,23 @@ class MemberServiceTest {
             .gender(true)
             .age(45)
             .isDeleted(false)
+            .isAdmin(false)
             .build();
 
-        MemberResponseDto responseDto = new MemberResponseDto(member); // DTO 생성
+        MemberResponseDto responseDto = new MemberResponseDto(member);
+
+
+        Authentication mockAuthentication = mock(Authentication.class);
+        MemberDetails mockMemberDetails = new MemberDetails(member); // 본인 정보 조회
+        when(mockAuthentication.getPrincipal()).thenReturn(mockMemberDetails);
+        when(mockAuthentication.isAuthenticated()).thenReturn(true);
+
+
+        SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
 
         // When
-        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
-            Optional.of(member));
-        when(memberMapper.toDto(member)).thenReturn(responseDto); // MemberMapper의 toDto 설정
+        when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(Optional.of(member));
+        when(memberMapper.toDto(member)).thenReturn(responseDto);
 
         MemberResponseDto result = memberService.getMemberById(memberId);
 
@@ -321,6 +348,8 @@ class MemberServiceTest {
         assertEquals(result.getTel(), "010-1234-5678");
         assertEquals(result.getGender(), true);
         assertEquals(result.getAge(), 45);
+        verify(memberRepository, times(1)).findByMemberIdAndIsDeletedFalse(memberId);
+        verify(memberMapper, times(1)).toDto(member);
     }
 
     @DisplayName("특정 회원 조회 실패 - 존재하지 않는 회원")
@@ -349,10 +378,14 @@ class MemberServiceTest {
         requestDto.setGender(true);
         requestDto.setAge(45);
 
+
         when(memberRepository.findByEmailAndIsDeletedFalse("test@test.com"))
             .thenReturn(Optional.of(Member.builder().build()));
 
-        assertThrows(IllegalArgumentException.class, () -> memberService.signup(requestDto));
+
+        assertThrows(IllegalArgumentException.class, () -> memberService.signupAndReturnEntity(requestDto));
+
+
         verify(memberRepository, never()).save(any(Member.class));
     }
 }
