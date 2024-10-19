@@ -120,4 +120,13 @@ public class MemberController {
         }
         return ResponseEntity.ok(false);
     }
+    // 로그인 여부 확인 API
+    @GetMapping("/check-login")
+    public ResponseEntity<Boolean> checkLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return ResponseEntity.ok(true);  // 로그인된 상태라면 true 반환
+        }
+        return ResponseEntity.ok(false);  // 로그인되지 않은 상태라면 false 반환
+    }
 }
