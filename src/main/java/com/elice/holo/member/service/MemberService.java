@@ -24,18 +24,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
 
-    // 회원 등록
-    @Transactional
-    public MemberResponseDto signup(MemberSignupRequestDto requestDto) {
-        if (memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()).isPresent()) {
-            return null;
-        }
 
-        Member member = memberMapper.toEntity(requestDto);
-        memberRepository.save(member);
 
-        return memberMapper.toDto(member);
-    }
 
     // 회원 등록 후 엔티티 반환
     @Transactional
