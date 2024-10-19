@@ -1,0 +1,19 @@
+spring:
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+  thymeleaf:
+    prefix: classpath:/templates/
+    cache: false
+  freemarker:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: **REMOVED_OAUTH_ID**
+            client-secret: **REMOVED_OAUTH_SECRET**
+            scope:
+              - email
+              - profile
