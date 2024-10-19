@@ -40,7 +40,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @Transactional
@@ -95,9 +94,9 @@ class ProductControllerTest {
         request.setCategoryId(category1.getCategoryId());
 
         //mock 이미지 파일
-        List<MultipartFile> multipartFiles = List.of(
-            new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg", "test image1 content".getBytes()),
-            new MockMultipartFile("Image2", "Image2.jpg", "image/jpeg", "test image2 content".getBytes()));
+        List<MockMultipartFile> multipartFiles = List.of(
+            new MockMultipartFile("productImages", "Image1.jpg", "image/jpeg", "test image1 content".getBytes()),
+            new MockMultipartFile("productImages", "Image2.jpg", "image/jpeg", "test image2 content".getBytes()));
 
         MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
             "application/json",
@@ -106,8 +105,8 @@ class ProductControllerTest {
         //when
         ResultActions result = mockMvc.perform(
             multipart(url)
-                .file("productImages", multipartFiles.get(0).getBytes())
-                .file("productImages", multipartFiles.get(1).getBytes())
+                .file(multipartFiles.get(0))
+                .file(multipartFiles.get(1))
                 .file(requestPart)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
         );
@@ -140,11 +139,11 @@ class ProductControllerTest {
         MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
             "application/json", objectMapper.writeValueAsBytes(request));
 
-        MockMultipartFile image = new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg",
+        MockMultipartFile image = new MockMultipartFile("productImages", "Image1.jpg", "image/jpeg",
             "test image1 content".getBytes());
 
         mockMvc.perform(multipart(url)
-            .file("productImages", image.getBytes())
+            .file(image)
             .file(requestPart)
             .contentType(MediaType.MULTIPART_FORM_DATA));
 
@@ -156,12 +155,12 @@ class ProductControllerTest {
         MockMultipartFile requestPart2 = new MockMultipartFile("addProductRequest", "request.json",
             "application/json", objectMapper.writeValueAsBytes(request2));
 
-        MockMultipartFile image2 = new MockMultipartFile("Image1", "Image1.jpg", "image/jpeg",
+        MockMultipartFile image2 = new MockMultipartFile("productImages", "Image1.jpg", "image/jpeg",
             "test image1 content".getBytes());
 
         //when
         ResultActions result = mockMvc.perform(multipart(url)
-                .file("productImages", image2.getBytes())
+                .file(image2)
                 .file(requestPart2)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
 
@@ -192,12 +191,12 @@ class ProductControllerTest {
         MockMultipartFile requestPart = new MockMultipartFile("addProductRequest", "request.json",
             "application/json", objectMapper.writeValueAsBytes(request));
 
-        MockMultipartFile InvalidFile = new MockMultipartFile("Image1", "file.txt", "image/jpeg",
+        MockMultipartFile invalidFile = new MockMultipartFile("productImages", "file.txt", "image/jpeg",
             "test image1 content".getBytes());
 
         //when
         ResultActions result = mockMvc.perform(multipart(url)
-            .file("productImages", InvalidFile.getBytes())
+            .file(invalidFile)
             .file(requestPart)
             .contentType(MediaType.MULTIPART_FORM_DATA));
 
