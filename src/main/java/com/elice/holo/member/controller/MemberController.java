@@ -10,11 +10,13 @@ import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseCookie;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
+    final Duration TOKEN_VALIDITY_DURATION = Duration.ofHours(2);
 
     public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.memberService = memberService;
@@ -52,17 +55,19 @@ public class MemberController {
             Member member = memberService.loginAndReturnEntity(requestDto);
 
             // JWT 토큰 생성
-            String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
+            String token = jwtTokenProvider.generateToken(member, TOKEN_VALIDITY_DURATION);
 
             // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
-            Cookie cookie = new Cookie("jwtToken", token);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true); // HTTPS에서만 사용 가능하게 설정
-            cookie.setPath("/"); // 애플리케이션 전체에 대해 쿠키가 유효하도록 설정
-            cookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
+            ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
+                    .path("/")
+                    .sameSite("None")  // same site를 None으로 설정
+                    .httpOnly(true)
+                    .secure(true)     // SameSite 설정 시 필수
+                    .maxAge(60 * 60 * 2)
+                    .build();
 
-            // 쿠키를 응답에 추가
-            response.addCookie(cookie);
+            // 쿠키를 응답에 추가: Set-Cookie 헤더 필요
+            response.addHeader("Set-Cookie", cookie.toString());
 
             return ResponseEntity.ok("로그인 성공");
         } catch (IllegalArgumentException e) {
