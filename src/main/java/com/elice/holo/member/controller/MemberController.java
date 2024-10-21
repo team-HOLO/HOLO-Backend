@@ -39,12 +39,12 @@ public class MemberController {
         // 회원가입 후 회원 정보를 엔티티로 받음
         Member member = memberService.signupAndReturnEntity(requestDto);
         if (member == null) {
-            return ResponseEntity.status(400).body("이미 존재하는 이메일입니다."); // 이메일 중복 시 에러 반환
+            return ResponseEntity.status(400).body("already existing email!"); // 이메일 중복 시 에러 반환
         }
 
         // JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
-        return ResponseEntity.status(201).body("회원가입 성공. JWT Token: " + token);
+        return ResponseEntity.status(201).body("sign up! JWT Token: " + token);
     }
 
     // 로그인 API - 쿠키로 JWT 토큰 전달
@@ -69,7 +69,7 @@ public class MemberController {
             // 쿠키를 응답에 추가: Set-Cookie 헤더 필요
             response.addHeader("Set-Cookie", cookie.toString());
 
-            return ResponseEntity.ok("로그인 성공");
+            return ResponseEntity.ok("sign_in complete");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(e.getMessage()); // 로그인 실패 시 400 상태 코드와 메시지 반환
         }
@@ -84,7 +84,7 @@ public class MemberController {
         cookie.setMaxAge(0); // 유효 시간을 0으로 설정하여 삭제
         response.addCookie(cookie);
 
-        return ResponseEntity.ok("로그아웃 성공");
+        return ResponseEntity.ok("logout finished");
     }
 
     // 모든 회원 조회 API
