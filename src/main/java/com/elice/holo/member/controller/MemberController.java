@@ -32,6 +32,18 @@ public class MemberController {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
+    // 쿠키 설정 메소드
+    private void setJwtCookie(HttpServletResponse response, String token, long maxAge) {
+        ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 
     // 회원가입 API
     @PostMapping("/signup")
@@ -51,39 +63,22 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
         try {
-            // 로그인 후 회원 정보를 엔티티로 받음
             Member member = memberService.loginAndReturnEntity(requestDto);
-
-            // JWT 토큰 생성
             String token = jwtTokenProvider.generateToken(member, TOKEN_VALIDITY_DURATION);
 
-            // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
-            ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
-                    .path("/")
-                    .sameSite("None")  // same site를 None으로 설정
-                    .httpOnly(true)
-                    .secure(true)     // SameSite 설정 시 필수
-                    .maxAge(60 * 60 * 2)
-                    .build();
-
-            // 쿠키를 응답에 추가: Set-Cookie 헤더 필요
-            response.addHeader("Set-Cookie", cookie.toString());
+            // 쿠키 설정 메소드 호출
+            setJwtCookie(response, token, TOKEN_VALIDITY_DURATION.toSeconds());
 
             return ResponseEntity.ok("sign_in complete");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage()); // 로그인 실패 시 400 상태 코드와 메시지 반환
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
     // 로그아웃 시 쿠키 삭제
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwtToken", null); // 쿠키 삭제
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // 유효 시간을 0으로 설정하여 삭제
-        response.addCookie(cookie);
-
+        // 쿠키 삭제 (maxAge를 0으로 설정)
+        setJwtCookie(response, null, 0);
         return ResponseEntity.ok("logout finished");
     }
 
