@@ -11,7 +11,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     //상품 상세 화면 쿼리
     @Query("select p from Product p join fetch p.productOptions po"
-        + " where p.isDeleted = false and p.productId = :id")
+        + " where p.isDeleted = false and p.productId = :id and po.isDeleted=false")
     Optional<Product> findProductDetailByProductId(Long id);
 
     Optional<Product> findByProductIdAndIsDeletedFalse(Long id);
