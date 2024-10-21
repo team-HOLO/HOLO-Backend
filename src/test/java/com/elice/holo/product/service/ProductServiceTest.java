@@ -100,12 +100,24 @@ class ProductServiceTest {
 
         //given
         Product product = Product.createProduct("의자", 300000, "시디즈", 100);
+        Category category = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+
+        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+        Category savedCategory = categoryRepository.save(category);
 
         getProductOptionDto().stream()
             .map(ProductOptionDto::toEntity)
             .collect(Collectors.toList()).forEach(product::addProductOption);
 
+        product.addProductCategory(savedCategory);
+
         when(productRepository.findProductDetailByProductId(any(Long.class))).thenReturn(Optional.of(product));
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(category));
+
 
         //when
         ProductResponseDto response = productService.findProductById(1L);
@@ -200,11 +212,21 @@ class ProductServiceTest {
             .map(ProductOptionDto::toEntity)
             .forEach(product::addProductOption);
 
+        Category category = Category.builder()
+            .name("가구")
+            .description("전체 가구 카테고리")
+            .parentCategory(null)
+            .build();
+        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+        Category savedCategory = categoryRepository.save(category);
+
+        product.addProductCategory(savedCategory);
+
         UpdateProductOptionDto updateDto = new UpdateProductOptionDto(null, "brown", "M", 30);
 //        UpdateProductOptionDto existingOptionDto = new UpdateProductOptionDto(1L, "white", "L", 30);
         boolean isThumbnail = false;
         UpdateProductRequest updateRequest = new UpdateProductRequest(
-            "침대 수정", 200000, "에이스 침대", 100, List.of(updateDto), List.of(isThumbnail));
+            "침대 수정", 200000, "에이스 침대", 100, null, List.of(updateDto), List.of(isThumbnail));
 
         when(productRepository.findProductDetailByProductId(productId)).thenReturn(Optional.of(product));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));

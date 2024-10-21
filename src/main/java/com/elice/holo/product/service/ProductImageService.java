@@ -51,6 +51,21 @@ public class ProductImageService {
             .collect(Collectors.toList());
     }
 
+    //상품 수정 화면 썸네일 교체
+    public void updateChangeThumbnail(List<Boolean> newIsThumbnails, Long productId) {
+        List<ProductImage> productImages = productImageRepository.findByProductIdAndIsDeletedFalse(
+            productId);
+
+        for (int i = 0; i < productImages.size(); i++) {
+            ProductImage productImage = productImages.get(i);
+
+            if (productImage.getIsThumbnail() != newIsThumbnails.get(i)) {
+                productImage.changeIsThumbnail(newIsThumbnails.get(i));
+            }
+        }
+
+    }
+
 
 
 

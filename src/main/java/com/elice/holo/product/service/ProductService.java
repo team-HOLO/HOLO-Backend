@@ -126,6 +126,7 @@ public class ProductService {
             request.getDescription(), request.getStockQuantity()
         );
 
+        productImageService.updateChangeThumbnail(request.getIsThumbnails(), product.getProductId());
         addProductOptions(request, product);
 
         return product.getProductId();

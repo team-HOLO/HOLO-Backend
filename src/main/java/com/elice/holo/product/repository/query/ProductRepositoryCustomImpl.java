@@ -189,9 +189,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
             case NAME :
                 return product.name.asc();
             case PRICE_ASC:
-                return product.price.desc();
-            case PRICE_DESC:
                 return product.price.asc();
+            case PRICE_DESC:
+                return product.price.desc();
             default:
                 return product.createdAt.desc();
         }
