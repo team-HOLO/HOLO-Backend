@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -125,7 +126,8 @@ public class MemberController {
     @GetMapping("/check-login")
     public ResponseEntity<Boolean> checkLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken)) {
             return ResponseEntity.ok(true);  // 로그인된 상태라면 true 반환
         }
         return ResponseEntity.ok(false);  // 로그인되지 않은 상태라면 false 반환
