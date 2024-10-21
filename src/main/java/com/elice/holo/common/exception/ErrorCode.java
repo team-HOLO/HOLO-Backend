@@ -18,7 +18,10 @@ public enum ErrorCode {
     DUPLICATE_PRODUCT_NAME(HttpStatus.CONFLICT, "Duplicate product name"),
     INVALID_FILE_EXTENSION(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid File Extension"),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart not found"),
-    CART_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart product not found");
+    CART_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart product not found"),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found"),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Duplicate email"),
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Password does not match");
 
 
     private final HttpStatus status;
