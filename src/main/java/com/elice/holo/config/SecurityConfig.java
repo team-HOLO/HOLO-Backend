@@ -11,6 +11,7 @@ import com.elice.holo.token.oauth.OAuth2UserCustomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -30,9 +31,17 @@ public class SecurityConfig {
     private final OAuth2UserCustomService oAuth2UserCustomService;
 
     @Bean
-    public WebSecurityCustomizer configure() {
+    @Profile("dev")
+    public WebSecurityCustomizer devConfigure() {
         return (web) -> web.ignoring()
             .requestMatchers(toH2Console()) // H2 콘솔 무시
+            .requestMatchers("/img/**", "/css/**", "/js/**"); // 정적 리소스 무시
+    }
+
+    @Bean
+    @Profile("prod")
+    public WebSecurityCustomizer ProdConfigure() {
+        return (web) -> web.ignoring()
             .requestMatchers("/img/**", "/css/**", "/js/**"); // 정적 리소스 무시
     }
 
