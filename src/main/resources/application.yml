@@ -115,7 +115,7 @@ spring:
     password: ''
   jpa:
     hibernate:
-      ddl-auto: create # prod 환경에서 create 모드 - 이후에는 update 모드로 변경
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: 'true'
