@@ -103,16 +103,12 @@ spring:
   redirect:
     url: https://elice-holo.netlify.app
 
-  # H2 DB 설정 for prod environment - 추후에 MySQL AWS RDS와 연결 예정
-  h2:
-    console:
-      path: /h2-console
-      enabled: true
+  #  AWS RDS와 연결
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:holo  # prod 환경에서의 메모리 H2 DB
-    username: sa
-    password: ''
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${RDS_ENDPOINT}:3306/${RDS_DB_NAME}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
