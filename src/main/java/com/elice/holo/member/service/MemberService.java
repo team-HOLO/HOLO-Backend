@@ -8,6 +8,8 @@ import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.exception.AccessDeniedException;
+import com.elice.holo.member.exception.DuplicateEmailException;
+import com.elice.holo.member.exception.MemberNotFoundException;
 import com.elice.holo.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -31,7 +33,7 @@ public class MemberService {
     @Transactional
     public Member signupAndReturnEntity(MemberSignupRequestDto requestDto) {
         if (memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new DuplicateEmailException("이메일 중복 발생");  // 이메일 중복 시 예외 발생
         }
 
         Member member = memberMapper.toEntity(requestDto);
@@ -43,10 +45,10 @@ public class MemberService {
     // 로그인
     public MemberResponseDto login(MemberLoginRequestDto requestDto) {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         if (!member.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberNotFoundException("Member not found");
         }
 
         return memberMapper.toDto(member);
@@ -55,10 +57,10 @@ public class MemberService {
     // 로그인 후 엔티티 반환
     public Member loginAndReturnEntity(MemberLoginRequestDto requestDto) {
         Member member = memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         if (!member.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberNotFoundException("Member not found");
         }
 
         return member;
@@ -81,7 +83,7 @@ public class MemberService {
     // 특정 회원 조회
     public MemberResponseDto getMemberById(Long memberId) {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
@@ -97,14 +99,14 @@ public class MemberService {
 
     public Member getMemberEntityById(Long memberId) {
         return memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
     }
 
     // 회원 정보 수정 (권한 검증 추가)
     @Transactional
     public MemberResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
@@ -115,7 +117,7 @@ public class MemberService {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
 
-        member.updateMemberInfo(requestDto.getName(), requestDto.getTel(), requestDto.getAge(), requestDto.getGender());
+        member.updateMemberInfo(requestDto.getPassword(),requestDto.getName(), requestDto.getTel(), requestDto.getAge(), requestDto.getGender());
         memberRepository.save(member);
 
         return memberMapper.toDto(member);
@@ -125,7 +127,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
@@ -142,6 +144,6 @@ public class MemberService {
 
     public Member findByEmail(String email) {
         return memberRepository.findByEmailAndIsDeletedFalse(email)
-            .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
+            .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
     }
 }

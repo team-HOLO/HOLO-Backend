@@ -10,11 +10,14 @@ import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseCookie;
 
 import java.util.List;
 
@@ -24,10 +27,23 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
+    final Duration TOKEN_VALIDITY_DURATION = Duration.ofHours(2);
 
     public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
+    }
+    // 쿠키 설정 메소드
+    private void setJwtCookie(HttpServletResponse response, String token, long maxAge) {
+        ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     // 회원가입 API
@@ -36,50 +52,35 @@ public class MemberController {
         // 회원가입 후 회원 정보를 엔티티로 받음
         Member member = memberService.signupAndReturnEntity(requestDto);
         if (member == null) {
-            return ResponseEntity.status(400).body("이미 존재하는 이메일입니다."); // 이메일 중복 시 에러 반환
+            return ResponseEntity.status(400).body("already existing email!"); // 이메일 중복 시 에러 반환
         }
 
         // JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
-        return ResponseEntity.status(201).body("회원가입 성공. JWT Token: " + token);
+        return ResponseEntity.status(201).body("sign up! JWT Token: " + token);
     }
 
     // 로그인 API - 쿠키로 JWT 토큰 전달
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
         try {
-            // 로그인 후 회원 정보를 엔티티로 받음
             Member member = memberService.loginAndReturnEntity(requestDto);
+            String token = jwtTokenProvider.generateToken(member, TOKEN_VALIDITY_DURATION);
 
-            // JWT 토큰 생성
-            String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
+            // 쿠키 설정 메소드 호출
+            setJwtCookie(response, token, TOKEN_VALIDITY_DURATION.toSeconds());
 
-            // 쿠키 설정 (HttpOnly, Secure 플래그 적용)
-            Cookie cookie = new Cookie("jwtToken", token);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true); // HTTPS에서만 사용 가능하게 설정
-            cookie.setPath("/"); // 애플리케이션 전체에 대해 쿠키가 유효하도록 설정
-            cookie.setMaxAge(60 * 60 * 2); // 2시간 동안 쿠키 유지
-
-            // 쿠키를 응답에 추가
-            response.addCookie(cookie);
-
-            return ResponseEntity.ok("로그인 성공");
+            return ResponseEntity.ok("sign_in complete");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage()); // 로그인 실패 시 400 상태 코드와 메시지 반환
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
     // 로그아웃 시 쿠키 삭제
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwtToken", null); // 쿠키 삭제
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // 유효 시간을 0으로 설정하여 삭제
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok("로그아웃 성공");
+        // 쿠키 삭제 (maxAge를 0으로 설정)
+        setJwtCookie(response, null, 0);
+        return ResponseEntity.ok("logout finished");
     }
 
     // 모든 회원 조회 API
@@ -125,7 +126,8 @@ public class MemberController {
     @GetMapping("/check-login")
     public ResponseEntity<Boolean> checkLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken)) {
             return ResponseEntity.ok(true);  // 로그인된 상태라면 true 반환
         }
         return ResponseEntity.ok(false);  // 로그인되지 않은 상태라면 false 반환

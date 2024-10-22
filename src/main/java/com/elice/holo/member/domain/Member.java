@@ -55,7 +55,7 @@ public class Member {
     }
 
     // 회원 정보 수정 메서드
-    public void updateMemberInfo(String name, String tel,
+    public void updateMemberInfo(String password,String  name, String tel,
         Integer age,
         Boolean gender) {
         this.password = password;
