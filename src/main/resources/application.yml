@@ -64,6 +64,9 @@ spring:
     activate:
       on-profile: dev
 
+  redirect:
+    url: http://localhost:3000
+
   # H2 DB 설정 for dev
   h2:
     console:
@@ -96,6 +99,9 @@ spring:
   config:
     activate:
       on-profile: prod
+
+    redirect:
+      url: https://elice-holo.netlify.app
 
   # H2 DB 설정 for prod environment - 추후에 MySQL AWS RDS와 연결 예정
   h2:
