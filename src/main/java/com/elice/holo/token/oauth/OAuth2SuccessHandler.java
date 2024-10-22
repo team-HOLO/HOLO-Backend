@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -24,7 +25,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     // JWT 토큰 제공자
     private final JwtTokenProvider tokenProvider;
     private final MemberService userService;
-
+    @Value("${spring.redirect.url}") // YML에서 redirect URL을 가져옴
+    private String redirectUrl;
     // OAuth2 로그인 성공 시 호출되는 메서드
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -44,8 +46,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 쿠키를 응답에 추가
         response.addCookie(jwtCookie);
 
-        // 리다이렉트 처리 (로그인 성공 후 지정된 페이지로 이동)
-        String targetUrl = "http://localhost:3000";
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
