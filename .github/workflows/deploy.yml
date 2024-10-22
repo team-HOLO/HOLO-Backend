@@ -91,7 +91,7 @@ jobs:
             export OAUTH_GOOGLE_CLIENT_SECRET='${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}'
             export RDS_ENDPOINT='${{ secrets.RDS_ENDPOINT }}'
             export RDS_DB_NAME='${{ secrets.RDS_DB_NAME }}'
-            export RDS_USERNAME='${{ secrets.USERNAME }}'
+            export RDS_USERNAME='${{ secrets.RDS_USERNAME }}'
             export RDS_PASSWORD='${{ secrets.RDS_PASSWORD }}'
             cd ${{ secrets.EC2_TARGET_PATH }}
             nohup java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar *.jar > log.txt 2>&1 &
