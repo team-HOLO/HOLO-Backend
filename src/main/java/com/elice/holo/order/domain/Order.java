@@ -16,7 +16,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,16 +57,24 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private String shippingAddress;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isDeleted = false;
 
+    @Column(nullable = false)
+    private String recipientName;
+
+    private String shippingRequest;
 
     // private 생성자
-    private Order(Member member, int totalPrice, String shippingAddress,
-                  List<OrderProduct> orderProducts) {
+    private Order(Member member, int totalPrice, String shippingAddress, String recipientName,
+        String shippingRequest,
+        List<OrderProduct> orderProducts) {
         this.member = member;
         this.totalPrice = totalPrice;
         this.shippingAddress = shippingAddress;
+        this.recipientName = recipientName;
+        this.shippingRequest = shippingRequest;
         this.status = OrderStatus.ORDER;
         this.orderProducts = new ArrayList<>(orderProducts);
 
@@ -79,8 +86,10 @@ public class Order extends BaseEntity {
 
     // 팩토리 메서드
     public static Order createOrder(Member member, int totalPrice, String shippingAddress,
-                                    List<OrderProduct> orderProducts) {
-        return new Order(member, totalPrice, shippingAddress, orderProducts);
+        String recipientName, String shippingRequest,
+        List<OrderProduct> orderProducts) {
+        return new Order(member, totalPrice, shippingAddress, recipientName, shippingRequest,
+            orderProducts);
     }
 
     @PrePersist
@@ -93,19 +102,6 @@ public class Order extends BaseEntity {
         this.status = newStatus;
     }
 
-    // 배송 주소 업데이트
-    public void updateShippingAddress(String newAddress) {
-        this.shippingAddress = newAddress;
-    }
-
-    // 주문 상품 추가 메서드
-    public void addOrderProducts(List<OrderProduct> newOrderProducts) {
-        this.orderProducts.clear();
-        this.orderProducts.addAll(newOrderProducts);
-        for (OrderProduct orderProduct : newOrderProducts) {
-            orderProduct.setOrder(this);
-        }
-    }
     // 삭제(소프트 딜리트)메서드
     public void softDelete() {
         this.isDeleted = true;

@@ -66,6 +66,7 @@ public class OrderService {
         int totalPrice = calculateTotalPrice(orderProducts);
 
         Order order = Order.createOrder(member, totalPrice, requestDto.getShippingAddress(),
+            requestDto.getShippingRequest(), requestDto.getRecipientName(),
             orderProducts);
 
         orderRepository.save(order);
@@ -96,7 +97,7 @@ public class OrderService {
     // 관리자용 전체 주문 조회
     @Transactional(readOnly = true)
     public List<OrderResponseDto> getAllOrdersForAdmin() {
-        List<Order> orders = orderRepository.findAllByIsDeletedFalse();
+        List<Order> orders = orderRepository.findAllByIsDeletedFalseOrderByOrderIdAsc();
         return orders.stream()
             .map(OrderResponseDto::new)
             .collect(Collectors.toList());

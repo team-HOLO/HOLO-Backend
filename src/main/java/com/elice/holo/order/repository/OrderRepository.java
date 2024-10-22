@@ -16,7 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByMember_MemberIdAndIsDeletedFalse(Long memberId);
 
     // 모든 주문 조회 (소프트 딜리트된 주문 제외)
-    List<Order> findAllByIsDeletedFalse();
+    List<Order> findAllByIsDeletedFalseOrderByOrderIdAsc();
 
     // 특정 주문 조회 (소프트 딜리트된 주문 제외)
     Optional<Order> findByOrderIdAndIsDeletedFalse(Long orderId);
