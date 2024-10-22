@@ -1,19 +1,115 @@
+# Application configuration
 spring:
+  application:
+    name: holo
+  profiles:
+    active: dev
+  # JPA 설정
   jpa:
     show-sql: true
     defer-datasource-initialization: true
-  thymeleaf:
-    prefix: classpath:/templates/
-    cache: false
-  freemarker:
-    cache: false
+  # Security - Oauth2 설정
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: **REMOVED_OAUTH_ID**
-            client-secret: **REMOVED_OAUTH_SECRET**
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
+
+# AWS Cloud 설정
+cloud:
+  aws:
+    credentials:
+      secret-key: ${HOLO_S3_SECRET_KEY}
+      access-key: ${HOLO_S3_ACCESS_KEY}
+    s3:
+      bucket:
+        name: holo-bucket
+        url: ''
+    region:
+      static: ap-northeast-2
+      auto: 'false'
+    stack:
+      auto: 'false'
+
+
+# JWT 설정
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  issuer: holo@naver.com
+
+# 파일 저장 위치 - 수정 필요
+file:
+  dir: C:/Users/Woomin/Desktop/study/ImageStorage/
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enable: true
+  info:
+    title: HOLO API Documentation
+    description: API documentation for the HOLO 쇼핑몰 프로젝트
+    version: 1.0.0
+
+# dev 환경 설정
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # H2 DB 설정 for dev
+  h2:
+    console:
+      path: /h2-console
+      enabled: 'true'
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/holo  # dev 환경에서의 H2 DB
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create  # dev 환경에서 create 모드
+    properties:
+      hibernate:
+        format_sql: 'true'
+  logging:
+    level:
+      org:
+        hibernate:
+          orm:
+            jdbc:
+              bind: trace
+          SQL: debug
+
+
+# prod 환경 설정
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # H2 DB 설정 for prod environment - 추후에 MySQL AWS RDS와 연결 예정
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:holo  # prod 환경에서의 메모리 H2 DB
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create # prod 환경에서 create 모드 - 이후에는 update 모드로 변경
+    properties:
+      hibernate:
+        format_sql: 'true'

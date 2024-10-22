@@ -1,0 +1,94 @@
+name: Java CI with Gradle and Deploy
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build -x test
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: holo
+          path: build/libs/*SNAPSHOT.jar
+
+
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+
+      # 1. 아티팩트에 업로드된 Jar 파일 다운로드
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: holo
+
+
+      # 2. 빌드된 jar 파일을 EC2로 전송
+      - name: Copy jar to EC2
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # rsync 명령 실행
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" *SNAPSHOT.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_TARGET_PATH }}
+          # 작업 종료 후 ssh 키 삭제
+          rm -f ~/.ssh/id_rsa
+
+      # 3. EC2에서 환경 변수를 설정하고 애플리케이션 실행
+      - name: Run jar on EC2 with environment variables
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # 8080 포트를 사용하는 기존 애플리케이션 종료
+            PID=$(lsof -t -i :8080)
+            if [ -n "$PID" ]; then
+              echo "Stopping existing application with PID: $PID"
+              kill -9 $PID
+            else
+              echo "No application running on port 8080"
+            fi
+            
+            # 새로운 애플리케이션 배포 및 실행
+            export HOLO_S3_ACCESS_KEY='${{ secrets.HOLO_S3_ACCESS_KEY }}'
+            export HOLO_S3_SECRET_KEY='${{ secrets.HOLO_S3_SECRET_KEY }}'
+            export JWT_SECRET_KEY='${{ secrets.JWT_SECRET_KEY }}'
+            export OAUTH_GOOGLE_CLIENT_ID='${{ secrets.OAUTH_GOOGLE_CLIENT_ID }}'
+            export OAUTH_GOOGLE_CLIENT_SECRET='${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}'
+            cd ${{ secrets.EC2_TARGET_PATH }}
+            nohup java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar *.jar > log.txt 2>&1 &
+            echo "New application deployed and started."

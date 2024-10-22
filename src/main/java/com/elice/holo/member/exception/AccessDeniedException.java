@@ -1,10 +1,11 @@
 package com.elice.holo.member.exception;
 
-public class AccessDeniedException extends RuntimeException {
+import com.elice.holo.common.exception.CustomException;
+import com.elice.holo.common.exception.ErrorCode;
 
-    public AccessDeniedException(String message) {
-        super(message);
+public class AccessDeniedException extends CustomException {
+
+    public AccessDeniedException(String detailMessage) {
+        super(ErrorCode.ACCESS_DENIED, detailMessage);
     }
-
-
 }

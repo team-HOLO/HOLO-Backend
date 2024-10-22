@@ -14,6 +14,8 @@ public class ProductResponseDto {
     private String name;
     private int price;
     private String description;
+    private int stockQuantity;
+    private Long categoryId;
     private List<ProductOptionDto> productOptions;
     private List<ProductImageDto>  productImageDtos;
 
@@ -22,6 +24,8 @@ public class ProductResponseDto {
         name = product.getName();
         price = product.getPrice();
         description = product.getDescription();
+        stockQuantity = product.getStockQuantity();
+        categoryId = product.getCategory().getCategoryId();
         productOptions = product.getProductOptions().stream()
             .filter(po -> !po.isDeleted())
             .map(ProductOptionDto::new)

@@ -3,6 +3,9 @@ package com.elice.holo.common.exception;
 import com.elice.holo.category.exception.CategoryNotFoundException;
 import com.elice.holo.category.exception.DuplicateCategoryNameException;
 import com.elice.holo.member.exception.AccessDeniedException;
+import com.elice.holo.member.exception.DuplicateEmailException;
+import com.elice.holo.member.exception.MemberNotFoundException;
+import com.elice.holo.member.exception.PasswordMismatchException;
 import com.elice.holo.order.exception.OrderNotCancelableException;
 import com.elice.holo.order.exception.OrderNotFoundException;
 import com.elice.holo.product.exception.DuplicateProductNameException;
@@ -105,6 +108,28 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.INVALID_FILE_EXTENSION);
 
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
+    // 회원을 찾을 수 없는 경우에 대한 예외 처리
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMemberNotFoundException(MemberNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.MEMBER_NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
+    // 이메일 중복 시 예외 처리
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.DUPLICATE_EMAIL);
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordMismatchException(PasswordMismatchException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.PASSWORD_MISMATCH);
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
 }

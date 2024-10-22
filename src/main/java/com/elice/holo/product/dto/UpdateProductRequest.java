@@ -1,6 +1,7 @@
 package com.elice.holo.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,16 +15,16 @@ public class UpdateProductRequest {
     @NotBlank
     private String name;
 
-    @NotBlank
-    @Pattern(regexp = "[0-9]*$") //숫자만 허용
+    @NotNull
     private int price;
 
     @NotBlank
     private String description;
 
-    @NotBlank
-    @Pattern(regexp = "[0-9]*$") //숫자만 허용
+    @NotNull
     private int stockQuantity;
+
+    private Long categoryId;
 
     private List<UpdateProductOptionDto> productOptions;
 

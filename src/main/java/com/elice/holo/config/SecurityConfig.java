@@ -45,8 +45,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS)) // 세션을 Stateless로 설정
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/members/signup", "/api/members/login")
+                .requestMatchers("/api/members/signup", "/api/members/login",
+                    "/api/members/check-admin", "/api/members/check-login")
                 .permitAll() // 회원 가입, 로그인 API는 인증 없이 접근 가능
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+                .permitAll() // Swagger UI 경로 허용
                 .requestMatchers("/api/members/**").authenticated() // 그 외 /api/members 경로는 인증 필요
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll() // 나머지 요청은 모두 허용
@@ -63,7 +66,8 @@ public class SecurityConfig {
         http.oauth2Login()
 
             .authorizationEndpoint()
-            .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()) // 쿠키 기반 OAuth2 요청 저장소 사용
+            .authorizationRequestRepository(
+                oAuth2AuthorizationRequestBasedOnCookieRepository()) // 쿠키 기반 OAuth2 요청 저장소 사용
             .and()
             .successHandler(oAuth2SuccessHandler()) // 성공 핸들러 설정
             .userInfoEndpoint()
@@ -74,14 +78,13 @@ public class SecurityConfig {
             .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                 new AntPathRequestMatcher("/api/**"));
 
-
-
         return http.build();
     }
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(jwttokenProvider, memberService); // RefreshTokenRepository 제거
+        return new OAuth2SuccessHandler(jwttokenProvider,
+            memberService); // RefreshTokenRepository 제거
     }
 
     // 쿠키 기반 OAuth2 요청 저장소 설정
