@@ -32,6 +32,8 @@ class CategoryControllerTest {
     private Category category1;
     private Category category2;
 
+    private final static String BASE_URL = "/api/categories";
+
     @BeforeEach
     void setUp() {
         categoryRepository.deleteAll(); // 테스트 간 데이터 초기화
@@ -65,7 +67,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("전체 카테고리 목록 조회 통합 테스트")
     void testGetAllCategories() throws Exception {
-        mockMvc.perform(get("/api/categories/all"))
+        mockMvc.perform(get(BASE_URL + "/all"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(4));  // 배열의 길이가 4인지 확인
     }
@@ -74,7 +76,7 @@ class CategoryControllerTest {
     @DisplayName("상위 카테고리 목록 조회 통합 테스트")
     void testGetTopLevelCategories() throws Exception {
         // When & Then
-        mockMvc.perform(get("/api/categories"))
+        mockMvc.perform(get(BASE_URL))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].name").value("ParentCategory"));
     }
@@ -83,7 +85,7 @@ class CategoryControllerTest {
     @DisplayName("특정 카테고리의 하위 카테고리 목록 조회 통합 테스트")
     void testGetSubCategories() throws Exception {
         // When & Then
-        mockMvc.perform(get("/api/categories/sub/" + parentCategory.getCategoryId()))
+        mockMvc.perform(get(BASE_URL + "/sub/" + parentCategory.getCategoryId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].name").value("ChildCategory"));
     }

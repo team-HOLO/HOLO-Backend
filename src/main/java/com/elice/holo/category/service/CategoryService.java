@@ -11,15 +11,15 @@ import com.elice.holo.category.mapper.CategoryMapper;
 import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.common.exception.ErrorCode;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -137,39 +137,27 @@ public class CategoryService {
     // 검색 기능 추가
     public Page<CategoryListDto> getCategoriesPageable(int page, int size, String sortBy,
         String direction, String name) {
-        // 정렬 기준
-        List<Order> orders = new ArrayList<>();
+        // 정렬 기준을 HashMap으로 처리
+        Map<String, String> sortCriteria = new HashMap<>();
+        sortCriteria.put("createdAt", "createdAt");
+        sortCriteria.put("updatedAt", "updatedAt");
+        sortCriteria.put("name", "name");
+        sortCriteria.put("categoryId", "categoryId");
 
-        if (sortBy.equalsIgnoreCase("createdAt")) {
-            orders.add(new Order(
-                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                "createdAt"));
-        } else if (sortBy.equalsIgnoreCase("updatedAt")) {
-            orders.add(new Order(
-                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                "updatedAt"));
-        } else if (sortBy.equalsIgnoreCase("name")) {
-            orders.add(new Order(
-                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                "name"));
-        } else if (sortBy.equalsIgnoreCase("categoryId")) {
-            orders.add(new Order(
-                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                "categoryId"));
-        } else {
-            // 기본 정렬 기준 설정 (예: 이름)
-            orders.add(new Order(Sort.Direction.ASC, "name"));
-        }
+        // 정렬 속성 설정
+        String sortProperty = sortCriteria.getOrDefault(sortBy, "name");
+        Sort.Direction sortDirection =
+            direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(new Sort.Order(sortDirection, sortProperty));
 
-        Sort sort = Sort.by(orders);    // 정렬
-        Pageable pageable = PageRequest.of(page, size, sort);       // pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size, sort);  // pageable 객체 생성
 
         Page<Category> categoryPage;
         // 검색어가 있는 경우
         if (name != null && !name.isEmpty()) {
             categoryPage = categoryRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(name,
                 pageable);
-        } else {        // 검색어가 없는 경우 -> 단순 반환
+        } else {  // 검색어가 없는 경우
             categoryPage = categoryRepository.findByIsDeletedFalse(pageable);
         }
 

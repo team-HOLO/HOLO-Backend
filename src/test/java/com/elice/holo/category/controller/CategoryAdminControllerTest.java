@@ -50,6 +50,8 @@ class CategoryAdminControllerTest {
     private CategoryCreateDto categoryCreateDto;
     private CategoryResponseDto categoryResponseDto;
 
+    private final static String BASE_URL = "/api/admin/categories";
+
     @BeforeEach
     void setup() {
         // Create a Member entity for testing
@@ -87,7 +89,7 @@ class CategoryAdminControllerTest {
         Mockito.when(categoryService.getCategoryById(anyLong())).thenReturn(categoryDetailsDto);
 
         // When & Then
-        mockMvc.perform(get("/api/admin/categories/details/1"))
+        mockMvc.perform(get(BASE_URL + "/details/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Category 1"))
             .andExpect(jsonPath("$.description").value("Description"));
@@ -100,7 +102,7 @@ class CategoryAdminControllerTest {
         Mockito.when(categoryService.createCategory(any())).thenReturn(categoryResponseDto);
 
         // When & Then
-        mockMvc.perform(post("/api/admin/categories")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryCreateDto)))
             .andExpect(status().isCreated())
@@ -133,7 +135,7 @@ class CategoryAdminControllerTest {
         ));
 
         // When & Then
-        mockMvc.perform(post("/api/admin/categories")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryCreateDto)))
             .andExpect(status().isForbidden());
@@ -143,7 +145,7 @@ class CategoryAdminControllerTest {
     @DisplayName("Admin 권한으로 카테고리 삭제")
     void deleteCategory_withAdminRole_shouldReturnNoContent() throws Exception {
         // When & Then
-        mockMvc.perform(delete("/api/admin/categories/1"))
+        mockMvc.perform(delete(BASE_URL + "/1"))
             .andExpect(status().isNoContent());
     }
 
@@ -158,7 +160,7 @@ class CategoryAdminControllerTest {
             .thenReturn(Page.empty());
 
         // When & Then
-        mockMvc.perform(get("/api/admin/categories?page=0&size=15&sortBy=name&direction=asc"))
+        mockMvc.perform(get(BASE_URL + "?page=0&size=15&sortBy=name&direction=asc"))
             .andExpect(status().isOk());
     }
 }
