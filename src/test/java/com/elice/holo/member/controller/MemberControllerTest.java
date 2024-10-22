@@ -81,7 +81,7 @@ public class MemberControllerTest {
 
         // Then
         assertEquals(201, responseEntity.getStatusCodeValue());
-        assertEquals("회원가입 성공. JWT Token: mockJwtToken", responseEntity.getBody());
+        assertEquals("sign up! JWT Token: mockJwtToken", responseEntity.getBody());
         verify(memberService, times(1)).signupAndReturnEntity(signupRequest);
     }
 
@@ -112,7 +112,7 @@ public class MemberControllerTest {
 
         // Then
         assertEquals(200, responseEntity.getStatusCodeValue());
-        verify(response, times(1)).addCookie(any(Cookie.class));  // 쿠키가 추가되었는지 검증
+        verify(response, times(1)).addHeader(eq("Set-Cookie"), anyString());
     }
 
     @Test
@@ -140,9 +140,9 @@ public class MemberControllerTest {
         ResponseEntity<String> responseEntity = memberController.logout(response);
 
         // Then
-        verify(response, times(1)).addCookie(any(Cookie.class));
+        verify(response, times(1)).addHeader(eq("Set-Cookie"), anyString());
         assertEquals(200, responseEntity.getStatusCodeValue());
-        assertEquals("로그아웃 성공", responseEntity.getBody());
+        assertEquals("logout finished", responseEntity.getBody());
     }
 
     @Test
