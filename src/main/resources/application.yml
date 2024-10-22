@@ -98,6 +98,10 @@ spring:
       on-profile: prod
 
   # H2 DB 설정 for prod environment - 추후에 MySQL AWS RDS와 연결 예정
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:holo  # prod 환경에서의 메모리 H2 DB
