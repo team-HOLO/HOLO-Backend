@@ -22,7 +22,8 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found"),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Duplicate email"),
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Password does not match"),
-    FILE_SIZE_LIMIT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "file size limit exceed");
+    FILE_SIZE_LIMIT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "file size limit exceed"),
+    PRODUCT_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "Product not enough");
 
     private final HttpStatus status;
     private final String message;

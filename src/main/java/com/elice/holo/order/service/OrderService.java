@@ -151,4 +151,16 @@ public class OrderService {
                 () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
         order.softDelete();
     }
+
+    //주문 수정
+    @Transactional
+    public void updateShippingInfo(Long orderId, String newShippingAddress, String newRecipientName,
+        String newShippingRequest) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(
+                () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
+
+        order.updateShippingInfo(newShippingAddress, newRecipientName, newShippingRequest);
+    }
+
 }

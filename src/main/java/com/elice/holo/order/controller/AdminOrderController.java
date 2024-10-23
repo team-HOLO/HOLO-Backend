@@ -1,13 +1,17 @@
 package com.elice.holo.order.controller;
 
 import com.elice.holo.order.dto.OrderResponseDto;
-import com.elice.holo.order.dto.UpdateOrderStatusRequestDto;
+import com.elice.holo.order.dto.UpdateOrderStatusDto;
 import com.elice.holo.order.service.OrderService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/orders")
@@ -32,7 +36,8 @@ public class AdminOrderController {
 
     // 관리자가 주문 상태를 변경하는 기능
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<Void> updateOrderStatus(@PathVariable Long orderId, @RequestBody UpdateOrderStatusRequestDto request) {
+    public ResponseEntity<Void> updateOrderStatus(@PathVariable Long orderId,
+        @RequestBody UpdateOrderStatusDto request) {
         orderService.updateOrderStatus(orderId, request.getNewStatus());
         return ResponseEntity.ok().build();
     }
