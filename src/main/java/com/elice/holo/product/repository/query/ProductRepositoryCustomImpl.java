@@ -115,6 +115,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
     public Page<Product> findAdminPage(Pageable pageable) {
         List<Product> result = queryFactory
             .selectFrom(product)
+            .where(product.isDeleted.isFalse())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
