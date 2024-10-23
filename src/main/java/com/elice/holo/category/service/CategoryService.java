@@ -82,16 +82,30 @@ public class CategoryService {
         return categoryMapper.toCategoryResponseDto(updatedCategory);
     }
 
-    // 카테고리 삭제를 위한 메서드
+    // 카테고리 삭제를 위한 메서드 (하위 카테고리들도 삭제)
     @Transactional
     public void deleteCategory(Long id) {
-
         Category target = categoryRepository.findByCategoryIdAndIsDeletedFalse(id)
             .orElseThrow(() -> new CategoryNotFoundException(ErrorCode.CATEGORY_NOT_FOUND,
                 "해당 ID의 카테고리가 존재하지 않습니다."));
 
+        // 하위 카테고리들도 삭제 (soft delete)
+        deleteSubCategories(target);
+
         target.deleteCategory();
-        categoryRepository.save(target);
+        categoryRepository.save(target);  // 삭제된 상태 저장
+    }
+
+    // 하위 카테고리 재귀적으로 삭제하는 메서드
+    private void deleteSubCategories(Category parentCategory) {
+        List<Category> subCategories = categoryRepository.findByParentCategoryAndIsDeletedFalse(
+            parentCategory);
+
+        for (Category subCategory : subCategories) {
+            deleteSubCategories(subCategory);
+            subCategory.deleteCategory();
+            categoryRepository.save(subCategory);
+        }
     }
 
     // 모든 카테고리 목록을 반환
