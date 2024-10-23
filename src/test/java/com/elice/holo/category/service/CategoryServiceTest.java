@@ -136,7 +136,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("부모 카테고리 삭제 시 하위 카테고리도 삭제된다.")
+    @DisplayName("부모 카테고리 삭제 테스트 - 하위 카테고리도 삭제")
     void deleteCategoryWithSubCategoriesTest() {
         // given
         Long parentCategoryId = 1L;
@@ -165,7 +165,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("자식 카테고리만 삭제할 경우 부모 카테고리는 삭제되지 않는다.")
+    @DisplayName("자식 카테고리 삭제 테스트 - 부모 카테고리는 삭제되지 않음")
     void deleteOnlyChildCategoryTest() {
         // given
         Long parentCategoryId = 1L;
