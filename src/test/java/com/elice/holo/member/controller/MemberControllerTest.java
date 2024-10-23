@@ -216,13 +216,19 @@ public class MemberControllerTest {
     public void testDeleteMember() {
         // Given
         Long memberId = 1L;
+        HttpServletResponse response = mock(HttpServletResponse.class);  // HttpServletResponse 목 객체 생성
 
         // When
-        ResponseEntity<Void> responseEntity = memberController.deleteMember(memberId);
+        ResponseEntity<Void> responseEntity = memberController.deleteMember(memberId, response);
 
         // Then
         assertEquals(204, responseEntity.getStatusCodeValue());
         verify(memberService, times(1)).deleteMember(memberId);
+
+
+        verify(response, times(1)).addHeader(eq("Set-Cookie"), argThat(cookie ->
+                cookie.contains("Max-Age=0") && cookie.contains("jwtToken=;")
+        ));
     }
 
     @Test

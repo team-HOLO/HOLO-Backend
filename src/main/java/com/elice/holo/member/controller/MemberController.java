@@ -108,10 +108,15 @@ public class MemberController {
 
     // 회원 삭제 API
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId) {
+    public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId, HttpServletResponse response) {
         memberService.deleteMember(memberId);
+
+        // 로그아웃 시와 동일하게 쿠키 삭제
+        setJwtCookie(response, null, 0);
+
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/check-admin")
     public ResponseEntity<Boolean> checkAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
