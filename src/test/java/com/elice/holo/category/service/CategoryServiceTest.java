@@ -109,6 +109,27 @@ class CategoryServiceTest {
     }
 
     @Test
+    @DisplayName("카테고리 등록 실패 테스트 - 존재하지 않는 부모 카테고리로 카테고리 등록 시 예외 발생")
+    void createCategoryWithInvalidParentTest() {
+        // given
+        Long invalidParentCategoryId = 999L;
+        CategoryCreateDto categoryCreateDto = new CategoryCreateDto("가구", "1인용 가구",
+            invalidParentCategoryId);
+
+        // 이름은 중복되지 않음
+        when(categoryRepository.existsByNameAndIsDeletedFalse(
+            categoryCreateDto.getName())).thenReturn(false);
+        // 존재하지 않는 부모 카테고리
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(
+            invalidParentCategoryId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(CategoryNotFoundException.class,
+            () -> categoryService.createCategory(categoryCreateDto));
+    }
+
+
+    @Test
     @DisplayName("카테고리 업데이트 테스트")
     void updateCategoryTest() {
         // given
