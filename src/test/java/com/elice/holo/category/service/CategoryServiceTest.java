@@ -13,8 +13,10 @@ import static org.mockito.Mockito.when;
 
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
+import com.elice.holo.category.dto.CategoryDetailsDto;
 import com.elice.holo.category.dto.CategoryListDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
+import com.elice.holo.category.exception.CategoryNotFoundException;
 import com.elice.holo.category.exception.DuplicateCategoryNameException;
 import com.elice.holo.category.mapper.CategoryMapper;
 import com.elice.holo.category.repository.CategoryRepository;
@@ -210,6 +212,109 @@ class CategoryServiceTest {
         assertEquals("category1", result.get(0).getName());
         assertEquals("category2", result.get(1).getName());
     }
+
+    @Test
+    @DisplayName("카테고리 상세정보 조회 테스트")
+    public void testGetCategoryById() {
+        // given
+        Long categoryId = 1L;
+        Category category = createCategory(categoryId, "Category1", "Description");
+
+        CategoryDetailsDto categoryDetailsDto = new CategoryDetailsDto(categoryId, "Category1",
+            "Description", null);
+
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
+            Optional.of(category));
+        when(categoryMapper.toCategoryDetailsDto(category)).thenReturn(categoryDetailsDto);
+
+        // when
+        CategoryDetailsDto result = categoryService.getCategoryById(categoryId);
+
+        // then
+        assertNotNull(result);
+        assertEquals("Category1", result.getName());
+    }
+
+    @Test
+    @DisplayName("카테고리 상세정보 조회 테스트 - 존재하지 않는 ID로 카테고리 상세정보 조회시 예외 발생")
+    public void testGetCategoryByIdWithInvalidId() {
+        // given
+        Long invalidCategoryId = 999L;
+
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(invalidCategoryId)).thenReturn(
+            Optional.empty());
+
+        // when & then
+        assertThrows(CategoryNotFoundException.class,
+            () -> categoryService.getCategoryById(invalidCategoryId));
+    }
+
+    @Test
+    @DisplayName("삭제된 카테고리 조회 시 예외 발생")
+    public void testGetDeletedCategory() {
+        // given
+        Long categoryId = 1L;
+
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
+            Optional.empty());
+
+        // when & then
+        assertThrows(CategoryNotFoundException.class,
+            () -> categoryService.getCategoryById(categoryId));
+    }
+
+
+    @Test
+    @DisplayName("최상위 카테고리 조회 테스트")
+    public void testGetTopLevelCategories() {
+        // given
+        Category topCategory = createCategory(1L, "topCategory", "description");
+
+        CategoryResponseDto topCategoryDto = new CategoryResponseDto(1L, "topCategory",
+            new ArrayList<>());
+
+        List<Category> topCategories = Arrays.asList(topCategory);
+
+        when(categoryRepository.findByIsDeletedFalseAndParentCategoryIsNull()).thenReturn(
+            topCategories);
+        when(categoryMapper.toCategoryResponseDto(topCategory)).thenReturn(topCategoryDto);
+
+        // when
+        List<CategoryResponseDto> result = categoryService.getTopLevelCategories();
+
+        // then
+        assertEquals(1, result.size());
+        assertEquals("topCategory", result.getFirst().getName());
+    }
+
+    @Test
+    @DisplayName("하위 카테고리 목록 조회 테스트")
+    public void testGetSubCategories() {
+        // given
+        Long categoryId = 1L;
+        Category parentCategory = createCategory(categoryId, "상위 카테고리", "설명1");
+
+        Category subCategory = createCategory(2L, "하위 카테고리", "설명2");
+
+        List<Category> subCategories = Arrays.asList(subCategory);
+        CategoryResponseDto subCategoryDto = new CategoryResponseDto(2L, "하위 카테고리",
+            new ArrayList<>());
+
+        // mocking
+        when(categoryRepository.findByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(
+            Optional.of(parentCategory));
+        when(categoryRepository.findByParentCategoryAndIsDeletedFalse(parentCategory)).thenReturn(
+            subCategories);
+        when(categoryMapper.toCategoryResponseDto(subCategory)).thenReturn(subCategoryDto);
+
+        // when
+        List<CategoryResponseDto> result = categoryService.getSubCategories(categoryId);
+
+        // then
+        assertEquals(1, result.size());
+        assertEquals("하위 카테고리", result.getFirst().getName());
+    }
+
 
     @Test
     @DisplayName("페이지네이션 및 검색 기능 테스트 - 검색어 포함")
