@@ -8,6 +8,7 @@ import com.elice.holo.member.exception.MemberNotFoundException;
 import com.elice.holo.member.exception.PasswordMismatchException;
 import com.elice.holo.order.exception.OrderNotCancelableException;
 import com.elice.holo.order.exception.OrderNotFoundException;
+import com.elice.holo.order.exception.ProductNotEnoughException;
 import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.exception.InvalidFileExtensionException;
 import com.elice.holo.product.exception.ProductNotFoundException;
@@ -56,6 +57,20 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
+
+    // 수량 초과 관련 예외 처리
+    @ExceptionHandler(ProductNotEnoughException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotEnoughException(
+        ProductNotEnoughException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+            .status(ErrorCode.PRODUCT_NOT_ENOUGH.getStatus().value())
+            .message(ex.getMessage())
+            .build();
+
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
 
     @ExceptionHandler(OrderNotCancelableException.class)
     public ResponseEntity<ErrorResponse> handleOrderNotCancelableException(

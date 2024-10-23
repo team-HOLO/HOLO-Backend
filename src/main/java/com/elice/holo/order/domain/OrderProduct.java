@@ -1,5 +1,7 @@
 package com.elice.holo.order.domain;
 
+import com.elice.holo.common.exception.ErrorCode;
+import com.elice.holo.order.exception.ProductNotEnoughException;
 import com.elice.holo.product.domain.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,13 +50,15 @@ public class OrderProduct {
     private String size;
 
     // 팩토리 메서드
-    public static OrderProduct createOrderProduct(Product product, int quantity, String color, String size) {
+    public static OrderProduct createOrderProduct(Product product, int quantity, String color,
+        String size) {
         if (!product.canReduceStock(quantity)) {
-            throw new IllegalStateException("재고가 부족합니다.");
+            throw new ProductNotEnoughException(ErrorCode.PRODUCT_NOT_ENOUGH, "재고가 부족합니다.");
         }
         product.reduceStock(quantity);  // 재고 감소
         return new OrderProduct(product, quantity, color, size);
     }
+
     // private 생성자
     private OrderProduct(Product product, int quantity, String color, String size) {
         this.product = product;

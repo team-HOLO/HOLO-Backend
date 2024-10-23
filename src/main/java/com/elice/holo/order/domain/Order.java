@@ -106,4 +106,12 @@ public class Order extends BaseEntity {
     public void softDelete() {
         this.isDeleted = true;
     }
+
+    // 주문수정 메서드 (배송지, 배송받는사람, 배송요청사항)
+    public void updateShippingInfo(String newShippingAddress, String newRecipientName,
+        String newShippingRequest) {
+        this.shippingAddress = newShippingAddress;
+        this.recipientName = newRecipientName;
+        this.shippingRequest = newShippingRequest;
+    }
 }
