@@ -21,8 +21,8 @@ public enum ErrorCode {
     CART_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Cart product not found"),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found"),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Duplicate email"),
-    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Password does not match");
-
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Password does not match"),
+    FILE_SIZE_LIMIT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "file size limit exceed");
 
     private final HttpStatus status;
     private final String message;

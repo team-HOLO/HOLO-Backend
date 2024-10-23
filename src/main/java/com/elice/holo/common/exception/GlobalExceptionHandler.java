@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RestControllerAdvice
@@ -126,10 +127,21 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.DUPLICATE_EMAIL);
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
+
     @ExceptionHandler(PasswordMismatchException.class)
-    public ResponseEntity<ErrorResponse> handlePasswordMismatchException(PasswordMismatchException ex) {
+    public ResponseEntity<ErrorResponse> handlePasswordMismatchException(
+        PasswordMismatchException ex) {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = ErrorResponse.fromErrorCode(ErrorCode.PASSWORD_MISMATCH);
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleFileSizeLimitExceed(
+        MaxUploadSizeExceededException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(
+            ErrorCode.FILE_SIZE_LIMIT_EXCEEDED);
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
 }
