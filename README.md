@@ -24,13 +24,20 @@ HOLO는 인테리어 제품을 쉽고 빠르게 구매할 수 있습니다!
     - 상품 관리
     - 카테고리 관리
     - 주문 관리
-
+- 디스코드 봇
+	- 새로운 주문 등록 알림
+	- 주문 정보 수정 알림
+	- 주문 취소 알림
 # 기술 스택 -> 버전 추가
 - **Frontend** : React(18.3.1), Material UI(6.1.3)
-- **Backend** : Spring Boot(3.3.4), MySQL Community(8.0.39)
-- **Authentication** : JWT
+- **Backend** : Spring Boot(3.3.4), MySQL Community(8.0.39),Java(21)
+- **Storage** : AWS S3
+- **Database** : AWS RDS, MySQL Community(8.0.39)
+- **Test** : junit(5.10.3)
+- **Authentication** : JWT, Google OAuth2
 - **Security** : Spring Security6
-- **Deployment**: Netlify(Frontend), Github Actions(CI/CD), AWS EC2(Backend, Ubuntu 22.04.5 LTS)
+- **Web Server** : Nginx
+- **Deployment**: Netlify(Frontend), AWS EC2(Backend, Ubuntu 22.04.5 LTS), Github Actions(CI/CD)
 
 # 아키텍처
 [아키텍처 이미지](~~~)
