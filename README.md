@@ -15,40 +15,41 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
   | 임서현       | 팀원 (Member) | 장바구니 (Cart)          | localstorge를 통해 장바구니 등록 /수량 수정/ 선택 삭제/ 전체 삭제/조회/ 총 가격 계산 |
 
 # 핵심 기능
-- 일반 유저
-    - 장바구니
-    - 상품 구매
-    - Oauth 이용 로그인
-- 관리자
-    - 상품 관리
-    - 카테고리 관리
-    - 주문 관리
-- 디스코드 봇
-	- 새로운 주문 등록 알림
-	- 주문 정보 수정 알림
-	- 주문 취소 알림
+## 일반 유저
+### 장바구니
+### 상품 구매
+### Oauth 이용 로그인
+## 관리자
+### 상품 관리
+### 카테고리 관리
+![카테고리-시연-최종](/uploads/0b3d1ec0b2842c3df08694da9581f73a/카테고리-시연-최종.gif)
+### 주문 관리
+## 디스코드 봇
+### 새로운 주문 등록 알림
+### 주문 정보 수정 알림
+### 주문 취소 알림
   
 장바구니 기능
 ![장바구니_기능](/uploads/4798f39ab173c3ab0f8bdf7578e650de/장바구니_기능.gif)
-# 기술 스택 -> 버전 추가
+
 
 # 기술 스택
-- **Frontend** : React(18.3.1), Material UI(6.1.3)
-- **Backend** : Spring Boot(3.3.4), MySQL Community(8.0.39),Java(21)
-- **Storage** : AWS S3
-- **Database** : AWS RDS, MySQL Community(8.0.39)
-- **Test** : junit(5.10.3)
-- **Authentication** : JWT, Google OAuth2
-- **Security** : Spring Security6
-- **Web Server** : Nginx
+- **Frontend** : React(v18.3.1), Material UI(v6.1.3)
+- **Backend** : Spring Boot(v3.3.4), Java(v21)
+- **Storage** : AWS S3(이미지 파일 저장)
+- **Database** : AWS RDS (MySQL Community v8.0.39)
+- **Test** : Junit(v5.10.3)
+- **Security & Authentication** : Spring Security (v6), JWT, Google OAuth2
 - **Deployment**: Netlify(Frontend), AWS EC2(Backend, Ubuntu 22.04.5 LTS), Github Actions(CI/CD)
+- **Domain & DNS**: AWS Route 53
+- **SSL/TLS**: Let's Encrypt(TLSv1.2, v1.3)
 
 # 아키텍처
 ![HOLO_Architecture_Diagram](/uploads/26d47ea3156341c8afd23ffc5b3bfbbf/HOLO_sample_.drawio__3_.png)
 - Netlify를 이용한 React 프론트 배포
 - Nginx는 SSL을 처리하고, 리버스 프록시로서 클라이언트 요청을 Spring 애플리케이션으로 전달
 - AWS S3, RDS를 사용해 데이터 저장 및 이미지 업로드 기능 제공
-- Github Actions를 이용한 배포 자동화
+- Github Actions를 이용한 CI/CD
 - Google Oauth를 사용한 사용자 인증 및 인가 기능 제공
 - 주문 생성, 수정, 삭제와 같은 주요 이벤트는 Discord Webhook을 통해 관리자에게 실시간으로 알림 전달
 
@@ -83,4 +84,4 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 
 # Links
 - https://elice-holo.netlify.app
-- API 서버: https://elice-holo.shop
+- API 서버: https://elice-holo.shop/api/categories/all
