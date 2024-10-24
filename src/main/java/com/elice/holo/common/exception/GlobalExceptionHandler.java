@@ -6,6 +6,7 @@ import com.elice.holo.member.exception.AccessDeniedException;
 import com.elice.holo.member.exception.DuplicateEmailException;
 import com.elice.holo.member.exception.MemberNotFoundException;
 import com.elice.holo.member.exception.PasswordMismatchException;
+import com.elice.holo.order.exception.DiscordMessageFailedException;
 import com.elice.holo.order.exception.OrderNotCancelableException;
 import com.elice.holo.order.exception.OrderNotFoundException;
 import com.elice.holo.order.exception.ProductNotEnoughException;
@@ -157,6 +158,16 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = ErrorResponse.fromErrorCode(
             ErrorCode.FILE_SIZE_LIMIT_EXCEEDED);
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
+    // 디스코드 메세지 전송 실패 시 예외 처리
+    @ExceptionHandler(DiscordMessageFailedException.class)
+    public ResponseEntity<ErrorResponse> handleDiscordMessageFailedException(
+        DiscordMessageFailedException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.fromErrorCode(
+            ErrorCode.DISCORD_MESSAGE_FAILED);
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
 }

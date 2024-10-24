@@ -23,7 +23,8 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Duplicate email"),
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Password does not match"),
     FILE_SIZE_LIMIT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "file size limit exceed"),
-    PRODUCT_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "Product not enough");
+    PRODUCT_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "Product not enough"),
+    DISCORD_MESSAGE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send Discord message");
 
     private final HttpStatus status;
     private final String message;
