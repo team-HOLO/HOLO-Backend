@@ -20,7 +20,7 @@ public interface MemberMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "tel", target = "tel")
     @Mapping(source = "gender", target = "gender")
-    @Mapping(source = "age", target = "age")
+//    @Mapping(source = "age", target = "age")
     @Mapping(source = "isAdmin", target = "isAdmin")
     MemberResponseDto toDto(Member member);
 

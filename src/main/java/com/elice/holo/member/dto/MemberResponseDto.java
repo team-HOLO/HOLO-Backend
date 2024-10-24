@@ -26,7 +26,7 @@ public class MemberResponseDto {
         this.name = member.getName();
         this.tel = member.getTel();
         this.gender = member.getGender();
-        this.age = member.getAge();
+//        this.age = member.getAge();
         this.isAdmin = member.getIsAdmin();
     }
 }

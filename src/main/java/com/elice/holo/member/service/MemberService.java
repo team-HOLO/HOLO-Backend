@@ -117,7 +117,7 @@ public class MemberService {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
 
-        member.updateMemberInfo(requestDto.getPassword(),requestDto.getName(), requestDto.getTel(), requestDto.getAge(), requestDto.getGender());
+        member.updateMemberInfo(requestDto.getPassword(),requestDto.getName(), requestDto.getTel(),  requestDto.getGender());
         memberRepository.save(member);
 
         return memberMapper.toDto(member);

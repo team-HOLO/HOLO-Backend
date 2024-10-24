@@ -68,9 +68,9 @@ public class MemberDetails implements UserDetails {
         return member.getGender();
     }
 
-    public Integer getAge() {
-        return member.getAge();
-    }
+//    public Integer getAge() {
+//        return member.getAge();
+//    }
 
     public String getTel() {
         return member.getTel();

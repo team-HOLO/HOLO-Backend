@@ -42,8 +42,8 @@ public class Member {
     @Column(name = "tel")
     private String tel;
 
-    @Column(name = "age")
-    private Integer age;
+//    @Column(name = "age")
+//    private Integer age;
 
     @Column(name = "gender")
     private Boolean gender;
@@ -56,13 +56,13 @@ public class Member {
 
     // 회원 정보 수정 메서드
     public void updateMemberInfo(String password,String  name, String tel,
-        Integer age,
+
         Boolean gender) {
         this.password = password;
         this.name = name;
         this.email = email;
         this.tel = tel;
-        this.age = age;
+//        this.age = age;
         this.gender = gender;
     }
 
