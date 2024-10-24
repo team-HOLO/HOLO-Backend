@@ -21,5 +21,5 @@ public class MemberSignupRequestDto {
     private String tel;
     private Boolean gender;
 
-    private Integer age;
+//    private Integer age;
 }

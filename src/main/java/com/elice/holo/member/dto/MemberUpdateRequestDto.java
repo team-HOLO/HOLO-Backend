@@ -18,5 +18,5 @@ public class MemberUpdateRequestDto {
     private String name;
     private String tel;
     private Boolean gender;
-    private Integer age;
+//    private Integer age;
 }
