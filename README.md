@@ -45,7 +45,7 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 ![image](/uploads/caee15e25414f21ce5dc126c4b4df4d4/image.png)
 
 # API 문서
-- API 문서 -> 노션에 있는거 Gitlab 위키에 옮겨서 링크
+- [API 문서](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/Documents/API-%EB%AA%85%EC%84%B8%EC%84%9C)
 - Swagger-UI: https://elice-holo.shop/swagger-ui/index.html
 
 # 트러블슈팅
