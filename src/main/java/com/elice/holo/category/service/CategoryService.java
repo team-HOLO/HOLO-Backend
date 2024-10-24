@@ -3,6 +3,7 @@ package com.elice.holo.category.service;
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.dto.CategoryCreateDto;
 import com.elice.holo.category.dto.CategoryDetailsDto;
+import com.elice.holo.category.dto.CategoryDto;
 import com.elice.holo.category.dto.CategoryListDto;
 import com.elice.holo.category.dto.CategoryResponseDto;
 import com.elice.holo.category.exception.CategoryNotFoundException;
@@ -111,9 +112,7 @@ public class CategoryService {
     // 모든 카테고리 목록을 반환
     public List<CategoryResponseDto> getAllCategories() {
         List<Category> categories = categoryRepository.findByIsDeletedFalse();
-        return categories.stream()
-            .map(categoryMapper::toCategoryResponseDto)
-            .collect(Collectors.toList());
+        return getCategoryResponseDtosIsNotDeleted(categories);
     }
 
     // 카테고리 상세 정보 조회하는 메서드
@@ -126,11 +125,29 @@ public class CategoryService {
     }
 
 
-    // 최상위 카테고리 목록을 반환하는 메서드
     public List<CategoryResponseDto> getTopLevelCategories() {
         List<Category> topLevelCategories = categoryRepository.findByIsDeletedFalseAndParentCategoryIsNull();
+        return getCategoryResponseDtosIsNotDeleted(topLevelCategories);
+    }
+
+    private List<CategoryResponseDto> getCategoryResponseDtosIsNotDeleted(
+        List<Category> topLevelCategories) {
         return topLevelCategories.stream()
-            .map(categoryMapper::toCategoryResponseDto)
+            .map(category -> {
+                // 하위 카테고리 중 isDeleted가 false인 것만 포함
+                List<CategoryDto> filteredSubCategories = category.getSubCategories().stream()
+                    .filter(subCategory -> !Boolean.TRUE.equals(
+                        subCategory.getIsDeleted())) // isDeleted가 true인 것 제외
+                    .map(categoryMapper::toCategoryDto) // CategoryDto로 변환
+                    .collect(Collectors.toList());
+
+                // 필터링된 하위 카테고리를 포함하여 CategoryResponseDto 생성
+                return new CategoryResponseDto(
+                    category.getCategoryId(),
+                    category.getName(),
+                    filteredSubCategories // 필터링된 하위 카테고리 전달
+                );
+            })
             .collect(Collectors.toList());
     }
 
