@@ -16,6 +16,7 @@ import com.elice.holo.order.dto.OrderProductRequestDto;
 import com.elice.holo.order.dto.OrderRequestDto;
 import com.elice.holo.order.dto.UpdateShippingInfoDto;
 import com.elice.holo.order.repository.OrderRepository;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +56,9 @@ class OrderControllerTest {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     @BeforeEach
     public void mockMvcSetUp() {

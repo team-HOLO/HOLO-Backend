@@ -10,6 +10,7 @@ import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.domain.MemberDetails;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -60,6 +62,9 @@ public class ProductAdminControllerTest {
     CategoryRepository categoryRepository;
     @Autowired
     private ProductService productService;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     @BeforeEach
     public void mockMvcSetUp() {

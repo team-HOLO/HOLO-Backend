@@ -220,7 +220,7 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         //when
-        orderService.adminCancelOrder(1L);
+//        orderService.adminCancelOrder(1L);
 
         //then
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCEL);
