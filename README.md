@@ -25,7 +25,7 @@ HOLO는 인테리어 제품을 쉽고 빠르게 구매할 수 있습니다!
     - 카테고리 관리
     - 주문 관리
 
-# 기술 스택 -> 버전 추가
+# 기술 스택
 - **Frontend** : React(18.3.1), Material UI(6.1.3)
 - **Backend** : Spring Boot(3.3.4), MySQL Community(8.0.39)
 - **Authentication** : JWT
@@ -33,10 +33,13 @@ HOLO는 인테리어 제품을 쉽고 빠르게 구매할 수 있습니다!
 - **Deployment**: Netlify(Frontend), Github Actions(CI/CD), AWS EC2(Backend, Ubuntu 22.04.5 LTS)
 
 # 아키텍처
-[아키텍처 이미지](~~~)
-- AWS - EC2(SpringBoot, Spring Security, Nginx) / RDS MySQL / S3
-- Netlify 프론트 배포
-- Github Actions 배포 자동화
+![HOLO_Architecture_Diagram](/uploads/26d47ea3156341c8afd23ffc5b3bfbbf/HOLO_sample_.drawio__3_.png)
+- Netlify를 이용한 React 프론트 배포
+- Nginx는 SSL을 처리하고, 리버스 프록시로서 클라이언트 요청을 Spring 애플리케이션으로 전달
+- AWS S3, RDS를 사용해 데이터 저장 및 이미지 업로드 기능 제공
+- Github Actions를 이용한 배포 자동화
+- Google Oauth를 사용한 사용자 인증 및 인가 기능 제공
+- 주문 생성, 수정, 삭제와 같은 주요 이벤트는 Discord Webhook을 통해 관리자에게 실시간으로 알림 전달
 
 
 # ERD
