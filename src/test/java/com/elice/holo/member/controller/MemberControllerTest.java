@@ -61,7 +61,7 @@ public class MemberControllerTest {
     public void testSignupSuccess() {
         // Given
         MemberSignupRequestDto signupRequest = new MemberSignupRequestDto(
-            "test@example.com", "password", "Test User", false, "010-1234-5678", true, 25);
+            "test@example.com", "password", "Test User", false, "010-1234-5678", true);
 
 
         Member mockMember = Member.builder()
@@ -71,7 +71,7 @@ public class MemberControllerTest {
             .isAdmin(false)
             .tel("010-1234-5678")
             .gender(true)
-            .age(25)
+
             .isDeleted(false)
             .build();
 
@@ -103,7 +103,7 @@ public class MemberControllerTest {
             .isAdmin(false)
             .tel("010-1234-5678")
             .gender(true)
-            .age(25)
+
             .isDeleted(false)
             .build();
 
@@ -199,8 +199,8 @@ public class MemberControllerTest {
             "newPassword",      // 패스워드 추가
             "Updated User",
             "010-9999-8888",
-            true,
-            26
+            true
+
         );
         MemberResponseDto updatedMember = new MemberResponseDto(memberId, "test@example.com", "Updated User", "010-9999-8888", true, 26, false);
 

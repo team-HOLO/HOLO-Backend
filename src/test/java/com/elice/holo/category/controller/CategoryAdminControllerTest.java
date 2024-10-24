@@ -72,7 +72,7 @@ class CategoryAdminControllerTest {
             .isAdmin(true)
             .isDeleted(false)
             .tel("010-1234-5678")
-            .age(30)
+
             .gender(true)
             .build();
 
@@ -130,7 +130,7 @@ class CategoryAdminControllerTest {
             .isAdmin(false)  // 일반 유저 권한 설정
             .isDeleted(false)
             .tel("010-1234-5678")
-            .age(25)
+
             .gender(true)
             .build();
 

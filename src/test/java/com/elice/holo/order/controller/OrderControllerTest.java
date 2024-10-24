@@ -367,7 +367,7 @@ class OrderControllerTest {
             .isAdmin(false)
             .isDeleted(false)
             .tel("010-1234-5678")
-            .age(30)
+
             .gender(true)
             .build();
 

@@ -16,6 +16,8 @@ import com.elice.holo.member.dto.MemberMapper;
 import com.elice.holo.member.dto.MemberResponseDto;
 import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
+import com.elice.holo.member.exception.DuplicateEmailException;
+import com.elice.holo.member.exception.MemberNotFoundException;
 import com.elice.holo.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +58,7 @@ class MemberServiceTest {
         requestDto.setName("유재석");
         requestDto.setTel("010-1234-5678");
         requestDto.setGender(true);
-        requestDto.setAge(45);
+
 
         // 회원가입 후 반환할 Member 객체
         Member member = Member.builder()
@@ -65,7 +67,7 @@ class MemberServiceTest {
             .name(requestDto.getName())
             .tel(requestDto.getTel())
             .gender(requestDto.getGender())
-            .age(requestDto.getAge())
+
             .isDeleted(false)
             .build();
 
@@ -84,7 +86,7 @@ class MemberServiceTest {
         assertEquals(result.getName(), requestDto.getName());
         assertEquals(result.getTel(), requestDto.getTel());
         assertEquals(result.getGender(), requestDto.getGender());
-        assertEquals(result.getAge(), requestDto.getAge());
+
     }
 
     @DisplayName("로그인 서비스 테스트")
@@ -101,7 +103,7 @@ class MemberServiceTest {
             .name("유재석")
             .tel("010-1234-5678")
             .gender(true)
-            .age(45)
+
             .isDeleted(false)
             .isAdmin(false)
             .build();
@@ -120,7 +122,7 @@ class MemberServiceTest {
         assertEquals(result.getName(), "유재석");
     }
 
-    @DisplayName("회원 로그인 실패 - 존재하지 않는 회원")
+    @DisplayName("로그인 시 존재하지 않는 회원 예외 발생 테스트")
     @Test
     void loginFailTest() {
         // Given
@@ -130,9 +132,10 @@ class MemberServiceTest {
 
         // When
         when(memberRepository.findByEmailAndIsDeletedFalse(loginRequest.getEmail()))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> memberService.login(loginRequest));
+        // Then
+        assertThrows(MemberNotFoundException.class, () -> memberService.login(loginRequest));
     }
 
     @DisplayName("회원 로그인 실패 - 삭제된 회원")
@@ -145,10 +148,10 @@ class MemberServiceTest {
 
         // When
         when(memberRepository.findByEmailAndIsDeletedFalse(loginRequest.getEmail()))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
         // Then
-        assertThrows(IllegalArgumentException.class, () -> memberService.login(loginRequest));
+        assertThrows(MemberNotFoundException.class, () -> memberService.login(loginRequest));
     }
 
     @DisplayName("회원 삭제(소프트 딜리트) 테스트")
@@ -179,10 +182,10 @@ class MemberServiceTest {
 
         // When
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
-            Optional.empty());
+                Optional.empty());
 
-        //  Then
-        assertThrows(IllegalArgumentException.class, () -> memberService.deleteMember(memberId));
+        // Then
+        assertThrows(MemberNotFoundException.class, () -> memberService.deleteMember(memberId));
         verify(memberRepository, never()).save(any(Member.class));
     }
 
@@ -194,10 +197,10 @@ class MemberServiceTest {
 
         // When
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
-            Optional.empty());
+                Optional.empty());
 
         // Then
-        assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
+        assertThrows(MemberNotFoundException.class, () -> memberService.getMemberById(memberId));
     }
 
     @DisplayName("회원 정보 수정 테스트")
@@ -210,7 +213,7 @@ class MemberServiceTest {
         updateRequest.setName("강호동");
         updateRequest.setTel("010-8765-4321");
         updateRequest.setGender(false);
-        updateRequest.setAge(50);
+
 
         Member existingMember = Member.builder()
             .email("test@test.com")
@@ -218,7 +221,7 @@ class MemberServiceTest {
             .name("유재석")
             .tel("010-1234-5678")
             .gender(true)
-            .age(45)
+
             .isDeleted(false)
             .isAdmin(false)
             .build();
@@ -229,7 +232,7 @@ class MemberServiceTest {
             .name(updateRequest.getName()) // 수정된 이름
             .tel(updateRequest.getTel()) // 수정된 전화번호
             .gender(updateRequest.getGender()) // 수정된 성별
-            .age(updateRequest.getAge()) // 수정된 나이
+
             .isDeleted(false)
             .isAdmin(false)
             .build();
@@ -247,7 +250,7 @@ class MemberServiceTest {
         assertEquals(result.getName(), updateRequest.getName());
         assertEquals(result.getTel(), updateRequest.getTel());
         assertEquals(result.getGender(), updateRequest.getGender());
-        assertEquals(result.getAge(), updateRequest.getAge());
+
 
         verify(memberRepository).save(existingMember);
     }
@@ -263,7 +266,7 @@ class MemberServiceTest {
             .name("AdminUser")
             .tel("010-1234-5678")
             .gender(true)
-            .age(30)
+
             .isDeleted(false)
             .isAdmin(true)
             .build();
@@ -273,7 +276,7 @@ class MemberServiceTest {
             .name("NormalUser")
             .tel("010-8765-4321")
             .gender(false)
-            .age(25)
+
             .isDeleted(false)
             .isAdmin(false)
             .build();
@@ -320,7 +323,7 @@ class MemberServiceTest {
             .name("유재석")
             .tel("010-1234-5678")
             .gender(true)
-            .age(45)
+
             .isDeleted(false)
             .isAdmin(false)
             .build();
@@ -347,7 +350,7 @@ class MemberServiceTest {
         assertEquals(result.getName(), "유재석");
         assertEquals(result.getTel(), "010-1234-5678");
         assertEquals(result.getGender(), true);
-        assertEquals(result.getAge(), 45);
+
         verify(memberRepository, times(1)).findByMemberIdAndIsDeletedFalse(memberId);
         verify(memberMapper, times(1)).toDto(member);
     }
@@ -360,13 +363,13 @@ class MemberServiceTest {
 
         // When
         when(memberRepository.findByMemberIdAndIsDeletedFalse(memberId)).thenReturn(
-            Optional.empty());
+                Optional.empty());
 
         // Then
-        assertThrows(IllegalArgumentException.class, () -> memberService.getMemberById(memberId));
+        assertThrows(MemberNotFoundException.class, () -> memberService.getMemberById(memberId));
     }
 
-    @DisplayName("이미 존재하는 이메일로 회원가입 시도 테스트")
+    @DisplayName("회원가입 시 중복된 이메일로 인한 예외 발생 테스트")
     @Test
     void signupExistingEmailTest() {
         // Given
@@ -376,16 +379,13 @@ class MemberServiceTest {
         requestDto.setName("유재석");
         requestDto.setTel("010-1234-5678");
         requestDto.setGender(true);
-        requestDto.setAge(45);
 
+        // When
+        when(memberRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail()))
+                .thenReturn(Optional.of(new Member()));
 
-        when(memberRepository.findByEmailAndIsDeletedFalse("test@test.com"))
-            .thenReturn(Optional.of(Member.builder().build()));
-
-
-        assertThrows(IllegalArgumentException.class, () -> memberService.signupAndReturnEntity(requestDto));
-
-
+        // Then
+        assertThrows(DuplicateEmailException.class, () -> memberService.signupAndReturnEntity(requestDto));
         verify(memberRepository, never()).save(any(Member.class));
     }
 }
