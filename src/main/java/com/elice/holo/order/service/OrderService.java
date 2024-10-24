@@ -67,7 +67,7 @@ public class OrderService {
         int totalPrice = calculateTotalPrice(orderProducts);
 
         Order order = Order.createOrder(member, totalPrice, requestDto.getShippingAddress(),
-            requestDto.getShippingRequest(), requestDto.getRecipientName(),
+            requestDto.getRecipientName(), requestDto.getShippingRequest(),
             orderProducts);
 
         orderRepository.save(order);
