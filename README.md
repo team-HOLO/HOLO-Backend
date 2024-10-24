@@ -40,7 +40,7 @@ HOLO는 인테리어 제품을 쉽고 빠르게 구매할 수 있습니다!
 
 
 # ERD
-- image/스크린샷_2024-10-24_104847.png
+![image](/uploads/8ba912c2bca9f44e802747f7cc313b88/image.png)
 
 # API 문서
 - API 문서 -> 노션에 있는거 Gitlab 위키에 옮겨서 링크
