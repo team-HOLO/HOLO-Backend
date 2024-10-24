@@ -67,6 +67,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
             .where(productNameFilter(cond), product.isDeleted.isFalse())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
+            .orderBy(product.createdAt.desc())
             .fetch();
     }
 
