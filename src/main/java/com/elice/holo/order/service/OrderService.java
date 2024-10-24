@@ -35,6 +35,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
+    private final DiscordWebhookService discordWebhookService; // Discord 알림 서비스 추가
 
 
     // 주문 생성
@@ -70,6 +71,8 @@ public class OrderService {
             orderProducts);
 
         orderRepository.save(order);
+
+        discordWebhookService.sendOrderAddedNotification(requestDto, member.getName());
 
         return order.getOrderId();
     }
@@ -117,6 +120,7 @@ public class OrderService {
         for (OrderProduct orderProduct : order.getOrderProducts()) {
             orderProduct.getProduct().addStock(orderProduct.getQuantity());
         }
+        discordWebhookService.sendOrderCanceledNotification(order);
     }
 
     // 관리자 주문상태 변경
@@ -158,6 +162,8 @@ public class OrderService {
                 () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
 
         order.updateShippingInfo(newShippingAddress, newRecipientName, newShippingRequest);
+        discordWebhookService.sendOrderUpdatedNotification(orderId, newShippingAddress,
+            newRecipientName, newShippingRequest);
     }
 
 }

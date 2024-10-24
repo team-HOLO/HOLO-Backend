@@ -57,6 +57,10 @@ springdoc:
     description: API documentation for the HOLO 쇼핑몰 프로젝트
     version: 1.0.0
 
+# discord 설정
+discord:
+  webhook-url: ${DISCORD_WEBHOOK_URL}
+
 # dev 환경 설정
 ---
 spring:
