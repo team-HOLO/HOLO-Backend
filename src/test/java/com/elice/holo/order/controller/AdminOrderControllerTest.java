@@ -16,6 +16,7 @@ import com.elice.holo.order.dto.OrderProductRequestDto;
 import com.elice.holo.order.dto.OrderRequestDto;
 import com.elice.holo.order.dto.UpdateOrderStatusDto;
 import com.elice.holo.order.repository.OrderRepository;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.servlet.MockMvc;
@@ -55,13 +57,13 @@ class AdminOrderControllerTest {
     private ProductRepository productRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     @BeforeEach
     public void mockMvcSetUp() {

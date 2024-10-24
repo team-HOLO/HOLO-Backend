@@ -13,6 +13,7 @@ import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.common.exception.ErrorCode;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.domain.MemberDetails;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.domain.ProductImage;
 import com.elice.holo.product.dto.AddProductRequest;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -60,6 +62,9 @@ class ProductControllerTest {
     CategoryRepository categoryRepository;
     @Autowired
     private ProductService productService;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -126,8 +131,8 @@ class ProductControllerTest {
         //then
         resultActions
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].name").value("의자")) // content 배열의 첫 번째 요소
-            .andExpect(jsonPath("$.content[1].price").value(100000)) // content 배열의 두 번째 요소
+            .andExpect(jsonPath("$.content[0].name").value("책상")) // content 배열의 첫 번째 요소
+            .andExpect(jsonPath("$.content[1].price").value(300000)) // content 배열의 두 번째 요소
             .andExpect(jsonPath("$.totalElements").value(2)) // 총 요소 수
             .andExpect(jsonPath("$.totalPages").value(1)); // 총 페이지 수
 

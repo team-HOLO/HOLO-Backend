@@ -7,6 +7,7 @@ import com.elice.holo.member.dto.MemberSignupRequestDto;
 import com.elice.holo.member.dto.MemberMapper;
 import com.elice.holo.member.dto.MemberUpdateRequestDto;
 import com.elice.holo.member.service.MemberService;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.elice.holo.token.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,6 +47,9 @@ public class MemberControllerTest {
 
     @InjectMocks
     private MemberController memberController;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     @BeforeEach
     public void setUp() {

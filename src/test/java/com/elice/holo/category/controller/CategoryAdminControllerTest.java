@@ -16,6 +16,7 @@ import com.elice.holo.category.dto.CategoryResponseDto;
 import com.elice.holo.category.service.CategoryService;
 import com.elice.holo.member.domain.Member;
 import com.elice.holo.member.domain.MemberDetails;
+import com.elice.holo.order.service.DiscordWebhookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,9 @@ class CategoryAdminControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private DiscordWebhookService discordWebhookService; // DiscordWebhookService Mock
 
     private CategoryDetailsDto categoryDetailsDto;
     private CategoryCreateDto categoryCreateDto;
