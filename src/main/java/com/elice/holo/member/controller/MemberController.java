@@ -52,7 +52,7 @@ public class MemberController {
         // 회원가입 후 회원 정보를 엔티티로 받음
         Member member = memberService.signupAndReturnEntity(requestDto);
         if (member == null) {
-            return ResponseEntity.status(400).body("already existing email!"); // 이메일 중복 시 에러 반환
+            return ResponseEntity.status(400).body("already existing email!");
         }
 
         // JWT 토큰 생성
@@ -78,7 +78,7 @@ public class MemberController {
     // 로그아웃 시 쿠키 삭제
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-        // 쿠키 삭제 (maxAge를 0으로 설정)
+
         setJwtCookie(response, null, 0);
         return ResponseEntity.ok("logout finished");
     }
@@ -111,7 +111,7 @@ public class MemberController {
     public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId, HttpServletResponse response) {
         memberService.deleteMember(memberId);
 
-        // 로그아웃 시와 동일하게 쿠키 삭제
+
         setJwtCookie(response, null, 0);
 
         return ResponseEntity.noContent().build();
@@ -133,17 +133,18 @@ public class MemberController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() &&
                 !(authentication instanceof AnonymousAuthenticationToken)) {
-            return ResponseEntity.ok(true);  // 로그인된 상태라면 true 반환
+            return ResponseEntity.ok(true);
         }
-        return ResponseEntity.ok(false);  // 로그인되지 않은 상태라면 false 반환
+        return ResponseEntity.ok(false);
     }
+    //현재 로그인한 사용자의 정보 반환
     @GetMapping("/me")
     public ResponseEntity<MemberResponseDto> getMyInfo() {
-        // SecurityContextHolder에서 현재 인증된 사용자 정보
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 현재 로그인한 사용자의 memberId로 회원 정보 조회
+
         MemberResponseDto memberResponseDto = memberService.getMemberById(memberDetails.getMemberId());
         return ResponseEntity.ok(memberResponseDto);
     }
