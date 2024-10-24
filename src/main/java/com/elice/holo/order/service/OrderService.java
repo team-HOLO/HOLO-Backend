@@ -119,19 +119,6 @@ public class OrderService {
         }
     }
 
-    // 관리자 주문최소(언제든 가능)
-    @Transactional
-    public void adminCancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(
-                () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
-        order.updateOrderStatus(OrderStatus.CANCEL);
-        // 주문취소시 상품의 puantity다시 복구
-        for (OrderProduct orderProduct : order.getOrderProducts()) {
-            orderProduct.getProduct().addStock(orderProduct.getQuantity());
-        }
-    }
-
     // 관리자 주문상태 변경
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
@@ -141,6 +128,12 @@ public class OrderService {
 
         // 주문 상태 업데이트
         order.updateOrderStatus(newStatus);
+        // 주문상태를 취소로 puantity다시 복구
+        if (newStatus == OrderStatus.CANCEL) {
+            for (OrderProduct orderProduct : order.getOrderProducts()) {
+                orderProduct.getProduct().addStock(orderProduct.getQuantity());
+            }
+        }
     }
 
     // 주문 삭제 (소프트 딜리트 적용)
@@ -149,6 +142,10 @@ public class OrderService {
         Order order = orderRepository.findByOrderIdAndIsDeletedFalse(orderId)
             .orElseThrow(
                 () -> new OrderNotFoundException(ErrorCode.ORDER_NOT_FOUND, "해당 주문을 찾을 수 없습니다."));
+        // 주문 상태가 CANCLE&FINISH 일때만 삭제가능
+        if (order.getStatus() != OrderStatus.CANCEL && order.getStatus() != OrderStatus.FINISH) {
+            throw new IllegalStateException("주문이 취소 상태가 아니므로 삭제할 수 없습니다.");
+        }
         order.softDelete();
     }
 

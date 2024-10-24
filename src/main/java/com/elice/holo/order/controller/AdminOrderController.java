@@ -27,13 +27,6 @@ public class AdminOrderController {
         return ResponseEntity.ok(orders);
     }
 
-    // 관리자 주문 취소
-    @PutMapping("/{orderId}/cancel")
-    public ResponseEntity<Void> adminCancelOrder(@PathVariable Long orderId) {
-        orderService.adminCancelOrder(orderId);
-        return ResponseEntity.ok().build();
-    }
-
     // 관리자가 주문 상태를 변경하는 기능
     @PutMapping("/{orderId}/status")
     public ResponseEntity<Void> updateOrderStatus(@PathVariable Long orderId,
@@ -41,4 +34,6 @@ public class AdminOrderController {
         orderService.updateOrderStatus(orderId, request.getNewStatus());
         return ResponseEntity.ok().build();
     }
+
+
 }
