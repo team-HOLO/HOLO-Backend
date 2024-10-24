@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseCookie;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/api/members")
@@ -33,41 +37,47 @@ public class MemberController {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
+
     // 쿠키 설정 메소드
     private void setJwtCookie(HttpServletResponse response, String token, long maxAge) {
         ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
-                .path("/")
-                .sameSite("None")
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(maxAge)
-                .build();
+            .path("/")
+            .sameSite("None")
+            .httpOnly(true)
+            .secure(true)
+            .maxAge(maxAge)
+            .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
-    // 회원가입 API
+    @Operation(summary = "회원가입", description = "새로운 회원을 등록합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+        @ApiResponse(responseCode = "400", description = "이미 존재하는 이메일")
+    })
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody MemberSignupRequestDto requestDto) {
-        // 회원가입 후 회원 정보를 엔티티로 받음
         Member member = memberService.signupAndReturnEntity(requestDto);
         if (member == null) {
             return ResponseEntity.status(400).body("already existing email!");
         }
 
-        // JWT 토큰 생성
-        String token = jwtTokenProvider.generateToken(member, java.time.Duration.ofHours(2));
+        String token = jwtTokenProvider.generateToken(member, Duration.ofHours(2));
         return ResponseEntity.status(201).body("sign up! JWT Token: " + token);
     }
 
-    // 로그인 API - 쿠키로 JWT 토큰 전달
+    @Operation(summary = "로그인", description = "회원으로 로그인하고 JWT 토큰을 쿠키에 설정합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "로그인 성공"),
+        @ApiResponse(responseCode = "400", description = "로그인 실패")
+    })
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto requestDto, HttpServletResponse response) {
         try {
             Member member = memberService.loginAndReturnEntity(requestDto);
             String token = jwtTokenProvider.generateToken(member, TOKEN_VALIDITY_DURATION);
 
-            // 쿠키 설정 메소드 호출
             setJwtCookie(response, token, TOKEN_VALIDITY_DURATION.toSeconds());
 
             return ResponseEntity.ok("sign_in complete");
@@ -75,29 +85,43 @@ public class MemberController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
-    // 로그아웃 시 쿠키 삭제
+
+    @Operation(summary = "로그아웃", description = "사용자를 로그아웃하고 JWT 쿠키를 삭제합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    })
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-
         setJwtCookie(response, null, 0);
         return ResponseEntity.ok("logout finished");
     }
 
-    // 모든 회원 조회 API
+    @Operation(summary = "모든 회원 조회", description = "모든 회원의 정보를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "회원 목록 조회 성공")
+    })
     @GetMapping
     public ResponseEntity<List<MemberResponseDto>> getAllMembers() {
         List<MemberResponseDto> memberList = memberService.getAllMembers();
         return ResponseEntity.ok(memberList);
     }
 
-    // 특정 회원 조회 API
+    @Operation(summary = "특정 회원 조회", description = "주어진 ID에 해당하는 회원의 정보를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공"),
+        @ApiResponse(responseCode = "404", description = "회원 없음")
+    })
     @GetMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable(name = "memberId") Long memberId) {
         MemberResponseDto memberResponseDto = memberService.getMemberById(memberId);
         return ResponseEntity.ok(memberResponseDto);
     }
 
-    // 회원 정보 수정 API
+    @Operation(summary = "회원 정보 수정", description = "주어진 ID에 해당하는 회원의 정보를 수정합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공"),
+        @ApiResponse(responseCode = "404", description = "회원 없음")
+    })
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> updateMember(
         @PathVariable(name = "memberId") Long memberId,
@@ -106,45 +130,54 @@ public class MemberController {
         return ResponseEntity.ok(updatedMember);
     }
 
-    // 회원 삭제 API
+    @Operation(summary = "회원 삭제", description = "주어진 ID에 해당하는 회원을 삭제합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "회원 삭제 성공"),
+        @ApiResponse(responseCode = "404", description = "회원 없음")
+    })
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> deleteMember(@PathVariable(name = "memberId") Long memberId, HttpServletResponse response) {
         memberService.deleteMember(memberId);
-
-
         setJwtCookie(response, null, 0);
-
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "관리자 확인", description = "현재 사용자가 관리자 권한을 가지고 있는지 확인합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "관리자 여부 확인 성공")
+    })
     @GetMapping("/check-admin")
     public ResponseEntity<Boolean> checkAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-
             boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
             return ResponseEntity.ok(isAdmin);
         }
         return ResponseEntity.ok(false);
     }
-    // 로그인 여부 확인 API
+
+    @Operation(summary = "로그인 여부 확인", description = "현재 사용자가 로그인했는지 확인합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "로그인 여부 확인 성공")
+    })
     @GetMapping("/check-login")
     public ResponseEntity<Boolean> checkLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() &&
-                !(authentication instanceof AnonymousAuthenticationToken)) {
+            !(authentication instanceof AnonymousAuthenticationToken)) {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.ok(false);
     }
-    //현재 로그인한 사용자의 정보 반환
+
+    @Operation(summary = "현재 로그인한 사용자 정보", description = "현재 로그인한 사용자의 정보를 반환합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "사용자 정보 조회 성공")
+    })
     @GetMapping("/me")
     public ResponseEntity<MemberResponseDto> getMyInfo() {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
-
-
         MemberResponseDto memberResponseDto = memberService.getMemberById(memberDetails.getMemberId());
         return ResponseEntity.ok(memberResponseDto);
     }
