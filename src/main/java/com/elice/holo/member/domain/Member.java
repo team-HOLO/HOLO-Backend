@@ -34,10 +34,10 @@ public class Member {
     private String name;
 
     @Column(name = "is_admin")
-    private Boolean isAdmin; // 관리자 여부
+    private Boolean isAdmin;
 
     @Column(name = "is_deleted")
-    private Boolean isDeleted; // 회원탈퇴 여부 true : 탈퇴
+    private Boolean isDeleted;
 
     @Column(name = "tel")
     private String tel;
@@ -46,7 +46,7 @@ public class Member {
     private Integer age;
 
     @Column(name = "gender")
-    private Boolean gender; // (true = 남성, false = 여성 등)
+    private Boolean gender;
 
 
     // 회원 탈퇴 메서드 (isDeleted 값 변경)
