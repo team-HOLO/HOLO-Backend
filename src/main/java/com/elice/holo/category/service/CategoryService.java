@@ -12,6 +12,7 @@ import com.elice.holo.category.mapper.CategoryMapper;
 import com.elice.holo.category.repository.CategoryRepository;
 import com.elice.holo.common.exception.ErrorCode;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,18 +135,18 @@ public class CategoryService {
         List<Category> topLevelCategories) {
         return topLevelCategories.stream()
             .map(category -> {
-                // 하위 카테고리 중 isDeleted가 false인 것만 포함
-                List<CategoryDto> filteredSubCategories = category.getSubCategories().stream()
+                List<CategoryDto> filteredSubCategories = category.getSubCategories() != null
+                    ? category.getSubCategories().stream()
                     .filter(subCategory -> !Boolean.TRUE.equals(
                         subCategory.getIsDeleted())) // isDeleted가 true인 것 제외
-                    .map(categoryMapper::toCategoryDto) // CategoryDto로 변환
-                    .collect(Collectors.toList());
+                    .map(categoryMapper::toCategoryDto)
+                    .collect(Collectors.toList())
+                    : new ArrayList<>(); // 하위 카테고리가 null일 경우 빈 리스트 반환
 
-                // 필터링된 하위 카테고리를 포함하여 CategoryResponseDto 생성
                 return new CategoryResponseDto(
                     category.getCategoryId(),
                     category.getName(),
-                    filteredSubCategories // 필터링된 하위 카테고리 전달
+                    filteredSubCategories
                 );
             })
             .collect(Collectors.toList());
