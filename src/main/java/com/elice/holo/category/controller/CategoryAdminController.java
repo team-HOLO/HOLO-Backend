@@ -9,6 +9,7 @@ import com.elice.holo.member.domain.MemberDetails;
 import com.elice.holo.member.exception.AccessDeniedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,14 +37,18 @@ public class CategoryAdminController {
 
     private final CategoryService categoryService;
 
-    // 특정 카테고리의 상세 정보 조회
+    @Operation(summary = "특정 카테고리의 상세 정보 조회", description = "주어진 ID에 해당하는 카테고리의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "카테고리 상세 정보 조회 성공"),
+        @ApiResponse(responseCode = "403", description = "접근 거부"),
+        @ApiResponse(responseCode = "404", description = "카테고리 없음")
+    })
     @GetMapping("/details/{id}")
     public ResponseEntity<CategoryDetailsDto> getCategoryDetails(
-        @PathVariable(name = "id") Long id) {
+        @Parameter(description = "카테고리 ID") @PathVariable(name = "id") Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 카테고리 상세정보 조회 권한이 있는지 확인
         if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("카테고리 상세 정보 조회 권한이 없습니다.");
         }
@@ -47,15 +56,17 @@ public class CategoryAdminController {
         return ResponseEntity.status(HttpStatus.OK).body(categoryDetails);
     }
 
-    // 새로운 카테고리 생성
+    @Operation(summary = "새로운 카테고리 생성", description = "주어진 정보를 바탕으로 새로운 카테고리를 생성합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "카테고리 생성 성공"),
+        @ApiResponse(responseCode = "403", description = "접근 거부")
+    })
     @PostMapping
     public ResponseEntity<CategoryResponseDto> createCategory(
         @Valid @RequestBody CategoryCreateDto categoryCreateDto) {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 카테고리 생성 권한이 있는지 확인
         if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("카테고리 생성 권한이 없습니다.");
         }
@@ -63,34 +74,39 @@ public class CategoryAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryResponseDto);
     }
 
-
-    // 카테고리 정보 수정(업데이트)
+    @Operation(summary = "카테고리 정보 수정", description = "주어진 ID에 해당하는 카테고리를 수정합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "카테고리 수정 성공"),
+        @ApiResponse(responseCode = "403", description = "접근 거부"),
+        @ApiResponse(responseCode = "404", description = "카테고리 없음")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
         @Valid @RequestBody CategoryCreateDto categoryCreateDto,
-        @PathVariable(name = "id") Long id
-    ) {
-
+        @Parameter(description = "카테고리 ID") @PathVariable(name = "id") Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 카테고리 수정 권한이 있는지 확인
         if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("카테고리 수정 권한이 없습니다.");
         }
 
         CategoryResponseDto updated = categoryService.updateCategory(id, categoryCreateDto);
         return ResponseEntity.status(HttpStatus.OK).body(updated);
-
     }
 
-    // 카테고리 삭제 처리(Soft Delete 적용)
+    @Operation(summary = "카테고리 삭제", description = "주어진 ID에 해당하는 카테고리를 삭제합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "카테고리 삭제 성공"),
+        @ApiResponse(responseCode = "403", description = "접근 거부"),
+        @ApiResponse(responseCode = "404", description = "카테고리 없음")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<Void> deleteCategory(
+        @Parameter(description = "카테고리 ID") @PathVariable(name = "id") Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 카테고리 삭제 권한이 있는지 확인
         if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("카테고리 삭제 권한이 없습니다.");
         }
@@ -99,18 +115,28 @@ public class CategoryAdminController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    // Admin 카테고리 관리 페이지에서 페이지네이션 및 검색을 적용한 카테고리 전체 목록 조회
+    @Operation(summary = "카테고리 목록 조회", description = "페이지네이션 및 검색을 적용하여 카테고리 목록을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "카테고리 목록 조회 성공")
+    })
     @GetMapping
     public ResponseEntity<Page<CategoryListDto>> getCategories(
+        @Parameter(description = "페이지 번호", required = false, example = "0")
         @RequestParam(name = "page", defaultValue = "0") int page,
+
+        @Parameter(description = "페이지 크기", required = false, example = "15")
         @RequestParam(name = "size", defaultValue = "15") int size,
+
+        @Parameter(description = "정렬 기준", required = false, example = "name")
         @RequestParam(name = "sortBy", defaultValue = "name") String sortBy,
+
+        @Parameter(description = "정렬 방향", required = false, example = "asc")
         @RequestParam(name = "direction", defaultValue = "asc") String direction,
+
+        @Parameter(description = "카테고리 이름으로 검색", required = false)
         @RequestParam(name = "name", required = false) String name) {
 
-        Page<CategoryListDto> categoryPage = categoryService.getCategoriesPageable(page, size,
-            sortBy, direction, name);
+        Page<CategoryListDto> categoryPage = categoryService.getCategoriesPageable(page, size, sortBy, direction, name);
         return ResponseEntity.status(HttpStatus.OK).body(categoryPage);
     }
-
 }
