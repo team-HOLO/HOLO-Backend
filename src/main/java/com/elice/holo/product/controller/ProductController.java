@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,30 +28,41 @@ public class ProductController {
 
     private final ProductService productService;
 
-    //상품 상세 조회
+    @Operation(summary = "상품 상세 조회", description = "주어진 ID에 해당하는 상품의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "상품 상세 정보 조회 성공"),
+        @ApiResponse(responseCode = "404", description = "상품 없음")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> getProductDetails(
-        @PathVariable(name = "id") Long id) {
+        @Parameter(description = "상품 ID") @PathVariable(name = "id") Long id) {
         return new ResponseEntity<>(productService.findProductById(id), HttpStatus.OK);
     }
 
-    //메인 상품 목록 조회
+    @Operation(summary = "상품 목록 조회", description = "모든 상품을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
+    })
     @GetMapping
-    public ResponseEntity<Page<ProductsResponseDto>> getAllProducts(@ModelAttribute
-    ProductSearchCond cond, Pageable pageable) {
+    public ResponseEntity<Page<ProductsResponseDto>> getAllProducts(
+        @ModelAttribute ProductSearchCond cond, Pageable pageable) {
 
         Page<ProductsResponseDto> products = productService.findProducts(pageable, cond);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    //카테고리별 상품 조회
+    @Operation(summary = "카테고리별 상품 조회", description = "주어진 카테고리에 해당하는 상품 목록을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "카테고리별 상품 목록 조회 성공"),
+        @ApiResponse(responseCode = "404", description = "카테고리 없음")
+    })
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<Page<ProductsResponseDto>> getCategoryProducts(
-        @PathVariable(name = "categoryId") Long categoryId,
+        @Parameter(description = "카테고리 ID") @PathVariable(name = "categoryId") Long categoryId,
         @ModelAttribute ProductSearchCond cond,
         @RequestParam(name = "sortBy", required = false) SortBy sort,
-        Pageable pageable
-    ) {
+        Pageable pageable) {
+
         Page<ProductsResponseDto> products = productService.findProductsByCategory(
             categoryId, cond, sort, pageable);
 

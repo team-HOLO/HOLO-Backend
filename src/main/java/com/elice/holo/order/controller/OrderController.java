@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -24,42 +28,60 @@ public class OrderController {
 
     private final OrderService orderService;
 
-
-    // 주문 생성
+    @Operation(summary = "주문 생성", description = "새로운 주문을 생성합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "주문 생성 성공"),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     @PostMapping
     public ResponseEntity<Long> createOrder(@RequestBody OrderRequestDto orderRequest) {
         Long orderId = orderService.createOrder(orderRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
     }
 
-    //회원이 주문내역 조회
+    @Operation(summary = "회원 주문 내역 조회", description = "로그인한 회원의 주문 내역을 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "주문 내역 조회 성공")
+    })
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getMemberOrders() {
         List<OrderResponseDto> orders = orderService.getMemberOrders();
         return ResponseEntity.ok(orders);
     }
 
-    //주문 취소 (ORDER 상태일때만 가능)
+    @Operation(summary = "주문 취소", description = "주문 상태가 ORDER일 때만 주문을 취소합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "주문 취소 성공"),
+        @ApiResponse(responseCode = "404", description = "주문 없음")
+    })
     @PutMapping("/{orderId}/cancel")
-    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
+    public ResponseEntity<Void> cancelOrder(@Parameter(description = "주문 ID") @PathVariable Long orderId) {
         orderService.cancelOrder(orderId);
         return ResponseEntity.ok().build();
     }
 
-    //주문 수정
+    @Operation(summary = "주문 수정", description = "주문 정보를 수정합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "주문 수정 성공"),
+        @ApiResponse(responseCode = "404", description = "주문 없음")
+    })
     @PutMapping("/{orderId}/update")
-    public ResponseEntity<Void> updateShippingInfo(@PathVariable Long orderId,
+    public ResponseEntity<Void> updateShippingInfo(
+        @Parameter(description = "주문 ID") @PathVariable Long orderId,
         @RequestBody UpdateShippingInfoDto updateShippingInfoDto) {
         orderService.updateShippingInfo(orderId, updateShippingInfoDto.getShippingAddress(),
             updateShippingInfoDto.getRecipientName(), updateShippingInfoDto.getShippingRequest());
         return ResponseEntity.noContent().build();
     }
 
-    // 주문 삭제 (소프트 딜리트)
+    @Operation(summary = "주문 삭제", description = "주문을 소프트 딜리트합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "주문 삭제 성공"),
+        @ApiResponse(responseCode = "404", description = "주문 없음")
+    })
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
+    public ResponseEntity<Void> deleteOrder(@Parameter(description = "주문 ID") @PathVariable Long orderId) {
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }
-
 }
