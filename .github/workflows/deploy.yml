@@ -93,6 +93,7 @@ jobs:
             export RDS_DB_NAME='${{ secrets.RDS_DB_NAME }}'
             export RDS_USERNAME='${{ secrets.RDS_USERNAME }}'
             export RDS_PASSWORD='${{ secrets.RDS_PASSWORD }}'
+            export DISCORD_WEBHOOK)URL='${{ secrets.DISCORD_WEBHOOK_URL }}'
             cd ${{ secrets.EC2_TARGET_PATH }}
             nohup java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar *.jar > log.txt 2>&1 &
             echo "New application deployed and started."
