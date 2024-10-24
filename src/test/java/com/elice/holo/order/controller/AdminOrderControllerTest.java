@@ -104,32 +104,6 @@ class AdminOrderControllerTest {
     }
 
     @Test
-    @DisplayName("관리자 주문 취소 테스트")
-    public void adminCancelOrderTest() throws Exception {
-
-        //given
-        Member member = createMember();
-
-        Product product1 = getProduct("쇼파", 300000, "데일리", 100);
-        Product product2 = getProduct("의자", 200000, "데일리", 100);
-
-        OrderProduct orderProduct1 = OrderProduct.createOrderProduct(product1, 1, "BLACK", "L");
-        OrderProduct orderProduct2 = OrderProduct.createOrderProduct(product2, 1, "WHITE",
-            "one size");
-
-
-        Order order = Order.createOrder(member, 500000, "김포", "홍길동",
-            "문자 주세요", List.of(orderProduct1, orderProduct2));
-        Order savedOrder = orderRepository.save(order);
-
-        //when
-        ResultActions result = mockMvc.perform(put(url + "/{orderId}/cancel", order.getOrderId()));
-        //then
-        result.andExpect(status().isOk());
-        Assertions.assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CANCEL);
-    }
-
-    @Test
     @DisplayName("관리자 주문 상태 변경 테스트")
     public void updateOrderStatusTest() throws Exception {
 

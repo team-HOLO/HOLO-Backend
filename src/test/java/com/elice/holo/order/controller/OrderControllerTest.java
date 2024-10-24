@@ -329,12 +329,13 @@ class OrderControllerTest {
 
         String responseBody = orderResult.andReturn().getResponse().getContentAsString();
         Long orderId = objectMapper.readValue(responseBody, Long.class);
+        Order order = orderRepository.findById(orderId).get();
+        order.updateOrderStatus(CANCEL);
 
         //when
         ResultActions result = mockMvc.perform(delete(url + "/{orderId}", orderId));
 
         //then
-        Order order = orderRepository.findById(orderId).get();
         assertThat(order.isDeleted()).isTrue();
     }
 

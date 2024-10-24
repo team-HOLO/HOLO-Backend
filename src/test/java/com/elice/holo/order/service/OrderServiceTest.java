@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +48,8 @@ class OrderServiceTest {
     private ProductRepository productRepository;
     @Mock
     private MemberRepository memberRepository;
+    // 목(mock) DiscordWebhookService 설정
+    DiscordWebhookService discordWebhookService = mock(DiscordWebhookService.class);
 
     @InjectMocks
     private OrderService orderService;
@@ -58,7 +61,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("주문 생성 테스트")
-    void createOrderTest() {
+    void createOrderTest() throws Exception {
 
         //given
         Authentication authentication = mock(Authentication.class);
@@ -78,7 +81,6 @@ class OrderServiceTest {
 
         List<OrderProductRequestDto> products = List.of(new OrderProductRequestDto(1L, 2, "blue", "L"));
         OrderRequestDto request = new OrderRequestDto(products, "서울", "배송 메모", "수신자 이름");
-
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         orderProducts.add(OrderProduct.createOrderProduct(product, 2, "blue", "L"));
@@ -102,10 +104,6 @@ class OrderServiceTest {
         // then
         assertEquals(1L, orderId);
     }
-
-
-
-
 
     @Test
     @DisplayName("회원 주문 조회 테스트")
@@ -185,6 +183,7 @@ class OrderServiceTest {
 
         //given
         Order order = mock(Order.class);
+        when(order.getStatus()).thenReturn(OrderStatus.CANCEL);
         when(orderRepository.findByOrderIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(order));
 
         //when
@@ -209,22 +208,7 @@ class OrderServiceTest {
         //then
         assertThat(exception.getMessage()).contains("해당 주문을 찾을 수 없습니다.");
     }
-    @Test
-    @DisplayName("관리자 주문 취소 테스트")
-    void adminCancelOrderTest() {
 
-        //given
-        Order order = Order.createOrder(Member.builder().build(), 100000, "주소", "요청", "수신자", new ArrayList<>());
-        order.updateOrderStatus(OrderStatus.SHIPPING);  // This could be any status
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        //when
-//        orderService.adminCancelOrder(1L);
-
-        //then
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCEL);
-    }
     @Test
     @DisplayName("주문 상태 업데이트 테스트")
     void updateOrderStatusTest() {

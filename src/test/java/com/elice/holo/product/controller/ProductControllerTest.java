@@ -1,28 +1,15 @@
 package com.elice.holo.product.controller;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.elice.holo.category.domain.Category;
 import com.elice.holo.category.repository.CategoryRepository;
-import com.elice.holo.common.exception.ErrorCode;
-import com.elice.holo.member.domain.Member;
-import com.elice.holo.member.domain.MemberDetails;
 import com.elice.holo.order.service.DiscordWebhookService;
-import com.elice.holo.product.ProductMapper;
 import com.elice.holo.product.domain.ProductImage;
-import com.elice.holo.product.dto.AddProductRequest;
 import com.elice.holo.product.dto.ProductOptionDto;
 import com.elice.holo.product.domain.Product;
 import com.elice.holo.product.domain.ProductOption;
-import com.elice.holo.product.dto.UpdateProductOptionDto;
-import com.elice.holo.product.dto.UpdateProductRequest;
-import com.elice.holo.product.exception.DuplicateProductNameException;
 import com.elice.holo.product.repository.ProductRepository;
 import com.elice.holo.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -137,10 +124,6 @@ class ProductControllerTest {
             .andExpect(jsonPath("$.totalPages").value(1)); // 총 페이지 수
 
     }
-
-
-
-
 
     @Test
     @DisplayName("카테고리별 상품 조회 테스트")
