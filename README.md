@@ -44,6 +44,24 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 # ERD
 ![image](/uploads/caee15e25414f21ce5dc126c4b4df4d4/image.png)
 
+# 배포 환경
+```
+ - 서버 : AWS EC2
+   - 운영 체제: Ubuntu 22.04.5 LTS (GNU/Linux 6.8.0-1017-aws x86_64)
+   - JRE: openjdk version "21.0.4"
+   - 애플리케이션 서버: Spring Boot (내장 Tomcat 사용)
+   - 리버스 프록시: Nginx(v1.18.0)
+     - HTTPS 및 SSL/TLS 처리
+     - TLSv1.2, TLSv1.3
+ - 데이터 베이스: AWS RDS
+   - MySQL Community(8.0.39)
+ - 파일 저장: AWS S3
+ - 도메인 및 DNS
+       - 가비아에서 구매한 도메인 `elice-holo.shop`을 AWS Route 53에서 관리
+    - EC2 인스턴스의 퍼블릭 IP에 도메인 연결
+    - SSL/TLS 인증서를 사용한 HTTPS 제공 (Let's Encrypt)
+```
+
 # API 문서
 - [API 문서](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/Documents/API-%EB%AA%85%EC%84%B8%EC%84%9C)
 - Swagger-UI: https://elice-holo.shop/swagger-ui/index.html
