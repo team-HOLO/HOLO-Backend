@@ -154,8 +154,8 @@ public class MemberControllerTest {
     @DisplayName("모든 회원 조회 테스트")
     public void testGetAllMembers() {
         List<MemberResponseDto> mockMemberList = List.of(
-            new MemberResponseDto(1L, "test1@example.com", "Test User 1", "010-1111-2222", true, 25, false),
-            new MemberResponseDto(2L, "test2@example.com", "Test User 2", "010-3333-4444", true, 30, false)
+            new MemberResponseDto(1L, "test1@example.com", "Test User 1", "010-1111-2222", true, 25, false,"password123"),
+            new MemberResponseDto(2L, "test2@example.com", "Test User 2", "010-3333-4444", true, 30, false,"password123")
         );
 
 
@@ -175,7 +175,7 @@ public class MemberControllerTest {
     public void testGetMemberById() {
         // Given
         Long memberId = 1L;
-        MemberResponseDto mockMember = new MemberResponseDto(memberId, "test@example.com", "Test User", "010-1111-2222", true, 25, false);
+        MemberResponseDto mockMember = new MemberResponseDto(memberId, "test@example.com", "Test User", "010-1111-2222", true, 25, false,"password123");
 
 
         when(memberService.getMemberById(memberId)).thenReturn(mockMember);
@@ -202,7 +202,7 @@ public class MemberControllerTest {
             true
 
         );
-        MemberResponseDto updatedMember = new MemberResponseDto(memberId, "test@example.com", "Updated User", "010-9999-8888", true, 26, false);
+        MemberResponseDto updatedMember = new MemberResponseDto(memberId, "test@example.com", "Updated User", "010-9999-8888", true, 26, false,"password123");
 
 
         when(memberService.updateMember(memberId, updateRequest)).thenReturn(updatedMember);
