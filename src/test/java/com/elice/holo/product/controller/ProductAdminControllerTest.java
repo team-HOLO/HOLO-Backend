@@ -80,7 +80,7 @@ public class ProductAdminControllerTest {
             .isAdmin(true)  //관리자 권한 설정
             .isDeleted(false)
             .tel("010-1234-5678")
-            .age(30)
+
             .gender(true)
             .build();
 
