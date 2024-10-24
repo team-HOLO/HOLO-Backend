@@ -67,7 +67,7 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 - Swagger-UI: https://elice-holo.shop/swagger-ui/index.html
 
 # 트러블슈팅
-- [더 많은 트러블 슈팅을 보시려면 → ](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/TroubleShooting/%EC%9D%B4%EC%8A%88-%EB%AA%A9%EB%A1%9D)
+- [더 많은 트러블 슈팅을 보시려면 → ](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/TroubleShooting/TroubleShooting)
 
 # Links
 - https://elice-holo.netlify.app
