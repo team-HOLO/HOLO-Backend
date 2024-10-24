@@ -28,7 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final MemberService userService;
 
 
-    @Value("${spring.redirect.url}") // YML에서 redirect URL을 가져옴
+    @Value("${spring.redirect.url}")
     private String redirectUrl;
 
 
@@ -48,14 +48,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal(); // 인증된 사용자의 정보를 가져옴
-        Member user = userService.findByEmail((String) oAuth2User.getAttributes().get("email")); // 사용자 정보 조회
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Member user = userService.findByEmail((String) oAuth2User.getAttributes().get("email"));
 
-        // JWT 토큰 생성
-        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(2)); // JWT 토큰을 2시간 동안 유효하도록 생성
 
-        // JWT 토큰을 쿠키에 설정 (HttpOnly, Secure 플래그 적용)
-        setJwtCookie(response, accessToken, 60 * 60 * 2); // 2시간 동안 쿠키 유지
+        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(2));
+
+
+        setJwtCookie(response, accessToken, 60 * 60 * 2);
 
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

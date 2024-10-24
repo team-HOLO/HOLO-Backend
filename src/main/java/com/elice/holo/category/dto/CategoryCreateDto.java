@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// 카테고리 생성, 수정 요청 시
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

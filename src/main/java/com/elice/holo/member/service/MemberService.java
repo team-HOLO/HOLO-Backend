@@ -71,7 +71,7 @@ public class MemberService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 관리자가 아니면 권한 에러
+
         if (!memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("관리자 권한이 필요합니다.");
         }
@@ -88,7 +88,7 @@ public class MemberService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 로그인한 사용자가 해당 회원의 정보를 조회할 권한이 있는지 확인
+
         if (!memberDetails.getMemberId().equals(memberId) &&
             !memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("조회 권한이 없습니다.");
@@ -111,7 +111,7 @@ public class MemberService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
 
-        // 로그인한 사용자가 해당 회원의 정보를 수정할 권한이 있는지 확인
+
         if (!memberDetails.getMemberId().equals(memberId) &&
             !memberDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             throw new AccessDeniedException("수정 권한이 없습니다.");

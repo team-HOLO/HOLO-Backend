@@ -39,52 +39,41 @@ public class JwtTokenProvider {
         Date now = new Date();
 
         return Jwts.builder()
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // JWT 타입
-            .setIssuer(jwtProperties.getIssuer()) // 발급자
-            .setIssuedAt(now) // 발급 시간
-            .setExpiration(expiry) // 만료 시간
-            .setSubject(member.getMemberId().toString()) // memberId를 subject로 설정
+            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+            .setIssuer(jwtProperties.getIssuer())
+            .setIssuedAt(now)
+            .setExpiration(expiry)
+            .setSubject(member.getMemberId().toString())
             .signWith(SignatureAlgorithm.HS256,
-                jwtProperties.getSecretKey()) // Secret Key 그대로 사용
-            .compact(); // 토큰 생성 및 반환
+                jwtProperties.getSecretKey())
+            .compact();
     }
 
-//    //refresh 토큰 생성
-//    public String generateRefreshToken(Member member, Duration expiredAt) {
-//        Date now = new Date();
-//        return Jwts.builder()
-//            .setIssuer(jwtProperties.getIssuer())
-//            .setIssuedAt(now)
-//            .setExpiration(new Date(now.getTime() + expiredAt.toMillis()))
-//            .setSubject(member.getEmail())
-//            .claim("memberId", member.getMemberId())
-//            .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
-//            .compact();
-//    }
+
 
     // JWT 토큰의 유효성을 검사하는 메서드
     public boolean validToken(String token) {
         try {
-            // 토큰 파싱 및 서명 검증
+
             Jwts.parser()
-                .setSigningKey(jwtProperties.getSecretKey()) // 비밀 키 그대로 사용
+                .setSigningKey(jwtProperties.getSecretKey())
                 .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            return false; // 토큰이 유효하지 않으면 false 반환
+            return false;
         }
     }
 
     // 토큰에서 인증 정보를 추출
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        Long memberId = Long.parseLong(claims.getSubject()); // subject를 memberId로 사용
+        Long memberId = Long.parseLong(claims.getSubject());
 
-        // memberId로 Member 엔티티 조회
+
         Member member = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자"));
 
-        MemberDetails memberDetails = new MemberDetails(member); // MemberDetails 생성
+        MemberDetails memberDetails = new MemberDetails(member);
 
         return new UsernamePasswordAuthenticationToken(
             memberDetails, token, memberDetails.getAuthorities());
@@ -92,14 +81,14 @@ public class JwtTokenProvider {
 
     // 토큰에서 사용자 ID를 추출
     public Long getMemberId(String token) {
-        Claims claims = getClaims(token);  // 토큰에서 클레임을 가져옴
-        return claims.get("memberId", Long.class);  // 클레임에서 사용자 ID를 추출
+        Claims claims = getClaims(token);
+        return claims.get("memberId", Long.class);
     }
 
     // JWT 토큰에서 클레임을 추출
     private Claims getClaims(String token) {
         return Jwts.parser()
-            .setSigningKey(jwtProperties.getSecretKey()) // 비밀 키 그대로 사용
+            .setSigningKey(jwtProperties.getSecretKey())
             .parseClaimsJws(token)
             .getBody();
     }
