@@ -5,7 +5,10 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 > **"혼자만의 공간을 나만의 감성으로"** HOLO는 1인 가구를 위한 맞춤형 인테리어 경험을 제공합니다.
 
 # Links
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c94a2a65-b5d9-4f7a-b9ba-bfcd8080ee16/deploy-status)](https://app.netlify.com/sites/elice-holo/deploys)  | ![Github Actions](https://github.com/team-HOLO/HOLO-BE/actions/workflows/deploy.yml/badge.svg?branch=dev)
+프론트엔드 배포 상태: [![Netlify Status](https://api.netlify.com/api/v1/badges/c94a2a65-b5d9-4f7a-b9ba-bfcd8080ee16/deploy-status)](https://app.netlify.com/sites/elice-holo/deploys)  
+  
+  
+백엔드 배포 상태: ![Github Actions](https://github.com/team-HOLO/HOLO-BE/actions/workflows/deploy.yml/badge.svg?branch=dev)
 - https://elice-holo.netlify.app 
 - API 서버: https://elice-holo.shop/api/categories/all
 
