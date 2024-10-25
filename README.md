@@ -4,6 +4,11 @@
 HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 가구의 라이프 스타일과 딱 맞는 인테리어 제품을 쉽고 빠르게 구매할 수 있습니다!  
 > **"혼자만의 공간을 나만의 감성으로"** HOLO는 1인 가구를 위한 맞춤형 인테리어 경험을 제공합니다.
 
+# Links
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c94a2a65-b5d9-4f7a-b9ba-bfcd8080ee16/deploy-status)](https://app.netlify.com/sites/elice-holo/deploys)  | ![Github Actions](https://github.com/team-HOLO/HOLO-BE/actions/workflows/deploy.yml/badge.svg?branch=dev)
+- https://elice-holo.netlify.app 
+- API 서버: https://elice-holo.shop/api/categories/all
+
 # 팀원 소개
 - 팀원 모두 프론트엔드와 백엔드에 참여하여, 도메인 별로 담당을 나눠 프로젝트를 진행했습니다.
   | 이름 (Name)  | 역할 (Role)  | 담당 도메인 (Domain)      | 주요 기여 (Key Contributions) |
@@ -11,7 +16,7 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
   | 심우민       | 팀장 (Leader) | 상품 (Product)          | 상품 등록/수정/삭제 API, 상품 정렬 및 검색 기능, S3를 이용한 이미지 업로드 기능 구현 |
   | 백승주       | 팀원 (Member) | 회원 (Member)           |  회원 가입/로그인/수정/ 삭제 API, Spring Security- jwt 토큰 쿠키 사용 인증 방식, oauth 로그인 기능 구현 |
   | 손병훈       | 팀원 (Member) | 주문 (Order)            |  주문 등록/수정/삭제 API, 주문 조회 및 상태 변경기능 |
-  | 윤지현       | 팀원 (Member) | 카테고리 (Category)      | 카테고리 등록/수정/삭제 API, 카테고리 조회 기능 구현, Netlify와 Github Actions를 사용한 배포 자동화, EC2 서버 세팅, Discord 주문 알림 |
+  | 윤지현       | 팀원 (Member) | 카테고리 (Category)      | 카테고리 등록/수정/삭제 API, 카테고리 조회 기능 구현, Netlify와 Github Actions를 사용한 CI/CD, EC2 서버 세팅, Discord 주문 알림 |
   | 임서현       | 팀원 (Member) | 장바구니 (Cart)          | localstorge를 통해 장바구니 등록 /수량 수정/ 선택 삭제/ 전체 삭제/조회/ 총 가격 계산 |
 
 # 핵심 기능
@@ -38,21 +43,20 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 - 관리자 권한 없이 Admin 페이지에 접근한 경우: 권한 안내 페이지로 이동
 - 유저 권한 없이 MyPage에 접근한 경우: 로그인 페이지로 이동
 ## 디스코드 봇
-### 새로운 주문 등록 알림
-### 주문 정보 수정 알림
-### 주문 취소 알림
+- 주문 생성, 수정, 취소 시 관리자에게 실시간 Discord 알림 전송
+- CS 대응을 위한 실시간 모니터링 기능
+![스크린샷_2024-10-25_오전_11.31.25](/uploads/336a7f176977384b07e415b79c026444/스크린샷_2024-10-25_오전_11.31.25.png)
+![스크린샷_2024-10-25_오전_11.30.30](/uploads/2aaf62359a166f7b099c4c38c20390d8/스크린샷_2024-10-25_오전_11.30.30.png)
 
 
 # 기술 스택
 - **Frontend** : React(v18.3.1), Material UI(v6.1.3)
 - **Backend** : Spring Boot(v3.3.4), Java(v21)
-- **Storage** : AWS S3(이미지 파일 저장)
-- **Database** : AWS RDS (MySQL Community v8.0.39)
+- **Storage** : AWS S3(이미지 파일 저장), AWS RDS (MySQL Community v8.0.39)
 - **Test** : Junit(v5.10.3)
-- **Security & Authentication** : Spring Security (v6), JWT, Google OAuth2
-- **Deployment**: Netlify(Frontend), AWS EC2(Backend, Ubuntu 22.04.5 LTS), Github Actions(CI/CD)
-- **Domain & DNS**: AWS Route 53
-- **SSL/TLS**: Let's Encrypt(TLSv1.2, v1.3)
+- **Security & Authentication** : Spring Security (v6), JWT, Google OAuth2, Let's Encrypt(TLSv1.2, v1.3)
+- **Deployment**: Netlify(Frontend), AWS EC2(Backend, Ubuntu 22.04.5 LTS), Github Actions(CI/CD), Nginx(Reverse Proxy, 1.18.0)
+- **DNS**: AWS Route 53
 
 # 아키텍처
 ![HOLO_Architecture_Diagram](/uploads/26d47ea3156341c8afd23ffc5b3bfbbf/HOLO_sample_.drawio__3_.png)
@@ -78,7 +82,7 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
      - TLSv1.2, TLSv1.3
  - 데이터 베이스: AWS RDS
    - MySQL Community(8.0.39)
- - 파일 저장: AWS S3
+ - 이미지 파일 저장: AWS S3
  - 도메인 및 DNS
     - 가비아에서 구매한 도메인 `elice-holo.shop`을 AWS Route 53에서 관리
     - EC2 인스턴스의 퍼블릭 IP에 도메인 연결
@@ -86,12 +90,6 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 ```
 
 # API 문서
-- [API 문서](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/Documents/API-%EB%AA%85%EC%84%B8%EC%84%9C)
 - Swagger-UI: https://elice-holo.shop/swagger-ui/index.html
 
-# 트러블슈팅
-- [더 많은 트러블 슈팅을 보시려면 → ](https://kdt-gitlab.elice.io/cloud_track/class_04/web_project2/team01/holo-backend/-/wikis/TroubleShooting/TroubleShooting)
-
-# Links
-- https://elice-holo.netlify.app
-- API 서버: https://elice-holo.shop/api/categories/all
+# [트러블슈팅](https://www.notion.so/elice-track/7d0239a270ed4bac8b55f17b0c511fe7?v=35b8497c9c3042a9b1ed863eaaefdb47&pvs=4)
