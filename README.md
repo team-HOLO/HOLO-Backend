@@ -21,7 +21,7 @@ HOLO는 1인 가구를 대상으로 한 인테리어 쇼핑몰입니다. 1인 �
 ### 상품 구매
 ![주문등록진짜진짜](/uploads/ac06748470fa9ed4e0eab8c60ca61af2/주문등록진짜진짜.gif)
 ### Oauth 이용 로그인
-
+![oauth로그인gif](/uploads/6cedee2401db7e0244c8d2015e5a1ca3/oauth로그인gif.gif)
 ### 마이페이지
 ![주문마이페이지진짜진짜](/uploads/45e9ca438ab75724e002adfc1d5da4ce/주문마이페이지진짜진짜.gif)
 ## 관리자
