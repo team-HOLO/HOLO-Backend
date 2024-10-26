@@ -1,0 +1,31 @@
+name: Documentation Update 📝
+description: 문서를 업데이트하거나 추가할 때 사용하세요.
+title: "[DOCS] 제목을 입력하세요"
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📝 문서 업데이트 내용
+        업데이트할 문서의 내용을 설명해주세요.
+
+  - type: textarea
+    id: document-summary
+    attributes:
+      label: 📚 문서 요약
+      description: "업데이트하거나 추가할 문서의 내용을 간단히 설명해주세요."
+      placeholder: "예: README.md에 설치 가이드 추가"
+
+  - type: textarea
+    id: document-location
+    attributes:
+      label: 📄 문서 위치
+      description: "업데이트가 필요한 문서의 위치(파일명 또는 링크)를 적어주세요."
+      placeholder: "예: docs/installation.md"
+
+  - type: textarea
+    id: reason-for-update
+    attributes:
+      label: ✅ 업데이트 이유
+      description: "문서 업데이트가 필요한 이유를 설명해주세요."
+      placeholder: "예: 새로운 기능 추가로 인한 문서 보완 필요"
