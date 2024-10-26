@@ -59,6 +59,13 @@ body:
         - 백엔드: Spring Boot 2.5.4
         - 데이터베이스: MySQL 8.0
 
+  - type: markdown
+    attributes:
+      value: |
+        ### 🖼️ 스크린샷 또는 이미지 첨부
+        문제가 발생한 화면의 스크린샷이나 관련 이미지를 추가해주세요.  
+        GitHub 이슈 작성 페이지에 이미지를 드래그 앤 드롭하거나 복사해서 붙여넣기 하시면 됩니다.
+
   - type: textarea
     id: logs
     attributes:
