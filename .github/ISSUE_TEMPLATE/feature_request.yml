@@ -1,7 +1,8 @@
-name: Feature Request
-about: 기능 추가 요청 🛠️
+# .github/ISSUE_TEMPLATE/feature_request.yml
+name: Feature Request 🛠️
+description: 기능 추가 요청을 작성할 때 사용하세요.
 title: "[FEAT] 제목을 입력하세요"
-labels: feature
+labels: ["feature"]
 
 body:
   - type: markdown
